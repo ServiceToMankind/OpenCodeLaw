@@ -1,0 +1,15 @@
+@charset "UTF-8";
+@font-face {
+  font-family: "montserrat";
+  src: url("../assets/fonts/Montserrat.ttf") format("ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "cuprumregular";
+  src: url("../assets/fonts/cuprum-variablefont_wght-webfont.woff")
+      format("woff2"),
+    url("../assets/fonts/cuprum-variablefont_wght-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}

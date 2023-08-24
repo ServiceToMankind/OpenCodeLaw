@@ -1,11 +1,5 @@
-@font-face {
-  font-family: "montserrat";
-  src: url("../fonts/Montserrat.ttf") format("ttf");
-  font-weight: normal;
-  font-style: normal;
-}
 $background-color: #f5f5f5;
-$primary-font: montserrat;
+$primary-font: "montserrat";
 $box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
 * {
   margin: 0;
