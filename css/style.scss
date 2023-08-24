@@ -13,6 +13,7 @@ $box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
 }
 body {
   background-color: #f5f5f5;
+  font-family: $primary-font;
 }
 .nav {
   background-color: #f5f5f5;
@@ -40,19 +41,44 @@ body {
   }
 }
 main {
+  margin: 2em;
+  display: flex;
   .vertical-nav {
     background-color: $background-color;
     box-shadow: $box-shadow;
+    border-radius: 5px;
+    margin-right: 2em;
+    padding: 2em;
     .nav-content {
       display: flex;
       align-items: center;
       img {
         width: 5em;
         height: 4.2em;
+        position: relative;
+        right: 1.5em;
       }
       h2 {
         font-family: $primary-font;
+        position: relative;
+        right: 1.5em;
       }
     }
+    .nav-ul {
+      li.nav-list {
+        list-style: none;
+      }
+      li.heading {
+        font-weight: bold;
+        font-size: 1.2em;
+        margin-bottom: 1em;
+      }
+    }
+  }
+  .container-main {
+    background-color: $background-color;
+    box-shadow: $box-shadow;
+    border-radius: 5px;
+    width: 100px;
   }
 }
