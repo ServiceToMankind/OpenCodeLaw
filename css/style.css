@@ -11,6 +11,7 @@
 
 body {
   background-color: #f5f5f5;
+  font-family: montserrat;
 }
 
 .nav {
@@ -48,9 +49,16 @@ body {
   text-align: center;
 }
 
+main {
+  margin: 2em;
+  display: flex;
+}
 main .vertical-nav {
   background-color: #f5f5f5;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+  border-radius: 5px;
+  margin-right: 2em;
+  padding: 2em;
 }
 main .vertical-nav .nav-content {
   display: flex;
@@ -59,7 +67,25 @@ main .vertical-nav .nav-content {
 main .vertical-nav .nav-content img {
   width: 5em;
   height: 4.2em;
+  position: relative;
+  right: 1.5em;
 }
 main .vertical-nav .nav-content h2 {
   font-family: montserrat;
+  position: relative;
+  right: 1.5em;
+}
+main .vertical-nav .nav-ul li.nav-list {
+  list-style: none;
+}
+main .vertical-nav .nav-ul li.heading {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+main .container-main {
+  background-color: #f5f5f5;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+  border-radius: 5px;
+  width: 100px;
 }/*# sourceMappingURL=style.css.map */
