@@ -26,16 +26,25 @@ body {
     color: #000;
     text-decoration: none;
     font-weight: bold;
-    margin: 0 1em;
+    text-align: center;
     &:hover {
       color: #000;
       text-decoration: underline;
     }
-
-    img {
-      width: 45px;
-      border-radius: 50%;
-      margin: 0 1em;
+    .title-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      img {
+        width: 45px;
+        border-radius: 50%;
+        margin: 0 1em;
+      }
+      h1 {
+        font-family: $primary-font;
+        font-size: 20px;
+        text-align: center;
+      }
     }
   }
 }

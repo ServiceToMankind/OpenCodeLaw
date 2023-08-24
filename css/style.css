@@ -26,16 +26,26 @@ body {
   color: #000;
   text-decoration: none;
   font-weight: bold;
-  margin: 0 1em;
+  text-align: center;
 }
 .nav a:hover {
   color: #000;
   text-decoration: underline;
 }
-.nav a img {
+.nav a .title-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nav a .title-wrap img {
   width: 45px;
   border-radius: 50%;
   margin: 0 1em;
+}
+.nav a .title-wrap h1 {
+  font-family: montserrat;
+  font-size: 20px;
+  text-align: center;
 }
 
 main .vertical-nav {
