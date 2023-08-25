@@ -1,0 +1,198 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f5f5f5;
+  font-family: "montserrat";
+}
+
+.nav {
+  background-color: #f5f5f5;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  margin: auto 2em;
+  padding: 2em;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+}
+.nav a {
+  color: #000;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+}
+.nav a:hover {
+  color: #000;
+  text-decoration: underline;
+}
+.nav a .title-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nav a .title-wrap img {
+  width: 45px;
+  border-radius: 50%;
+  margin: 0 1em;
+}
+.nav a .title-wrap h1 {
+  font-family: "montserrat";
+  font-size: 20px;
+  text-align: center;
+}
+
+main {
+  margin: 2em;
+  display: flex;
+}
+main .vertical-nav {
+  background-color: #f5f5f5;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+  border-radius: 5px;
+  margin-right: 2em;
+  padding: 2em;
+  min-width: 180px;
+  height: calc(100vh - 0px);
+  top: 0;
+  position: sticky;
+}
+main .vertical-nav .nav-content {
+  display: flex;
+  align-items: center;
+}
+main .vertical-nav .nav-content img {
+  width: 5em;
+  height: 4.2em;
+  position: relative;
+  right: 1.5em;
+}
+main .vertical-nav .nav-content h2 {
+  font-family: "montserrat";
+  position: relative;
+  right: 1.5em;
+  color: #333;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+main .vertical-nav .nav-ul li.nav-list {
+  list-style: none;
+  color: #333;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0.6em 0;
+}
+main .vertical-nav .nav-ul li.nav-list a {
+  text-decoration: none;
+  color: #333;
+}
+main .vertical-nav .nav-ul li.nav-list a::-moz-selection {
+  color: #007bff;
+}
+main .vertical-nav .nav-ul li.nav-list a::selection {
+  color: #007bff;
+}
+main .vertical-nav .nav-ul li.nav-list a.active {
+  color: #007bff;
+}
+main .vertical-nav .nav-ul li.nav-list .nav-hide {
+  display: none;
+}
+main .vertical-nav .nav-ul li.nav-list .nav-show {
+  display: block;
+}
+main .vertical-nav .nav-ul li.nav-list .sub-nav {
+  margin-left: 1em;
+}
+main .vertical-nav .nav-ul li.nav-list .sub-nav li.nav-list {
+  list-style: none;
+  color: #333;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0.6em 0;
+}
+main .vertical-nav .nav-ul li.nav-list .sub-nav li.nav-list a.heading {
+  font-family: "montserrat";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+main .vertical-nav .nav-ul li.nav-list .sub-nav li.nav-list a.active {
+  color: #007bff;
+}
+main .vertical-nav .nav-ul li.heading {
+  font-family: "montserrat";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+main .vertical-nav .nav-ul li.heading a.active {
+  color: #007bff;
+}
+main .container-main {
+  background-color: #f5f5f5;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+  border-radius: 5px;
+  width: 100%;
+  overflow: hidden;
+  contain: layout;
+  -webkit-text-size-adjust: 100%;
+     -moz-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+  text-rendering: optimizespeed !important;
+  -webkit-font-smoothing: antialiased;
+}
+main .container-main .container-main__content {
+  padding: 2em;
+}
+main .container-main .container-main__content .heading-primary {
+  color: #333;
+  font-family: "montserrat";
+  font-size: 25px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 0.5em;
+}
+main .container-main .container-main__content .paragraph {
+  color: #333;
+  text-align: justify;
+  font-family: Open Sans;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+main .container-main .container-main__content .adoption-d {
+  margin-top: 1.3em;
+}
+main .container-main .container-main__content .article-container .heading-secondary {
+  color: #333;
+  text-align: justify;
+  font-family: Open Sans;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  margin: 0.3em;
+}
+main .container-main .container-main__content .section-container {
+  margin-left: 2em;
+}
+
+@media (max-width: 768px) {
+  .vertical-nav {
+    display: none;
+  }
+}/*# sourceMappingURL=style.css.map */

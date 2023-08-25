@@ -1,7 +1,10 @@
 openconstitution: 1.0.0
 info:
-  title: Preamble
+  title: SERVICE TO MANKIND
   termsOfService: https://example.com/terms
+  logo:
+    url: https://stmorg.in/accesories/service_to_man_kind-20200709-0001.jpg
+    alt: Logo
   contact:
     name: Pranay Kiran
     url: https://example.com/contact
@@ -9,22 +12,23 @@ info:
   license: MIT
   version: 1.0.0
 preamble:
-  title: Constitution of Service to Mankind
+  title: PREAMBLE
   content: |
     Service to Mankind is a Non-Governmental Organization (NGO) registered under Andhra
     Pradesh Government that was started to create a platform for students who are
     intent on doing their bit towards the betterment of society. Street Cause is now an
     internationally renowned organization helping the underprivileged and the
     destitute in any and every way possible.
+  adopted: 2023-08-25
 articles:
-  - title: 1. Name of the Organization
+  - title: Name of the Organization
     content: |
       The name of the organization shall be Service to Mankind (hereinafter referred to as
       "the NGO").The acronym that might be used to refer to the NGO will be STM.
       The Registered Office of the Society shall be STM India Headquarters, Flat No. 205,
       6-2-941/SF/205, Second Floor, Moghal’s Emami Mansion, Khairatabad, Hyderabad, Telangana
       will operate anywhere.
-  - title: 2. Interpretations/Definitions
+  - title: Interpretations/Definitions
     content: |
       In this Constitution, unless the context otherwise requires:
       1. "Act" means the Societies Registration Act, 1860 (Act XXI of 1860) as amended from
@@ -42,42 +46,36 @@ articles:
       12. "Trustee" means a Trustee of the NGO.
       13. "Vice President" means the Vice President of the NGO.
       14. "Year" means the financial year of the NGO.
-  - title: 3. Aims and Objectives
+  - title: Aims and Objectives
     content: |
       The NGO has been established to create a platform for the students who are intent on doing
       their bit towards the betterment of society with the objective of helping the underprivileged
       and the destitute in any and every way possible.
-  - title: 4. Mission Statement
+  - title: Mission Statement
     content: |
       The mission of the NGO is to provide a platform for the students to serve the society and
       to inculcate a sense of social responsibility in them.
-  - title: 5. Vision Statement
+  - title: Vision Statement
     content: |
       The vision of the NGO is to create a society where everyone has access to basic amenities
       and to create a society where everyone is treated equally.
-  - title: 6. Membership
+  - title: Membership
     content: |
       The membership of the NGO shall be open to all the students of the college who are willing to
       serve the society and who are willing to abide by the rules and regulations of the NGO.
     sections:
-      - title: 1.Donor
+      - title: Donor
         content: |
           Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
-      - title: 2. Volunteer
+      - title: Volunteer
         content: |
           Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO is eligible to become a volunteer.
-      - title: 3. Coordinator
+      - title: Coordinator
         content: |
           Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO and who has been a volunteer for at least one year is eligible to become a coordinator.
-      - title: 4. Core Member
+      - title: Core Member
         content: |
           Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO and who has been a coordinator for at least one year is eligible to become a core member.
-  - title: 7. erripappa
-    content: |
-      erripappa
-  - title: 8. Sunil
-    content: |
-      Sunil
 ammendments:
   - title: Amendment 1
     article: Articles 1
