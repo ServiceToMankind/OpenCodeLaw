@@ -53,6 +53,9 @@ main {
     margin-right: 2em;
     padding: 2em;
     min-width: 180px;
+    height: calc(100vh - 0px);
+    top: 0;
+    position: sticky;
     .nav-content {
       display: flex;
       align-items: center;
@@ -82,6 +85,44 @@ main {
         font-weight: 500;
         line-height: normal;
         margin: 0.6em 0;
+        a {
+          text-decoration: none;
+          color: #333;
+        }
+        a::selection {
+          color: #007bff;
+        }
+        a.active {
+          color: #007bff;
+        }
+        .nav-hide {
+          display: none;
+        }
+        .nav-show {
+          display: block;
+        }
+        .sub-nav {
+          margin-left: 1em;
+          li.nav-list {
+            list-style: none;
+            color: #333;
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+            margin: 0.6em 0;
+            a.heading {
+              font-family: $primary-font;
+              font-size: 16px;
+              font-style: normal;
+              font-weight: 600;
+              line-height: normal;
+            }
+            a.active {
+              color: #007bff;
+            }
+          }
+        }
       }
       li.heading {
         font-family: $primary-font;
@@ -100,6 +141,11 @@ main {
     box-shadow: $box-shadow;
     border-radius: 5px;
     width: 100%;
+    overflow: hidden;
+    contain: layout;
+    text-size-adjust: 100%;
+    text-rendering: optimizespeed !important;
+    -webkit-font-smoothing: antialiased;
     .container-main__content {
       padding: 2em;
       .heading-primary {
@@ -121,6 +167,24 @@ main {
         font-style: normal;
         font-weight: 400;
         line-height: normal;
+      }
+      .adoption-d {
+        margin-top: 1.3em;
+      }
+      .article-container {
+        .heading-secondary {
+          color: #333;
+          text-align: justify;
+          font-family: Open Sans;
+          font-size: 17px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: normal;
+          margin: 0.3em;
+        }
+      }
+      .section-container {
+        margin-left: 2em;
       }
     }
   }
