@@ -1,5 +1,14 @@
 // js/opencon.js
 const body = document.querySelector("body");
+// Convert Markdown content to HTML
+function convertMarkdownToHTML(markdown) {
+  if (typeof marked !== "undefined") {
+    return marked.parse(markdown);
+  } else {
+    return markdown;
+  }
+  // return markdown;
+}
 
 fetch("specs/opencon.yaml")
   .then((response) => response.text())
@@ -127,7 +136,7 @@ fetch("specs/opencon.yaml")
     containerMainContent.appendChild(containerMainContentH1);
     const containerMainContentP1 = document.createElement("p");
     containerMainContentP1.classList.add("paragraph");
-    containerMainContentP1.textContent = preamble.content;
+    containerMainContentP1.innerHTML = convertMarkdownToHTML(preamble.content);
     containerMainContent.appendChild(containerMainContentP1);
     const containerMainContentP2 = document.createElement("p");
     containerMainContentP2.classList.add("paragraph");
@@ -157,7 +166,7 @@ fetch("specs/opencon.yaml")
       articleContainer.appendChild(articleContainerH2);
       const articleContainerP = document.createElement("p");
       articleContainerP.classList.add("paragraph");
-      articleContainerP.textContent = article.content;
+      articleContainerP.innerHTML = convertMarkdownToHTML(article.content);
       articleContainer.appendChild(articleContainerP);
       sections = article.sections;
       if (sections != undefined) {
@@ -172,7 +181,7 @@ fetch("specs/opencon.yaml")
           sectionContainer.appendChild(sectionContainerH3);
           const sectionContainerP = document.createElement("p");
           sectionContainerP.classList.add("paragraph");
-          sectionContainerP.textContent = section.content;
+          sectionContainerP.innerHTML = convertMarkdownToHTML(section.content);
           sectionContainer.appendChild(sectionContainerP);
         });
       }
