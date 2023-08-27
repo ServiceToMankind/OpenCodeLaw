@@ -1,3 +1,18 @@
+@charset "UTF-8";
+@font-face {
+  font-family: "montserrat";
+  src: url("../assets/fonts/Montserrat.ttf") format("ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "cuprumregular";
+  src: url("../assets/fonts/cuprum-variablefont_wght-webfont.woff")
+      format("woff2"),
+    url("../assets/fonts/cuprum-variablefont_wght-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
 $background-color: #f5f5f5;
 $primary-font: "montserrat";
 $box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
