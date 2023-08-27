@@ -89,7 +89,7 @@ fetch("specs/opencon.yaml")
       // navLi.classList.add("heading");
       const navLink = document.createElement("a");
       navLink.classList.add("nav-a");
-      navLink.href = `#article${index + 1}`;
+      navArticleId = navLink.href = `#article${index + 1}`;
       navLink.textContent = article.title;
       navLi.appendChild(navLink);
       navUl.appendChild(navLi);
@@ -113,7 +113,7 @@ fetch("specs/opencon.yaml")
           navSectionSubLi.classList.add("nav-list");
           const navSectionSubLink = document.createElement("a");
           navSectionSubLink.classList.add("nav-a");
-          navSectionSubLink.href = `#article${article.id}-section${index + 1}`;
+          navSectionSubLink.href = `${navArticleId}/section${index + 1}`;
           navSectionSubLink.textContent = `${index + 1}. ${section.title}`;
           navSectionSubLi.appendChild(navSectionSubLink);
           navSectionUl.appendChild(navSectionSubLi);
@@ -160,7 +160,7 @@ fetch("specs/opencon.yaml")
       articleContainer.classList.add("article-container");
       containerMainContentArticle.appendChild(articleContainer);
       const articleContainerH2 = document.createElement("h2");
-      articleContainerH2.id = `article${index + 1}`;
+      const articleId = (articleContainerH2.id = `article${index + 1}`);
       articleContainerH2.classList.add("heading-secondary");
       articleContainerH2.textContent = `${index + 1}. ${article.title}`;
       articleContainer.appendChild(articleContainerH2);
@@ -175,7 +175,7 @@ fetch("specs/opencon.yaml")
         articleContainer.appendChild(sectionContainer);
         sections.forEach((section, index) => {
           const sectionContainerH3 = document.createElement("h3");
-          sectionContainerH3.id = `article${article.id}-section${index + 1}`;
+          sectionContainerH3.id = `${articleId}/section${index + 1}`;
           sectionContainerH3.classList.add("heading-secondary");
           sectionContainerH3.textContent = `${index + 1}. ${section.title}`;
           sectionContainer.appendChild(sectionContainerH3);
