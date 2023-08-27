@@ -187,6 +187,73 @@ fetch("specs/opencon.yaml")
       }
     });
   })
+  .then(() => {
+    // ui script
+
+    const subMenus = document.querySelectorAll(".sub-menu");
+    const navLinks = document.querySelectorAll(".nav-a");
+
+    console.log(subMenus);
+
+    // Function to toggle visibility of sub-menus
+    function toggleSubMenu(event) {
+      const subMenu = event.currentTarget.querySelector(".sub-nav");
+      subMenu.classList.toggle("nav-hide");
+    }
+
+    // Function to prevent sub-menu from closing on click inside
+    function preventSubMenuClose(event) {
+      event.stopPropagation();
+    }
+
+    // Add event listeners to each sub-menu parent
+    subMenus.forEach((subMenu) => {
+      subMenu.addEventListener("click", toggleSubMenu);
+      subMenu
+        .querySelector(".nav-section")
+        .addEventListener("click", preventSubMenuClose);
+    });
+
+    // Highlight the active menu based on content scroll
+    function updateActiveMenu() {
+      const currentPosition = window.scrollY;
+      navLinks.forEach((link) => {
+        const section = document.querySelector(link.getAttribute("href"));
+        if (
+          section.offsetTop <= currentPosition + 100 && // Adding an offset to improve accuracy
+          section.offsetTop + section.offsetHeight > currentPosition + 100
+        ) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      });
+    }
+
+    // Update "active" class when a menu item is clicked
+    navLinks.forEach((link) => {
+      link.addEventListener("click", (event) => {
+        navLinks.forEach((link) => link.classList.remove("active"));
+        link.classList.add("active");
+        const target = document.querySelector(link.getAttribute("href"));
+
+        // Scroll to the target element with smooth scrolling
+        target.scrollIntoView({ behavior: "smooth" });
+
+        // Close open sub-menus when a menu item is clicked
+        subMenus.forEach((subMenu) => {
+          const subNav = subMenu.querySelector(".nav-section");
+          if (!subNav.contains(target)) {
+            subMenu.querySelector(".sub-nav").classList.add("nav-hide");
+          }
+        });
+      });
+    });
+
+    // Update active menu on scroll
+    window.addEventListener("scroll", updateActiveMenu);
+    updateActiveMenu(); // Initial update on page load
+  })
   .catch((error) => {
     console.error("Error loading YAML data:", error);
   });
