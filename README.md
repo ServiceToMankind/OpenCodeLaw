@@ -43,6 +43,10 @@ To use OpenCodeLaw, follow these steps:
 
 2. The generated page will display the constitution sections and articles based on the provided YAML data.
 
+# OpenCodeLaw YAML Schema Explanation
+
+The OpenCodeLaw YAML schema defines the structure of the constitution for the organization. This schema provides a clear and organized way to outline various sections, articles, and amendments of the constitution. Here's a breakdown of each key in the [schema](https://github.com/ServiceToMankind/OpenCodeLaw/blob/main/schema/opencodelaw.md).
+
 ## Contributing
 
 Contributions to the OpenCodeLaw project are welcome! Feel free to fork the repository, make changes, and submit pull requests.
