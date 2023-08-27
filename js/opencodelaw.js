@@ -10,7 +10,11 @@ function convertMarkdownToHTML(markdown) {
   // return markdown;
 }
 
-fetch("specs/opencon.yaml")
+// get src content from "<opencodelaw src="specs/opencon.yaml"></opencodelaw>" tag
+const opencodelawtag = document.querySelector("opencodelaw");
+const src = opencodelawtag.getAttribute("spec-url");
+
+fetch(src)
   .then((response) => response.text())
   .then((yamlData) => {
     const jsonData = jsyaml.load(yamlData);
@@ -192,8 +196,6 @@ fetch("specs/opencon.yaml")
 
     const subMenus = document.querySelectorAll(".sub-menu");
     const navLinks = document.querySelectorAll(".nav-a");
-
-    console.log(subMenus);
 
     // Function to toggle visibility of sub-menus
     function toggleSubMenu(event) {
