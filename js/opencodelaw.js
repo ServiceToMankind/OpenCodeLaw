@@ -117,7 +117,7 @@ fetch(src)
           navSectionSubLi.classList.add("nav-list");
           const navSectionSubLink = document.createElement("a");
           navSectionSubLink.classList.add("nav-a");
-          navSectionSubLink.href = `${navArticleId}/section${index + 1}`;
+          navSectionSubLink.href = `${navArticleId}-section${index + 1}`;
           navSectionSubLink.textContent = `${index + 1}. ${section.title}`;
           navSectionSubLi.appendChild(navSectionSubLink);
           navSectionUl.appendChild(navSectionSubLi);
@@ -179,7 +179,7 @@ fetch(src)
         articleContainer.appendChild(sectionContainer);
         sections.forEach((section, index) => {
           const sectionContainerH3 = document.createElement("h3");
-          sectionContainerH3.id = `${articleId}/section${index + 1}`;
+          sectionContainerH3.id = `${articleId}-section${index + 1}`;
           sectionContainerH3.classList.add("heading-secondary");
           sectionContainerH3.textContent = `${index + 1}. ${section.title}`;
           sectionContainer.appendChild(sectionContainerH3);
