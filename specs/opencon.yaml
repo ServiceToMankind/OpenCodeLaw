@@ -95,10 +95,10 @@ articles:
               2. Is found to be of unsound mind by a competent court.
               3. Is convicted of any offence involving moral turpitude.
               4. On the death of any member.
-              5. If they are expelled from the society
-                  * (a)for misconduct
-                  * (b)for insubordination
-                  * (c)due to non-performance
+              5. If they are expelled from the society \
+                  (a) for misconduct \
+                  (b) for insubordination \
+                  (c) due to non-performance 
               6. If found inactive or nonperforming, the member would be termed as inactive
               member in writing, the member is put under a performance plan by giving
               due notice of 3 months’ time from the date of declaration in writing to
@@ -180,8 +180,8 @@ articles:
           3. The member should be selected by the board.
       - title: Roles and Responsibilities
         content: |
-          All the IBM should abide by the rules and regulations of the NGO and work according to the constitution.
-          * The IMB members responsibilities are as follows:
+          All the IBM should abide by the rules and regulations of the NGO and work according to the constitution. \
+          The IMB members responsibilities are as follows:
             1. HR & Internshipment Controller Coordinator
             HR & Internshipment Controller Coordinator are responsible for the all activities of the recruitment process and internship program. They are responsible for the all recruitment activities of the college units.
             2. Finance Controller Coordinator
@@ -244,3 +244,39 @@ articles:
       3. The Annual Report of the NGO must be compulsorily prepared by the Finance Controller
       of STM by the AGM in the prescribed format mentioned in the Documentation policy
       4. All the Annual Reports from the inception of the NGO must be maintained in the STM management portal
+  - title: Sabbatical Leave
+    content: |
+      Sabbatical leave is a leave given to the members of the NGO who are working for the NGO for a long time and who are willing to take a break from the NGO for a certain period of time.
+    sections:
+      - title: Eligibility
+        content: |
+          Any member who is working for the NGO for a long time and who is willing to take a break from the NGO for a certain period of time is eligible for the sabbatical leave.
+      - title: Application
+        content: |
+          The member should fill the application form for the sabbatical leave and should submit the application to the board.
+      - title: Duration
+        content: |
+          The duration of the sabbatical leave will be varied from 6 months to 1 year. According to the application of the member.
+  - title: Resignation
+    content: |
+      Resignation is a process where the member of the NGO can leave the NGO if they are not willing to work for the NGO.
+    sections:
+      - title: Eligibility
+        content: |
+          Any member who is not willing to work for the NGO is eligible for the resignation.
+      - title: Application
+        content: |
+          The member should fill the application form for the resignation and should submit the application to the board.
+      - title: Duration
+        content: |
+          The duration of the resignation will be varied from 1 month to 3 months. According to the application of the member.
+  - title: Ammendments
+    content: |
+      1. Any changes to the constitution of the NGO should be done by the board of the NGO.
+      2. The ammenments should be done according to the by-laws of the NGO.
+      3. All the proposed ammendments should be approved by the board of the NGO, intermediate board of the NGO and all college units of the NGO.
+  - title: Dissolution
+    content: |
+      (a). In an event that the NGO fails to function totally and needs to be dissolved, the whole
+      board of the NGO shall be dissolved and a new board shall be elected by the General Body. Else, the whole NGO shall be dissolved. \
+      (b). College Units of the NGO can only be dissolved by the Board of the NGO
