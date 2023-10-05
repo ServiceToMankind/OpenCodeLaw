@@ -213,4 +213,20 @@ main {
   .vertical-nav {
     display: none;
   }
+  .nav,
+  .main {
+    margin: 10px auto;
+  }
+  .section-container {
+    margin-left: 1em !important;
+  }
+  li {
+    margin-left: 0.5em !important;
+  }
+  .container-main__content {
+    padding: 1.3em !important;
+  }
+  .paragraph {
+    margin-left: 0.4em !important;
+  }
 }
