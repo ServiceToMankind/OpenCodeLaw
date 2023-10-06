@@ -22,7 +22,7 @@ To use OpenCodeLaw, follow these steps:
     <!-- Include theme's CSS -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/ServiceToMankind/opencodelaw@latest/css/style.css"
+      href="https://cdn.jsdelivr.net/gh/ServiceToMankind/opencodelaw@1.2.0/css/style.css"
     />
   </head>
   <body>
@@ -32,7 +32,7 @@ To use OpenCodeLaw, follow these steps:
     <!-- Include required scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.0.0/js-yaml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ServiceToMankind/opencodelaw@latest/js/opencodelaw.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ServiceToMankind/opencodelaw@1.2.0/js/opencodelaw.js"></script>
   </body>
 </html>
 ```
