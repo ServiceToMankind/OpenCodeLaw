@@ -1,5 +1,9 @@
 # OpenCodeLaw
 
+<p align="center">
+  <a href="https://constitution.stmorg.in"><img src="assets/img/openlawcode_banner.png" width="700px" alt="OpenLawCode Banner"></a>
+</p>
+
 OpenCodeLaw is a project that allows you to dynamically generate a constitution page based on YAML specifications. It provides a user-friendly interface for displaying constitution articles and sections.
 
 ## Getting Started
