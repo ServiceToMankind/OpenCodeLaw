@@ -199,7 +199,7 @@ main {
           font-style: normal;
           font-weight: 700;
           line-height: normal;
-          margin: 0.3em;
+          margin: 0.5em;
         }
       }
       .section-container {
@@ -219,6 +219,7 @@ main {
   }
   .section-container {
     margin-left: 1em !important;
+    margin: 0.8em auto;
   }
   li {
     margin-left: 0.5em !important;
@@ -228,5 +229,8 @@ main {
   }
   .paragraph {
     margin-left: 0.4em !important;
+  }
+  .article-container {
+    margin: 2.3em 0;
   }
 }
