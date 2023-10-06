@@ -200,6 +200,11 @@ main {
           font-weight: 700;
           line-height: normal;
           margin: 0.5em;
+          .copy-link {
+            background: none;
+            border: 0;
+            margin: 0 0.8em;
+          }
         }
       }
       .section-container {

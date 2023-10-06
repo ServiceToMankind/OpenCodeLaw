@@ -203,6 +203,11 @@ main .container-main .container-main__content .article-container .heading-second
   line-height: normal;
   margin: 0.5em;
 }
+main .container-main .container-main__content .article-container .heading-secondary .copy-link {
+  background: none;
+  border: 0;
+  margin: 0 0.8em;
+}
 main .container-main .container-main__content .section-container {
   margin-left: 2em;
 }
