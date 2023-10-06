@@ -168,6 +168,21 @@ fetch(src)
       articleContainerH2.classList.add("heading-secondary");
       articleContainerH2.textContent = `${index + 1}. ${article.title}`;
       articleContainer.appendChild(articleContainerH2);
+      // add copy link button
+      const copyLink = document.createElement("button");
+      copyLink.classList.add("copy-link");
+      copyLink.textContent = "🔗";
+      copyLink.addEventListener("click", () => {
+        // initialize remaining copy link buttons to 🔗
+        const copyLinks = document.querySelectorAll(".copy-link");
+        copyLinks.forEach((copyLink) => {
+          copyLink.textContent = "🔗";
+        });
+        const url = window.location.href;
+        navigator.clipboard.writeText(`${url}#${articleId}`);
+        copyLink.textContent = "✅";
+      });
+      articleContainerH2.appendChild(copyLink);
       const articleContainerP = document.createElement("p");
       articleContainerP.classList.add("paragraph");
       articleContainerP.innerHTML = convertMarkdownToHTML(article.content);
@@ -183,6 +198,22 @@ fetch(src)
           sectionContainerH3.classList.add("heading-secondary");
           sectionContainerH3.textContent = `${index + 1}. ${section.title}`;
           sectionContainer.appendChild(sectionContainerH3);
+          // add copy link button
+          const copyLink = document.createElement("button");
+          copyLink.classList.add("copy-link");
+          copyLink.textContent = "🔗";
+          copyLink.addEventListener("click", () => {
+            const copyLinks = document.querySelectorAll(".copy-link");
+            copyLinks.forEach((copyLink) => {
+              copyLink.textContent = "🔗";
+            });
+            const url = window.location.href;
+            navigator.clipboard.writeText(
+              `${url}#${articleId}-section${index + 1}`
+            );
+            copyLink.textContent = "✅";
+          });
+          sectionContainerH3.appendChild(copyLink);
           const sectionContainerP = document.createElement("p");
           sectionContainerP.classList.add("paragraph");
           sectionContainerP.innerHTML = convertMarkdownToHTML(section.content);

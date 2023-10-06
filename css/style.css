@@ -201,7 +201,12 @@ main .container-main .container-main__content .article-container .heading-second
   font-style: normal;
   font-weight: 700;
   line-height: normal;
-  margin: 0.3em;
+  margin: 0.5em;
+}
+main .container-main .container-main__content .article-container .heading-secondary .copy-link {
+  background: none;
+  border: 0;
+  margin: 0 0.8em;
 }
 main .container-main .container-main__content .section-container {
   margin-left: 2em;
@@ -217,6 +222,7 @@ main .container-main .container-main__content .section-container {
   }
   .section-container {
     margin-left: 1em !important;
+    margin: 0.8em auto;
   }
   li {
     margin-left: 0.5em !important;
@@ -226,5 +232,8 @@ main .container-main .container-main__content .section-container {
   }
   .paragraph {
     margin-left: 0.4em !important;
+  }
+  .article-container {
+    margin: 2.3em 0;
   }
 }/*# sourceMappingURL=style.css.map */
