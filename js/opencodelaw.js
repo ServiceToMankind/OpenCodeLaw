@@ -290,3 +290,28 @@ fetch(src)
   .catch((error) => {
     console.error("Error loading YAML data:", error);
   });
+  window.addEventListener("scroll", scrollFunction);
+
+  function scrollFunction() {
+    const topButton = document.getElementById("backToTop");
+  
+    if (
+      document.body.scrollTop > 20 ||
+      document.documentElement.scrollTop > 20
+    ) {
+      topButton.style.display = "block";
+      console.log("Block");
+    } else {
+      topButton.style.display = "none";
+      console.log("None");
+    }
+  }
+  
+  // When the button is clicked, scroll to the top of the document
+  function topFunction() {
+    document.body.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  
+  // Add this event listener to handle button click
+  const topButton = document.getElementById("backToTop");
+  topButton.addEventListener("click", topFunction);
