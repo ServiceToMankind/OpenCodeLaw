@@ -20,6 +20,11 @@ body {
   font-family: "montserrat";
 }
 
+.down-arrow {
+  content: "▼"; /* Unicode character for down arrow */
+  margin-left: 5px; /* Add some space between the text and arrow */
+}
+
 .nav {
   background-color: #f5f5f5;
   padding: 10px 0;

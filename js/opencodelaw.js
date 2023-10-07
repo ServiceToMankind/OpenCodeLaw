@@ -96,11 +96,15 @@ fetch(src)
       navArticleId = navLink.href = `#article${index + 1}`;
       navLink.textContent = article.title;
       navLi.appendChild(navLink);
-      navUl.appendChild(navLi);
+
       sections = article.sections;
       if (sections != undefined) {
         navLi.classList.add("sub-menu");
         // navLi.classList.remove("heading");
+        const downArrow = document.createElement("span");
+        downArrow.classList.add("down-arrow");
+        downArrow.textContent = "▼"; // Unicode character for down arrow
+        navLink.appendChild(downArrow); // Append the arrow to the link
         const navSectionUl = document.createElement("ul");
         navSectionUl.classList.add("nav-ul");
         navSectionUl.classList.add("nav-section");
@@ -123,6 +127,7 @@ fetch(src)
           navSectionUl.appendChild(navSectionSubLi);
         });
       }
+      navUl.appendChild(navLi);
     });
     preamble = jsonData.preamble;
     // create  <div class="container-main">
@@ -226,14 +231,30 @@ fetch(src)
     // ui script
 
     const subMenus = document.querySelectorAll(".sub-menu");
-    const navLinks = document.querySelectorAll(".nav-a");
-
-    // Function to toggle visibility of sub-menus
+   
     function toggleSubMenu(event) {
       const subMenu = event.currentTarget.querySelector(".sub-nav");
       subMenu.classList.toggle("nav-hide");
+      event.stopPropagation(); // Prevent the click event from propagating to the parent
+    }
+    
+    // Add event listeners to each sub-menu parent
+    subMenus.forEach((subMenu) => {
+      subMenu.addEventListener("click", toggleSubMenu);
+      subMenu
+        .querySelector(".nav-section")
+        .addEventListener("click", preventSubMenuClose);
+    });
+    
+    // Function to prevent sub-menu from closing on click inside
+    function preventSubMenuClose(event) {
+      event.stopPropagation();
     }
 
+   
+    const navLinks = document.querySelectorAll(".nav-a");
+
+ 
     // Function to prevent sub-menu from closing on click inside
     function preventSubMenuClose(event) {
       event.stopPropagation();
