@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @font-face {
   font-family: "montserrat";
   src: url("../assets/fonts/Montserrat.ttf") format("ttf");
@@ -18,11 +19,6 @@
 body {
   background-color: #f5f5f5;
   font-family: "montserrat";
-}
-
-.down-arrow {
-  content: "▼"; /* Unicode character for down arrow */
-  margin-left: 5px; /* Add some space between the text and arrow */
 }
 
 .nav {
@@ -58,6 +54,11 @@ body {
   font-family: "montserrat";
   font-size: 20px;
   text-align: center;
+}
+
+.down-arrow {
+  content: "▼"; /* Unicode character for down arrow */
+  margin-left: 5px; /* Add some space between the text and arrow */
 }
 
 main {
