@@ -58,6 +58,10 @@ body {
     }
   }
 }
+.down-arrow {
+  content: "▼"; /* Unicode character for down arrow */
+  margin-left: 5px; /* Add some space between the text and arrow */
+}
 main {
   margin: 2em;
   display: flex;
