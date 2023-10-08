@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @font-face {
   font-family: "montserrat";
   src: url("../assets/fonts/Montserrat.ttf") format("ttf");
@@ -10,9 +11,11 @@
   font-weight: normal;
   font-style: normal;
 }
+/* Define other theme-related styles here */
 * {
   margin: 0;
   padding: 0;
+  transition: all 0.6s;
 }
 
 body {
@@ -27,7 +30,9 @@ body {
   border-radius: 5px;
   margin: auto 2em;
   padding: 2em;
+  position: relative;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+  /* Define styles for the toggle switch */
 }
 .nav a {
   color: #000;
@@ -53,6 +58,61 @@ body {
   font-family: "montserrat";
   font-size: 20px;
   text-align: center;
+}
+.nav .toggle-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+}
+.nav .toggle-label {
+  margin-right: 10px;
+  font-family: "montserrat";
+}
+.nav #theme-toggle {
+  visibility: hidden;
+}
+.nav .toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 55px;
+  height: 22px;
+  border: 1px solid black;
+  background-color: #ccc;
+  border-radius: 20px;
+}
+.nav .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  line-height: 0;
+  background-color: yellow;
+  border-radius: 20px;
+  transition: 0.5s;
+}
+.nav .slider:before {
+  content: "🌑"; /* Default to Dark theme emoji */
+  position: absolute;
+  transform: translateX(5px);
+  top: 50%;
+  left: 0;
+  transform: translate(0, -50%);
+  transition: all 0.6s ease;
+}
+.nav input:checked + .slider {
+  background-color: #fff;
+}
+.nav input:checked + .slider:before {
+  content: "☀️"; /* Change to Light theme emoji when checked */
+  left: calc(100% - 0px);
+  transform: translate(-100%, -50%);
+}
+.nav input:focus + .slider {
+  box-shadow: 0 0 1px #fff;
 }
 
 main {
