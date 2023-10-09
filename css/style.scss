@@ -14,27 +14,34 @@
   font-weight: normal;
   font-style: normal;
 }
-$background-color: #f5f5f5;
+$background-color_light: #f5f5f5;
 $primary-font: "montserrat";
 $box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
+
+/* Define other theme-related styles here */
+
 * {
   margin: 0;
   padding: 0;
+  transition: all .6s;
 }
 html{
   scroll-behavior: smooth;
 }
 body {
-  background-color: #f5f5f5;
+  background-color: $background-color_light;
   font-family: $primary-font;
 }
+
+
 .nav {
-  background-color: #f5f5f5;
+  background-color: $background-color_light;
   padding: 10px 0;
   margin-bottom: 20px;
   border-radius: 5px;
   margin: auto 2em;
   padding: 2em;
+  position: relative;
   box-shadow: $box-shadow;
   a {
     color: #000;
@@ -61,12 +68,71 @@ body {
       }
     }
   }
+
+ 
+  
+  .toggle-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+}
+.toggle-label {
+    margin-right: 10px;
+    font-family: $primary-font;
+}
+#theme-toggle{
+  visibility: hidden;
+}
+/* Define styles for the toggle switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 55px;
+    height: 22px;
+    border:1px solid black;
+    background-color: #ccc;
+    border-radius: 20px;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    line-height: 0;
+    background-color: yellow;
+    border-radius: 20px;
+    transition: 0.5s;
+}
+.slider:before {
+    content: '🌑'; /* Default to Dark theme emoji */
+    position: absolute;
+    transform: translateX(5px);
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
+    transition: all .6s ease;
+}
+input:checked + .slider {
+    background-color: #fff;
+}
+input:checked + .slider:before {
+    content: '☀️'; /* Change to Light theme emoji when checked */
+    left: calc(100% - 0px);
+    transform: translate(-100%, -50%);
+}
+input:focus + .slider {
+    box-shadow: 0 0 1px #fff;
+}
 }
 main {
   margin: 2em;
   display: flex;
   .vertical-nav {
-    background-color: $background-color;
+    background-color: $background-color_light;
     box-shadow: $box-shadow;
     border-radius: 5px;
     margin-right: 2em;
@@ -156,7 +222,7 @@ main {
     }
   }
   .container-main {
-    background-color: $background-color;
+    background-color: $background-color_light;
     box-shadow: $box-shadow;
     border-radius: 5px;
     width: 100%;
