@@ -99,6 +99,8 @@ fetch(src)
       const navLi = document.createElement('li')
       navLi.classList.add('nav-list')
       // navLi.classList.add("heading");
+     
+
       const navLink = document.createElement('a')
       navLink.classList.add('nav-a')
       navArticleId = navLink.href = `#article${index + 1}`
@@ -109,12 +111,20 @@ fetch(src)
       if (sections != undefined) {
         navLi.classList.add('sub-menu')
         // navLi.classList.remove("heading");
+
         const navSectionUl = document.createElement('ul')
         navSectionUl.classList.add('nav-ul')
         navSectionUl.classList.add('nav-section')
         navSectionUl.classList.add('sub-nav')
         navSectionUl.classList.add('nav-hide')
         navLi.appendChild(navSectionUl)
+
+        //dropdown icon
+        const downArrow = document.createElement("span");
+        downArrow.classList.add("down-arrow", "arrow-rotate"); // Add both classes
+        downArrow.textContent = "▼"; // Unicode character for down arrow
+        navLink.appendChild(downArrow); // Append the arrow to the link
+
         const navSectionLi = document.createElement('li')
         navSectionLi.classList.add('nav-list')
         const navSectionLink = document.createElement('a')
@@ -141,7 +151,7 @@ fetch(src)
             <input type="checkbox" id="theme-toggle">
             <span class="slider"></span>
         `
-       
+
 
     // Append the toggle switch to the toggle container
     toggleContainer.appendChild(themeToggle)
@@ -151,31 +161,31 @@ fetch(src)
     const lightBackgroundColor = "#f5f5f5"
     const darkTextColor = "#f2f2f2"
     const lightTextColor = "#333"
-     function toggleTheme() {
-       const slider = themeToggle.querySelector('.slider')
-       const nav = document.querySelector('.nav')
-       const vertical_nav = document.querySelector('main .vertical-nav')
-       const container_main = document.querySelector('main .container-main')
-       const articleDesc = document.querySelectorAll("main .container-main .container-main__content .paragraph")
-       const sideBarLinks = document.querySelectorAll("main .vertical-nav .nav-ul li.nav-list a")
-       const h1 = document.querySelectorAll("h1")
-       const h2 = document.querySelectorAll("h2")
-       const h3 = document.querySelectorAll("h3")
-       const themeText = document.querySelector(".toggle-label")
-      
-      
+    function toggleTheme() {
+      const slider = themeToggle.querySelector('.slider')
+      const nav = document.querySelector('.nav')
+      const vertical_nav = document.querySelector('main .vertical-nav')
+      const container_main = document.querySelector('main .container-main')
+      const articleDesc = document.querySelectorAll("main .container-main .container-main__content .paragraph")
+      const sideBarLinks = document.querySelectorAll("main .vertical-nav .nav-ul li.nav-list a")
+      const h1 = document.querySelectorAll("h1")
+      const h2 = document.querySelectorAll("h2")
+      const h3 = document.querySelectorAll("h3")
+      const themeText = document.querySelector(".toggle-label")
+
+
       if (themeToggle.querySelector('input').checked) {
         slider.style.backgroundColor = '#533566'
         nav.style.backgroundColor = `${darkBackgroundColor}`
         vertical_nav.style.backgroundColor = `${darkBackgroundColor}`
-        container_main.style.backgroundColor =  `${darkBackgroundColor}`
-        body.style.backgroundColor =  `${darkBackgroundColor}`
+        container_main.style.backgroundColor = `${darkBackgroundColor}`
+        body.style.backgroundColor = `${darkBackgroundColor}`
         articleDesc.forEach((e) => e.style.color = `#cecdcd`)
         sideBarLinks.forEach((e) => e.style.color = `${darkTextColor}`)
         h1.forEach((e) => e.style.color = `${darkTextColor}`)
         h2.forEach((e) => e.style.color = `${darkTextColor}`)
-        h3.forEach((e) => e.style.color = `${darkTextColor}`)  
-        themeText.style.color = `${darkTextColor}`  
+        h3.forEach((e) => e.style.color = `${darkTextColor}`)
+        themeText.style.color = `${darkTextColor}`
         localStorage.setItem('theme', 'dark')
       } else {
         slider.style.backgroundColor = 'yellow'
@@ -183,11 +193,11 @@ fetch(src)
         vertical_nav.style.backgroundColor = `${lightBackgroundColor}`
         container_main.style.backgroundColor = `${lightBackgroundColor}`
         body.style.backgroundColor = `${lightBackgroundColor}`
-        articleDesc.forEach((e)=> e.style.color = `${lightTextColor}`)
-        h1.forEach((e)=> e.style.color = `${lightTextColor}`)
-        h2.forEach((e)=> e.style.color = `${lightTextColor}`)
-        h3.forEach((e)=> e.style.color = `${lightTextColor}`)
-        sideBarLinks.forEach((e)=> e.style.color = `${lightTextColor}`)
+        articleDesc.forEach((e) => e.style.color = `${lightTextColor}`)
+        h1.forEach((e) => e.style.color = `${lightTextColor}`)
+        h2.forEach((e) => e.style.color = `${lightTextColor}`)
+        h3.forEach((e) => e.style.color = `${lightTextColor}`)
+        sideBarLinks.forEach((e) => e.style.color = `${lightTextColor}`)
         themeText.style.color = `${lightTextColor}`
         localStorage.setItem('theme', 'light')
       }
@@ -289,13 +299,13 @@ fetch(src)
         })
       }
     })
-      // Check the user's theme preference in localStorage
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme === 'dark') {
-        const themeToggle = document.querySelector(".toggle-switch")
-        themeToggle.querySelector('input').checked = true
-        toggleTheme()
-      }
+    // Check the user's theme preference in localStorage
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme === 'dark') {
+      const themeToggle = document.querySelector(".toggle-switch")
+      themeToggle.querySelector('input').checked = true
+      toggleTheme()
+    }
   })
   .then(() => {
     // ui script
@@ -304,10 +314,11 @@ fetch(src)
     const navLinks = document.querySelectorAll('.nav-a')
 
     // Function to toggle visibility of sub-menus
-    function toggleSubMenu(event) {
-      const subMenu = event.currentTarget.querySelector('.sub-nav')
+    // Function to toggle visibility of sub-menus and rotate arrow
+function toggleSubMenu(event) {
+  const subMenu = event.currentTarget.querySelector('.sub-nav')
       subMenu.classList.toggle('nav-hide')
-    }
+}
 
     // Function to prevent sub-menu from closing on click inside
     function preventSubMenuClose(event) {
@@ -362,9 +373,9 @@ fetch(src)
     window.addEventListener('scroll', updateActiveMenu)
     updateActiveMenu() // Initial update on page load
 
-   
 
-  
+
+
   })
   .catch((error) => {
     console.error('Error loading YAML data:', error)
