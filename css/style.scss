@@ -5,6 +5,7 @@
   font-weight: normal;
   font-style: normal;
 }
+
 @font-face {
   font-family: "cuprumregular";
   src: url("../assets/fonts/cuprum-variablefont_wght-webfont.woff")
@@ -24,9 +25,9 @@ $box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.18);
   padding: 0;
   transition: all .6s;
 }
-
-
-
+html{
+  scroll-behavior: smooth;
+}
 body {
   background-color: $background-color_light;
   font-family: $primary-font;
@@ -306,5 +307,26 @@ main {
   }
   .article-container {
     margin: 2.3em 0;
+  }
+}
+
+
+#backToTop {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 1000;
+  border: none;
+  outline: none;
+  background-color: #c07534;
+  color: white;
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 18px;
+
+  &:hover {
+    background-color: #555;
   }
 }
