@@ -299,6 +299,17 @@ fetch(src)
         })
       }
     })
+    // create back to top button
+    const backToTop = document.createElement("button")
+    backToTop.classList.add("back-to-top")
+    backToTop.id = "backToTop"
+    backToTop.title = "Go to top"
+    backToTop.textContent = "↑"
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+    )
+    body.appendChild(backToTop)
     // Check the user's theme preference in localStorage
     const savedTheme = localStorage.getItem('theme')
     if (savedTheme === 'dark') {
@@ -390,10 +401,8 @@ function toggleSubMenu(event) {
       document.documentElement.scrollTop > 20
     ) {
       topButton.style.display = "block";
-      console.log("Block");
     } else {
       topButton.style.display = "none";
-      console.log("None");
     }
   }
   
@@ -404,6 +413,3 @@ function toggleSubMenu(event) {
   
   // Add this event listener to handle button click
   const topButton = document.getElementById("backToTop");
-  topButton.addEventListener("click", topFunction);
-    console.error('Error loading YAML data:', error)
-  })
