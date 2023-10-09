@@ -160,6 +160,7 @@ fetch(src)
        const sideBarLinks = document.querySelectorAll("main .vertical-nav .nav-ul li.nav-list a")
        const h1 = document.querySelectorAll("h1")
        const h2 = document.querySelectorAll("h2")
+       const h3 = document.querySelectorAll("h3")
        const themeText = document.querySelector(".toggle-label")
       
       
@@ -172,7 +173,8 @@ fetch(src)
         articleDesc.forEach((e) => e.style.color = `#cecdcd`)
         sideBarLinks.forEach((e) => e.style.color = `${darkTextColor}`)
         h1.forEach((e) => e.style.color = `${darkTextColor}`)
-        h2.forEach((e) => e.style.color = `${darkTextColor}`)  
+        h2.forEach((e) => e.style.color = `${darkTextColor}`)
+        h3.forEach((e) => e.style.color = `${darkTextColor}`)  
         themeText.style.color = `${darkTextColor}`  
         localStorage.setItem('theme', 'dark')
       } else {
@@ -184,6 +186,7 @@ fetch(src)
         articleDesc.forEach((e)=> e.style.color = `${lightTextColor}`)
         h1.forEach((e)=> e.style.color = `${lightTextColor}`)
         h2.forEach((e)=> e.style.color = `${lightTextColor}`)
+        h3.forEach((e)=> e.style.color = `${lightTextColor}`)
         sideBarLinks.forEach((e)=> e.style.color = `${lightTextColor}`)
         themeText.style.color = `${lightTextColor}`
         localStorage.setItem('theme', 'light')
