@@ -104,7 +104,7 @@ body {
   content: "🌑"; /* Default to Dark theme emoji */
   position: absolute;
   transform: translateX(5px);
-  top: 47%;
+  top: 53%;
   left: 0;
   transform: translate(-2, -25%);
   transition: all 0.6s ease;
