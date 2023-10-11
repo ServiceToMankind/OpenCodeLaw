@@ -175,7 +175,7 @@ fetch(src)
 
 
       if (themeToggle.querySelector('input').checked) {
-        slider.style.backgroundColor = '#533566'
+        slider.style.backgroundColor = '#555'
         nav.style.backgroundColor = `${darkBackgroundColor}`
         vertical_nav.style.backgroundColor = `${darkBackgroundColor}`
         container_main.style.backgroundColor = `${darkBackgroundColor}`
@@ -188,7 +188,7 @@ fetch(src)
         themeText.style.color = `${darkTextColor}`
         localStorage.setItem('theme', 'dark')
       } else {
-        slider.style.backgroundColor = 'yellow'
+        slider.style.backgroundColor = 'rgb(255, 255, 198)'
         nav.style.backgroundColor = '#f5f5f5'
         vertical_nav.style.backgroundColor = `${lightBackgroundColor}`
         container_main.style.backgroundColor = `${lightBackgroundColor}`
