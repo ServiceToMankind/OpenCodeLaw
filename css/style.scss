@@ -385,8 +385,8 @@ main {
     }
     
     th {
-      background-color: rgba(38,137,13,1);
-      border: 1px solid rgba(134,188,37,1);
+      background-color: #007bff;
+      border: 1px solid #007bff;
       font-weight: normal;
       text-align: center;
       color: white;
@@ -486,12 +486,12 @@ main {
     }
     
     th[scope="row"] {
-      background-color: rgba(38,137,13,1);
+      background-color: #007bff;
       color: white;
       
       @media (min-width: $bp-lisa) {
-        border-left: 1px solid rgba(134,188,37,1);
-        border-bottom: 1px solid rgba(134,188,37,1);
+        border-left: 1px solid #007bff;
+        border-bottom: 1px solid #007bff;
       }
       
       @media (min-width: $bp-bart) {
@@ -505,14 +505,14 @@ main {
       text-align: right;
       
       @media (min-width: $bp-bart) {
-        border-left: 1px solid rgba(134,188,37,1);
-        border-bottom: 1px solid rgba(134,188,37,1);
+        border-left: 1px solid #007bff;
+        border-bottom: 1px solid #007bff;
         text-align: center; 
       }
       
       &:last-of-type {
         @media (min-width: $bp-bart) {
-          border-right: 1px solid rgba(134,188,37,1);
+          border-right: 1px solid #007bff;
         } 
       }
     }

@@ -369,8 +369,8 @@ main .container-main .container-main__content .section-container {
   }
 }
 .responsive-table thead th {
-  background-color: rgb(38, 137, 13);
-  border: 1px solid rgb(134, 188, 37);
+  background-color: #007bff;
+  border: 1px solid #007bff;
   font-weight: normal;
   text-align: center;
   color: white;
@@ -465,13 +465,13 @@ main .container-main .container-main__content .section-container {
   }
 }
 .responsive-table tbody th[scope=row] {
-  background-color: rgb(38, 137, 13);
+  background-color: #007bff;
   color: white;
 }
 @media (min-width: 30em) {
   .responsive-table tbody th[scope=row] {
-    border-left: 1px solid rgb(134, 188, 37);
-    border-bottom: 1px solid rgb(134, 188, 37);
+    border-left: 1px solid #007bff;
+    border-bottom: 1px solid #007bff;
   }
 }
 @media (min-width: 48em) {
@@ -486,14 +486,14 @@ main .container-main .container-main__content .section-container {
 }
 @media (min-width: 48em) {
   .responsive-table tbody td {
-    border-left: 1px solid rgb(134, 188, 37);
-    border-bottom: 1px solid rgb(134, 188, 37);
+    border-left: 1px solid #007bff;
+    border-bottom: 1px solid #007bff;
     text-align: center;
   }
 }
 @media (min-width: 48em) {
   .responsive-table tbody td:last-of-type {
-    border-right: 1px solid rgb(134, 188, 37);
+    border-right: 1px solid #007bff;
   }
 }
 .responsive-table tbody td[data-type=currency] {
