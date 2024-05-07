@@ -1,0 +1,309 @@
+openconstitution: 1.0.0
+info:
+  title: SERVICE TO MANKIND
+  termsOfService: https://example.com/terms
+  logo:
+    url: https://stmorg.in/accesories/service_to_man_kind-20200709-0001.jpg
+    alt: Logo
+  contact:
+    name: Pranay Kiran
+    url: https://example.com/contact
+    email: pranay@stmorg.in
+  license: MIT
+  version: 1.0.0
+preamble:
+  title: PREAMBLE
+  content: |
+    Service to Mankind is a Non-Governmental Organization (NGO) registered under Telangana Societies Registration Act., 2001 that was started to create a platform for students who are
+    intent on doing their bit towards the betterment of society. Service to Mankind is a platform for the students to serve the society and to inculcate a sense of social responsibility in them.
+  adopted: 2023-10-08T20:20:00+05:30
+articles:
+  - title: Name of the Organization
+    content: |
+      The name of the organization shall be Service to Mankind (hereinafter referred to as
+      "the NGO").The acronym that might be used to refer to the NGO will be STM.
+      The Registered Office of the Society shall be STM India Headquarters, Ft No. 25/24, Bowrampet, 500043, Hyderabad, Telangana
+      will operate anywhere.
+  - title: Interpretations/Definitions
+    content: |
+      In this Constitution, unless the context otherwise requires:
+      1. "Act" means the Telangana Societies Registration Act., 2001.
+      2. "Board" means the Board Members of the NGO.
+      3. "Constitution" means the Constitution of the NGO.
+      4. "Executive Committee" means the Executive Committee of the NGO.
+      5. "College Unit" means the College Unit of the NGO.
+      6. "Member" means a member of the NGO.
+      7. "NGO" means the Service to Mankind.
+      8. "Office" means the Registered Office of the NGO.
+      9. "President" means the President of the NGO.
+      10. "Secretary" means the Secretary of the NGO.
+      11. "Treasurer" means the Treasurer of the NGO.
+      12. "Trustee" means a Trustee of the NGO.
+      13. "Vice President" means the Vice President of the NGO.
+      14. "Year" means the financial year of the NGO.
+      15. "IBM" means the Intermediate Board Members of the NGO.
+      16. "STM" means the Service to Mankind.
+  - title: Aims and Objectives
+    content: |
+      The NGO has been established to create a platform for the students who are intent on doing
+      their bit towards the betterment of society with the objective of helping the underprivileged
+      and the destitute in any and every way possible.
+  - title: Mission Statement
+    content: |
+      The mission of the NGO is to provide a platform for the students to serve the society and
+      to inculcate a sense of social responsibility in them.
+  - title: Vision Statement
+    content: |
+      The vision of the NGO is to create a society where everyone has access to basic amenities
+      and to create a society where everyone is treated equally.
+  - title: STM Roles
+    content: |
+      The membership of the NGO shall be open to all the students of the college who are willing to
+      serve the society and who are willing to abide by the rules and regulations of the NGO.
+    sections:
+      - title: Board Member
+        content: |
+          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+      - title: Intermediate Board Member
+        content: |
+          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+      - title: College Unit Board Member
+        content: |
+          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+      - title: Coordinator
+        content: |
+          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+      - title: Volunteer
+        content: |
+          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+      - title: Donor
+        content: |
+          Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
+  - title: Membership
+    content: |
+      1. A person who has been recruited into the organization on follow of process as per Organization rules and regulations and is duly appointed by STM as such for any of the college units or works for the NGO in certain form shall be called as an STM ‘Member’..
+      2. A person who has registered online in the STM website and admitted in the NGO through a confirmation email and according to its regulations continues to be a member of the NGO.
+      3. An applicant can only be a member if appointed through the recruitment process by the competent authority as may be defined by society from time to time via the Board.
+      4. Any person who donates atleast INR 30 (Rupees Thirty Only) shall be a ‘Donor Member’ of STM, however, a Donor Member is not an official STM ‘Member’ and does not work for the organization.
+      5. Eligibility of membership
+          * (a)The following shall be eligible for membership in the society:-
+            1. The applicant will strive to work for the achievement of the objectives of the society.
+            2. The applicant shall abide by the Rules and Regulations of the Society.
+            3. They shall maintain good moral conduct and behavior.
+      6. Termination of membership
+          * (a)The membership of a member shall be terminated if he/she:
+              1. Resigns from the membership of the society.
+              2. Is found to be of unsound mind by a competent court.
+              3. Is convicted of any offence involving moral turpitude.
+              4. On the death of any member.
+              5. If they are expelled from the society \
+                  (a) for misconduct \
+                  (b) for insubordination \
+                  (c) due to non-performance 
+              6. If found inactive or nonperforming, the member would be termed as inactive
+              member in writing, the member is put under a performance plan by giving
+              due notice of 3 months’ time from the date of declaration in writing to
+              perform their duties at a satisfactory level, failing which the membership of
+              an individual shall be terminated..
+          * (b)The authority to terminate or revoke the status of a member shall be vested with the Board for all members. 
+          Intermediate board can terminate or revoke the membership of a member for college units. 
+          Head of the college units can terminate or revoke the membership of a member within the college unit.
+  - title: Internship
+    content: |
+      Internship is a program where the students of the college are given an opportunity to work for the NGO and to learn the working of the NGO as a coordinator in respective collage unit.
+    sections:
+      - title: Stipend
+        content: |
+          There is no stipend for the internship program. But the interns will be provided with the certificate of internship in thier respective college units.
+      - title: Duration
+        content: |
+          The duration of the internship program is 3 academic years.
+      - title: Eligibility
+        content: |
+          Any student who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO is eligible to become an intern according to the article 7 of the constitution.
+      - title: Selection Process
+        content: |
+          The selection process for the internship program is as follows:
+          1. The student should fill the application form for the internship program.
+          2. The student should attend the interview conducted by the college board.
+          3. The student should be selected by the board.
+      - title: Roles and Responsibilities
+        content: |
+          All the interns should abide by the rules and regulations of the NGO. The interns should work for the NGO in thier respective departments and should work for the betterment of the society.
+  - title: Board Members
+    content: |
+      The board members are the members who are selected by the board of the NGO to manage the NGO and to take care of the NGO.
+      They are responsible for the all legal and financial activities of the NGO.
+      The board consists of the following members:
+      1. President
+      2. Vice President
+      3. General Secretary
+      4. Joint Secretary
+      5. Treasurer
+      6. Executive Members
+
+      The board members are selected by the board of the NGO.
+    sections:
+      - title: Eligibility
+        content: |
+          Any member who is extremely active and has been working for the NGO for selfless service and who is willing to abide by the rules and regulations of the NGO is eligible to become a board member.
+      - title: Selection Process
+        content: |
+          The selection process for the board members is as follows:
+          1. The member should fill the application form for the board member.
+          2. The member should attend the interview conducted by the board.
+          3. The member should be selected by the board.
+      - title: Roles and Responsibilities
+        content: |
+          All the board members should abide by the rules and regulations of the NGO and work according to the constitution of the NGO and by-laws of the NGO.
+          The board members are responsible for the all legal and financial activities of the NGO.
+          The board members are responsible for the all activities of the NGO.
+  - title: Intermediate Board Members
+    content: |
+      The IBM are the members who are selected by the board of the NGO to manage the NGO and to take care of the NGO.
+      They are responsible for the all legal and financial activities of the NGO.
+      The IBM consists of the following members:
+        1. HR & Internshipment Controller Coordinator
+        2. Finance Controller Coordinator
+        3. Designing Coordinator
+        4. Public Relations Coordinator
+        5. Technical Coordinator
+        6. Internal Compliance Coordinator
+        7. Operations Coordinator
+        8. Content Coordinator
+        9. Volunteer Coordinator
+    sections:
+      - title: Eligibility
+        content: |
+          Any member who is extremely active and has been working for the NGO for selfless service and who is willing to abide by the rules and regulations of the NGO is eligible to become a IBM.
+      - title: Selection Process
+        content: |
+          The selection process for the IBM is as follows:
+          1. The member should fill the application form for the IBM.
+          2. The member should attend the interview conducted by the board.
+          3. The member should be selected by the board.
+      - title: Roles and Responsibilities
+        content: |
+          All the IBM should abide by the rules and regulations of the NGO and work according to the constitution. \
+          The IMB members responsibilities are as follows:
+            1. HR & Internshipment Controller Coordinator
+            HR & Internshipment Controller Coordinator are responsible for the all activities of the recruitment process and internship program. They are responsible for the all recruitment activities of the college units.
+            2. Finance Controller Coordinator
+            Finance Controller Coordinator are responsible for the all financial activities of the NGO. They are responsible for the all financial activities of the college units.
+            They need to maintain the accounts of the NGO of all the college units and need to submit the accounts to the board.4
+            Annual report of the accounts of the NGO should be submitted to the board.
+            3. Designing Coordinator
+            Designing Coordinator are responsible for the all designing activities of the NGO. They are responsible for the all designing activities of the college units.
+            They are responsible for the all designing activities of the NGO and maintain high quality of the designing in the NGO.
+            4. Public Relations Coordinator
+            Public Relations Coordinator are responsible for the all public relations activities of the NGO. They are responsible for the all public relations activities of the college units.
+            They are responsible for the all public relations activities of the NGO and maintain high quality of the public relations in the NGO.
+            5. Technical Coordinator
+            Technical Coordinator are responsible for the all technical activities of the NGO. They are responsible for the all technical activities of the college units.
+            They must maintain the website of the NGO and maintain high quality of the technical activities in the NGO.
+            They promote the open source technologies in the NGO.
+            6. Internal Compliance Coordinator
+            Internal Compliance Coordinator are responsible for the all internal compliance activities of the NGO. They are responsible for the all internal compliance activities of the college units.
+            They can take any action on any member of the NGO if they are not following the rules and regulations of the NGO and constitution of the NGO including the board members.
+            7. Operations Coordinator
+            Operations Coordinator are responsible for the all operations activities of the NGO. They are responsible for the all operations activities of the college units.
+            They are responsible for the all operations activities of the NGO and maintain high quality of the operations in the NGO.
+            8. Content Coordinator
+            Content Coordinator are responsible for the all content activities of the NGO. They are responsible for the all content activities of the college units.
+            They are responsible for the all content activities of the NGO and maintain high quality of the content in the NGO.
+            9. Volunteer Coordinator
+            Volunteer Coordinator are responsible for the all volunteer activities of the NGO. They are responsible for the all volunteer activities of the college units.
+            They are responsible for the all volunteer activities of the NGO and maintain high quality of the volunteer activities in the NGO.
+
+  - title: College Units
+    content: |
+      The college units are the units of the NGO which are established in the colleges to manage the NGO and to take care of the NGO.
+      The college units consists of the following members:
+      1. Head
+      2. Vice Head
+      3. Management Department Head
+      4. Donations and Finance Department Head
+      5. Technical Department Head
+      6. Content Department Head
+      7. Reseseach and Development Department Head
+      8. Graphics Department Head
+    sections:
+      - title: Establishment
+        content: |
+          To establish a college unit in a college, the following conditions should be satisfied:
+          1. There should be atleast 10 members in the college who are willing to work for the NGO.
+          2. The head of the college unit must consult the board of the NGO and get permission to establish the college unit.
+          3. The head of the college unit must fill the application form for the college unit.
+          4. The head of the college unit must attend the interview conducted by the board.
+          5. The head of the college unit must be selected by the board.
+      - title: Funds
+        content: |
+          All college units should should submit the accounts to the IBM (Finance Coordinator) of the NGO. The college units should get permission from the IBM (Finance Coordinator) or Board (Treasurer) of the NGO to use the funds of the NGO.
+      - title: Roles and Responsibilities
+        content: |
+          All the college units should abide by the rules and regulations of the NGO and work according to the constitution.
+          They can raise funds, and do any activity for the betterment of the society.
+  - title: Alumini
+    content: |
+      Refers to a person who has previously worked with the NGO and has maintained good membership standing.
+  - title: Anual Reports
+    content: |
+      1. All divisions and units must maintain the task reports of all the events taken up during the
+      year, and must submit the reports to the Finance Controller Coordinator of STM at least 2 weeks
+      prior to the AGM
+      2. A detailed annual report of all the events conducted throughout the NGO shall be
+      consolidated and maintained by the Finance Controller Coordinator of STM
+      3. The Annual Report of the NGO must be compulsorily prepared by the Finance Controller
+      of STM by the AGM in the prescribed format mentioned in the Documentation policy
+      4. All the Annual Reports from the inception of the NGO must be maintained in the STM management portal
+  - title: Sabbatical Leave
+    content: |
+      Sabbatical leave is a leave given to the members of the NGO who are working for the NGO for a long time and who are willing to take a break from the NGO for a certain period of time.
+    sections:
+      - title: Eligibility
+        content: |
+          Any member who is working for the NGO for a long time and who is willing to take a break from the NGO for a certain period of time is eligible for the sabbatical leave.
+      - title: Application
+        content: |
+          The member should fill the application form for the sabbatical leave and should submit the application to the board.
+      - title: Duration
+        content: |
+          The duration of the sabbatical leave will be varied from 6 months to 1 year. According to the application of the member.
+  - title: Resignation
+    content: |
+      Resignation is a process where the member of the NGO can leave the NGO if they are not willing to work for the NGO.
+    sections:
+      - title: Eligibility
+        content: |
+          Any member who is not willing to work for the NGO is eligible for the resignation.
+      - title: Application
+        content: |
+          The member should fill the application form for the resignation and should submit the application to the board.
+      - title: Duration
+        content: |
+          The duration of the resignation will be varied from 1 month to 3 months. According to the application of the member.
+  - title: Ammendments
+    content: |
+      1. Any changes to the constitution of the NGO should be done by the board of the NGO.
+      2. The ammenments should be done according to the by-laws of the NGO.
+      3. All the proposed ammendments should be approved by the board of the NGO, intermediate board of the NGO and all college units of the NGO.
+  - title: Dissolution
+    content: |
+      (a). In an event that the NGO fails to function totally and needs to be dissolved, the whole
+      board of the NGO shall be dissolved and a new board shall be elected by the General Body. Else, the whole NGO shall be dissolved. \
+      (b). College Units of the NGO can only be dissolved by the Board of the NGO
+ammendments:
+  - title: Ammendment No.1
+    content: |
+      This is Ammendment 1
+    archive: https://constitution/archives/v1
+    act: https://constitution.stmorg.in/acts/v1
+    date: 2024-10-08T20:20:00+05:30
+    author: Pranay Kiran
+  - title: Ammendment No. 2
+    content: |
+      This is Ammendment 2
+    archive: https://constitution/archives/v2
+    act: https://constitution.stmorg.in/acts/v2
+    date: 2024-01-08T20:20:00+05:30
+    author: Revanth Reddy

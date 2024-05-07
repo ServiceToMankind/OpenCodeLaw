@@ -299,73 +299,68 @@ fetch(src)
         })
       }
     })
-    // Ammendment data (replace with your actual jsonData.ammendments)
-    const ammendmentData = jsonData.ammendments
-    console.log(ammendmentData)
-    // Create amendments table
-    const ammendment_container = document.createElement("div")
-    ammendment_container.classList.add('container-ammendment')
-    const table = document.createElement('table')
-    table.classList.add('responsive-table')
-    const caption = document.createElement('caption')
-    caption.textContent = 'Ammendments'
-    table.appendChild(caption)
-    const thead = document.createElement('thead')
-    const headRow = document.createElement('tr')
-    const headers = ['Date', 'Act', 'Description', 'Author', 'Archive']
-    headers.forEach(header => {
-      const th = document.createElement('th')
-      th.textContent = header
-      th.scope = 'col'
-      // th.setAttribute('data-title', header)
-      headRow.appendChild(th)
-    });
-    thead.appendChild(headRow)
-    table.appendChild(thead)
-    const tbody = document.createElement('tbody')
-    // Loop through ammendmentData and create table rows
-    ammendmentData.forEach(ammendment => {
-      const row = document.createElement('tr')
-      // Extract data from each amendment object
-      const title = ammendment.title
-      const date = ammendment.date
-      const description = ammendment.content
-      const author = ammendment.author
-      const archive = ammendment.archive
-      // Create table cells and populate with data
-      const cells = [date, title, description, author, archive]
-      cells.forEach((cellData, index) => {
-        if(index===0){
-          cell = document.createElement('th')
-          cell.scope='row'
-        }else{
-          cell = document.createElement('td')
-          cell.setAttribute('data-title', headers[index]);
-        }
-        if (index === cells.length - 1) {
-          const paragraph = document.createElement('p')
-          const actLink = document.createElement('a')
-          actLink.href = ammendment.act
-          actLink.textContent = 'Act'
-          const archiveLink = document.createElement('a')
-          archiveLink.href = ammendment.archive
-          archiveLink.textContent = 'Constitution'
-          paragraph.appendChild(actLink)
-          paragraph.appendChild(document.createTextNode(' / '))
-          paragraph.appendChild(archiveLink)
-          cell.appendChild(paragraph)
-        } else {
-          cell.textContent = cellData
-        }
-        row.appendChild(cell)
-      });
-      tbody.appendChild(row)
-    });
-    table.appendChild(tbody)
-    ammendment_container.appendChild(table)
-    // Append the container to your desired location (replace with your logic)
-    containerMain.appendChild(ammendment_container)
+// Ammendment data (replace with your actual jsonData.ammendments)
+const ammendmentData = jsonData.ammendments;
+console.log(ammendmentData);
+
+// Create amendments table
+const ammendment_container = document.createElement("div");
+ammendment_container.classList.add('container-ammendment');
+
+const table = document.createElement('table');
+table.classList.add('responsive-table');
+
+const caption = document.createElement('caption');
+caption.textContent = 'Ammendments';
+table.appendChild(caption);
+
+const thead = document.createElement('thead');
+const headRow = document.createElement('tr');
+
+const headers = ['Date', 'Act', 'Description', 'Author', 'Archive'];
+headers.forEach(header => {
+  const th = document.createElement('th');
+  th.textContent = header;
+  th.scope = header === 'Act' ? 'col' : 'row';
+  headRow.appendChild(th);
+});
+
+thead.appendChild(headRow);
+table.appendChild(thead);
+
+const tbody = document.createElement('tbody');
+
+// Loop through ammendmentData and create table rows
+ammendmentData.forEach(ammendment => {
+  const row = document.createElement('tr');
+
+  // Extract data from each amendment object
+  const title = ammendment.title;
+  const date = ammendment.date;
+  const description = ammendment.content;
+  const author = ammendment.author;
+  const archive = ammendment.archive;
+
+  // Create table cells and populate with data
+  const cells = [date, title, description, author, archive];
+  cells.forEach(cellData => {
+    const cell = document.createElement('td');
+    cell.textContent = cellData;
+    row.appendChild(cell);
+  });
+
+  tbody.appendChild(row);
+});
+
+table.appendChild(tbody);
+ammendment_container.appendChild(table);
+
+// Append the container to your desired location (replace with your logic)
+containerMain.appendChild(ammendment_container);
+
+console.log("Ammendments table created and appended");
   
+
     // create back to top button
     const backToTop = document.createElement("button")
     backToTop.classList.add("back-to-top")
