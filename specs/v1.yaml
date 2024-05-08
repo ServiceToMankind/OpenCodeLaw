@@ -10,7 +10,7 @@ info:
     url: https://example.com/contact
     email: pranay@stmorg.in
   license: MIT
-  version: 1.0.0
+  version: 2.0.0
 preamble:
   title: PREAMBLE
   content: |
