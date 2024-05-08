@@ -1,0 +1,12 @@
+RewriteEngine on
+
+DirectoryIndex index.html
+
+RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
+RewriteRule ^ /%1 [NC,L,R]
+
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^ %{REQUEST_URI}.html [NC,L]
+
+# Deny access to .git directory
+RedirectMatch 404 /\.git
