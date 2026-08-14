@@ -1,0 +1,226 @@
+/* ===========================================================================
+   tokens.css — fonts, design tokens, base reset.
+   Loaded before layout.css. Defines *values only*: no component ever gets
+   styled here. Anything that names a class belongs in layout.css.
+
+   Palette rule: three brand hues (purple #320063, blue #007bff, ochre
+   #c07534) plus a neutral ramp. No hue outside those families is invented.
+   Where a brand value cannot carry text at 4.5:1 it is resolved, per theme,
+   to a lighter or darker shade of the *same* hue — the anchors below keep
+   the originals available for fills, rules and other non-text use.
+   =========================================================================== */
+
+/* --- Fonts --------------------------------------------------------------
+   Two files exist on disk; nothing else may be referenced. URLs are relative
+   to this stylesheet so the site keeps working under /OpenCodeLaw/ or at an
+   apex domain. Both swap: legal text must be readable before the webfont
+   lands, never after.
+   Montserrat.ttf carries a wght axis (100–900), so one file covers every
+   display weight. Cuprum, despite its filename, has no fvar table — it is a
+   static Regular; ask for 400 and let the browser synthesise emphasis.       */
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cuprum";
+  src: url("../assets/fonts/cuprum-variablefont_wght-webfont.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- Tokens: light (the default) ---------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  /* Brand anchors — the exact values, for fills, rules and graphics.
+     Not for body-sized text: see the resolved tokens below.                 */
+  --brand-accent: #320063;
+  --brand-link: #007bff;
+  --brand-action: #c07534;
+
+  /* Surfaces and ink */
+  --canvas: #f5f5f5;              /* page ground                            */
+  --surface: #ffffff;             /* cards, sheets, dialogs                 */
+  --ink: #333333;                 /* body text        — 12.6:1 on canvas    */
+  --muted: #5a5a5a;               /* metadata, dates  —  6.3:1 on canvas    */
+  --border: #d9d9d9;              /* hairlines                              */
+
+  /* Interactive */
+  --accent: var(--brand-accent);  /* primary            — 14.6:1 on canvas  */
+  --accent-ink: #ffffff;          /* text on an accent fill — 16.0:1        */
+  --accent-soft: rgba(50, 0, 99, 0.08);   /* accent wash: current TOC row   */
+  --accent-2: #0062cc;            /* links, shade of #007bff — 5.3:1        */
+  --action: #a05f26;              /* to-top, marks, shade of #c07534 — 4.6:1 */
+  --action-soft: var(--brand-action);       /* graphic ochre, 3.3:1 non-text */
+  --action-wash: rgba(192, 117, 52, 0.14);  /* search-hit highlight ground   */
+
+  /* Depth */
+  --shadow: rgba(0, 0, 0, 0.18);
+
+  /* Focus — ochre reads against both canvases and against an accent fill.
+     Use as: outline: 3px solid var(--focus); outline-offset: 2px;           */
+  --focus: var(--brand-action);
+
+  /* Geometry */
+  --header-h: 3.5rem;             /* sticky header; sync scroll-padding      */
+  --measure: 68ch;                /* prose column cap — never wider          */
+  --radius: 0.5rem;
+  --radius-lg: 0.875rem;
+
+  /* Space — 4 / 8 / 16 / 24 / 40 / 64 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  /* Type */
+  --font-display: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif;
+  --font-num: "Cuprum", "Montserrat", system-ui, sans-serif;
+}
+
+@media (min-width: 48em) {
+  :root { --header-h: 4rem; }
+}
+
+/* --- Tokens: dark -------------------------------------------------------
+   Declared twice on purpose. The media query serves readers on the system
+   setting; the attribute rule serves the in-page toggle and must be able to
+   win in both directions, so it may not sit inside the query.
+   Purple, blue and ochre are all sub-4.5:1 against #333333 at their brand
+   values, so each resolves to a lighter step of its own hue.                */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --canvas: #333333;
+    --surface: #3d3d3d;
+    --ink: #f2f2f2;               /* 9.7:1 on surface                        */
+    --muted: #cecdcd;             /* 8.0:1 on canvas                         */
+    --border: #4f4f4f;
+
+    --accent: #c79df1;            /* 5.7:1 on canvas                         */
+    --accent-ink: #333333;        /* text on an accent fill — 5.7:1          */
+    --accent-soft: rgba(199, 157, 241, 0.16);
+    --accent-2: #6cb2ff;          /* 5.7:1 on canvas                         */
+    --action: #e09a55;            /* 5.4:1 on canvas                         */
+    --action-soft: var(--brand-action);
+    --action-wash: rgba(224, 154, 85, 0.18);
+
+    --shadow: rgba(0, 0, 0, 0.45);  /* same ink, more of it: dark grounds
+                                       swallow an 18% shadow entirely        */
+    --focus: #e09a55;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --canvas: #333333;
+  --surface: #3d3d3d;
+  --ink: #f2f2f2;
+  --muted: #cecdcd;
+  --border: #4f4f4f;
+
+  --accent: #c79df1;
+  --accent-ink: #333333;
+  --accent-soft: rgba(199, 157, 241, 0.16);
+  --accent-2: #6cb2ff;
+  --action: #e09a55;
+  --action-soft: var(--brand-action);
+  --action-wash: rgba(224, 154, 85, 0.18);
+
+  --shadow: rgba(0, 0, 0, 0.45);
+  --focus: #e09a55;
+}
+
+/* --- Base reset ---------------------------------------------------------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; padding: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Anchors are citations: #art-6-s-1 must land clear of the sticky header. */
+  scroll-padding-top: calc(var(--header-h) + var(--space-3));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.65;
+  /* Ragged right, always. Justified legal prose opens rivers and destroys
+     the word-shape cues a reader uses to hold a long clause together.       */
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Long clauses break better when the last line is not a single word. */
+p, li, blockquote, dd { text-wrap: pretty; }
+
+img, svg, video { max-width: 100%; }
+img, svg { height: auto; }
+
+/* Controls inherit type: the header buttons are text, not chrome. */
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a { color: var(--accent-2); }
+
+::selection {
+  background-color: var(--action-wash);
+  color: var(--ink);
+}
+
+/* --- Focus ---------------------------------------------------------------
+   A floor, not a component style: every interactive element gets a visible
+   ring even if layout.css never mentions it. Mouse clicks stay quiet.       */
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) { outline: none; }
+
+/* --- Reduced motion ------------------------------------------------------
+   Global guard. Nothing here *creates* a transition — it only neutralises
+   whatever later stylesheets declare.                                       */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

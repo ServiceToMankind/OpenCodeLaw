@@ -1,0 +1,1477 @@
+/* =============================================================================
+   layout.css — the whole visual system for the rendered constitution.
+
+   Assumes tokens.css has already defined the palette and scale:
+     --canvas --ink --muted --surface --border --accent --accent-2 --action
+     --shadow --header-h --measure --radius --focus --space-1..--space-6
+     --font-display --font-body --font-num
+
+   Two rules govern everything below.
+
+   1. Prose first. This is a legal document. Text is set at 18px/1.65, capped at
+      a 68ch measure, ragged right — never justified, because justification in a
+      narrow column opens rivers and legal text is read line by line, not
+      skimmed. Article and section numbers are citation handles, so they get
+      their own slot in the left margin rather than running into the title.
+
+   2. No universal transitions. Only color, background-color, border-color,
+      transform and opacity are ever transitioned, and only on the handful of
+      elements that actually change state.
+   ========================================================================== */
+
+/* --- Fonts ---------------------------------------------------------------
+   Only two files exist on disk. Montserrat is a genuine variable font
+   (wght 100–900, defaulting to Thin), so every element that uses it sets an
+   explicit weight. Cuprum, despite its filename, ships here as a static
+   instance, so it is declared at a single weight and never asked to synthesise
+   others. Both swap: the text must be readable before the fonts land.
+   Paths are relative — the site is served under a sub-path (/OpenCodeLaw/).   */
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cuprum";
+  src: url("../assets/fonts/cuprum-variablefont_wght-webfont.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- Derived tokens ------------------------------------------------------
+   These are additions, not overrides: tokens.css stays the source of truth for
+   the palette. They exist because two brand colours cannot legally carry text
+   at 4.5:1 in both themes, and a contrast failure is not a style opinion.
+
+     --accent    #320063  13.5:1 on #f5f5f5  ✓ light    1.1:1 on #333333  ✗ dark
+     --accent-2  #007bff   3.7:1 on #f5f5f5  ✗          3.2:1 on #333333  ✗
+     --action    #c07534   3.3:1 on #f5f5f5  ✗          3.5:1 on #333333  ✗
+
+   So each gets a text-safe tint or shade *within its own hue* — purple stays at
+   270°, blue at 211°, amber at 28°. No new hue family is introduced. The raw
+   brand values keep their jobs as fills, rules and highlights, where 3:1 for
+   non-text contrast is the bar and all three clear it.                        */
+
+:root {
+  --accent-ink: var(--accent, #320063);      /* accent as text, light theme    */
+  --on-accent: #f5f5f5;                      /* text on an accent fill         */
+  --link-ink: #0069d9;                       /* 4.8:1 on #f5f5f5, hue 211      */
+  --action-ink: #8a5122;                     /* 5.9:1 on #f5f5f5, hue 28       */
+  --ok-ink: #1e7a3c;                         /* 4.9:1 on #f5f5f5               */
+  --ring: var(--focus, #320063);
+
+  --accent-wash: rgba(50, 0, 99, 0.07);
+  --action-wash: rgba(192, 117, 52, 0.12);
+  --ok-wash: rgba(30, 122, 60, 0.12);
+
+  --num-slot: 0px;                           /* margin gutter; grows ≥900px    */
+  --fab-h: 3rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent-ink: #cc99ff;                   /* hsl(270 100% 80%), 5.8:1 on #333 */
+    --on-accent: #333333;
+    --link-ink: #66b2ff;                     /* 5.6:1 on #333333, hue 210      */
+    --action-ink: #e0a878;                   /* 6.0:1 on #333333, hue 28       */
+    --ok-ink: #7fd39b;                       /* 7.0:1 on #333333               */
+    --ring: var(--focus, #cc99ff);
+
+    --accent-wash: rgba(204, 153, 255, 0.13);
+    --action-wash: rgba(192, 117, 52, 0.22);
+    --ok-wash: rgba(127, 211, 155, 0.14);
+  }
+}
+
+/* Repeated verbatim so an explicit toggle beats the system preference in both
+   directions — the inline head script sets data-theme before first paint. */
+:root[data-theme="dark"] {
+  --accent-ink: #cc99ff;
+  --on-accent: #333333;
+  --link-ink: #66b2ff;
+  --action-ink: #e0a878;
+  --ok-ink: #7fd39b;
+  --ring: var(--focus, #cc99ff);
+
+  --accent-wash: rgba(204, 153, 255, 0.13);
+  --action-wash: rgba(192, 117, 52, 0.22);
+  --ok-wash: rgba(127, 211, 155, 0.14);
+}
+
+/* --- Base ---------------------------------------------------------------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h, 3.5rem) + var(--space-4, 1.5rem));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  font-size: 1.125rem;                       /* 18px, and still user-scalable  */
+  line-height: 1.65;
+  text-align: left;                          /* ragged right, everywhere       */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display, "Montserrat", ui-sans-serif, system-ui, sans-serif);
+  font-weight: 700;
+  line-height: 1.22;
+  text-wrap: balance;
+  margin: 0;
+}
+
+p { margin: 0 0 var(--space-3, 1rem); }
+
+a {
+  color: var(--link-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+
+a:hover { text-decoration-thickness: 2px; }
+
+strong, b { font-weight: 700; }
+
+img { max-width: 100%; height: auto; }
+
+mark {
+  background: var(--action-wash);
+  color: inherit;
+  padding: 0.05em 0.2em;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 var(--action);
+}
+
+code, pre, kbd, samp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+code {
+  font-size: 0.9em;
+  background: var(--accent-wash);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+pre {
+  overflow-x: auto;
+  padding: var(--space-3, 1rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+}
+
+pre code { background: none; padding: 0; }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--space-5, 2rem) 0;
+}
+
+/* One ring, everywhere something is interactive. Split into longhands on
+   purpose: if --focus ever resolves to something unusable, outline-color falls
+   back to currentColor and the ring survives. */
+:focus-visible {
+  outline-width: 3px;
+  outline-style: solid;
+  outline-color: var(--ring);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+:focus:not(:focus-visible) { outline: none; }
+
+::selection {
+  background: var(--accent-wash);
+}
+
+/* Motion is an enhancement. Honour the system setting without exception. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Utilities ----------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-2, 0.5rem);
+  left: var(--space-2, 0.5rem);
+  z-index: 500;
+  padding: var(--space-2, 0.5rem) var(--space-3, 1rem);
+  background: var(--surface);
+  color: var(--accent-ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 6px 20px var(--shadow, rgba(0, 0, 0, 0.18));
+  font-family: var(--font-display, "Montserrat", sans-serif);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--space-4, 1.5rem)));
+  transition: transform 140ms ease-out;
+}
+
+.skip-link:focus { transform: translateY(0); }
+
+/* --- Reading progress ----------------------------------------------------
+   Fixed rather than sticky: the element precedes the header in the DOM, and it
+   has to sit *under* the sticky header regardless of scroll position. */
+
+.progress {
+  position: fixed;
+  top: var(--header-h, 3.5rem);
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99;
+  pointer-events: none;
+  background: transparent;
+}
+
+.progress__bar {
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: var(--action);
+  will-change: transform;
+  transition: transform 90ms linear;
+}
+
+/* --- Header --------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 1rem);
+  height: var(--header-h, 3.5rem);
+  padding: 0 var(--space-3, 1rem);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: var(--radius, 8px);
+}
+
+.site-header__logo {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  object-fit: contain;
+}
+
+.site-header__title {
+  font-family: var(--font-display, "Montserrat", sans-serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.site-header__brand:hover .site-header__title { color: var(--accent-ink); }
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 0.25rem);
+  flex: none;
+}
+
+/* --- Buttons -------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.45em 0.75em;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius, 8px);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.btn:hover {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.btn[aria-pressed="true"] {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  border-color: var(--accent-ink);
+}
+
+.btn--icon > [aria-hidden="true"] {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.btn__label { white-space: nowrap; }
+
+/* The span is empty in the markup — the glyph is a pure presentation concern,
+   and the button already carries an accessible name. */
+.theme-toggle__icon::before { content: "\263E"; }              /* ☾ → go dark  */
+
+:root[data-theme="dark"] .theme-toggle__icon::before { content: "\2600"; }  /* ☀ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle__icon::before { content: "\2600"; }
+}
+
+/* --- Shell ---------------------------------------------------------------
+   Mobile first: one column. The ToC is server-rendered, so it is never hidden
+   outright — with JavaScript off the FAB and sheet do nothing, and a reader on
+   a phone would be left with no navigation at all. Instead it is reordered to
+   the end of the page, out of the way of the text but still there. From 900px
+   up it becomes the sticky sidebar. */
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5, 2rem);
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: var(--space-5, 2rem) var(--space-4, 1.5rem) var(--space-6, 3rem);
+}
+
+.shell__aside {
+  order: 2;
+  padding-top: var(--space-4, 1.5rem);
+  border-top: 1px solid var(--border);
+}
+
+.shell__main {
+  order: 1;
+  min-width: 0;
+  outline: none;
+}
+
+.shell__main:focus-visible {
+  outline-width: 3px;
+  outline-style: solid;
+  outline-color: var(--ring);
+  outline-offset: 6px;
+}
+
+/* --- Table of contents ---------------------------------------------------- */
+
+.toc {
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.toc__heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.toc__list,
+.toc__sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc__item { margin: 0; }
+
+.toc__link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55ch;
+  padding: 0.3em 0.5em 0.3em 0.6em;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius, 8px) var(--radius, 8px) 0;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.toc__link:hover {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.toc__num {
+  flex: none;
+  min-width: 2.1ch;
+  text-align: right;
+  font-family: var(--font-num, "Cuprum", ui-sans-serif, sans-serif);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  color: var(--muted);
+}
+
+.toc__item--parent > .toc__link { font-weight: 600; }
+
+.toc__sub {
+  margin: 0 0 var(--space-2, 0.5rem) 1.15rem;
+  border-left: 1px solid var(--border);
+}
+
+.toc__link--sub {
+  font-size: 0.88rem;
+  color: var(--muted);
+  padding-top: 0.22em;
+  padding-bottom: 0.22em;
+}
+
+.toc__link--sub:hover { color: var(--accent-ink); }
+
+/* `is-current` is server-rendered (this page); `is-active` is the scroll-spy. */
+.toc__item.is-current > .toc__link,
+.toc__link.is-active {
+  color: var(--accent-ink);
+  font-weight: 700;
+  border-left-color: var(--accent-ink);
+  background: var(--accent-wash);
+}
+
+.toc__link--sub.is-active { font-weight: 600; }
+
+/* --- Banners -------------------------------------------------------------
+   Prominent, not alarming: a wash and a heavy left rule, no full-bleed colour.
+   The superseded banner is the one that must stop a reader, so it takes the
+   --action rule and a warmer wash. */
+
+.banner {
+  margin: 0 0 var(--space-5, 2rem);
+  padding: var(--space-4, 1.5rem);
+  background: var(--accent-wash);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent-ink);
+  border-radius: var(--radius, 8px);
+}
+
+.banner__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-ink);
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.banner__lead {
+  max-width: var(--measure, 68ch);
+  margin-bottom: var(--space-3, 1rem);
+}
+
+.banner__list {
+  max-width: var(--measure, 68ch);
+  margin: 0 0 var(--space-3, 1rem);
+  padding-left: 1.15rem;
+}
+
+.banner__list li { margin-bottom: var(--space-2, 0.5rem); }
+
+.banner__note {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.banner__more {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.banner--superseded {
+  background: var(--action-wash);
+  border-left-color: var(--action);
+}
+
+.banner--superseded .banner__title { color: var(--action-ink); }
+
+/* --- Page furniture ------------------------------------------------------- */
+
+.page-title {
+  font-size: clamp(1.7rem, 1.2rem + 2.2vw, 2.6rem);
+  margin-bottom: var(--space-3, 1rem);
+  max-width: 24ch;
+}
+
+.page-title__num {
+  display: block;
+  font-family: var(--font-num, "Cuprum", sans-serif);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.42em;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: 0.35em;
+}
+
+.page-lead {
+  max-width: var(--measure, 68ch);
+  font-size: 1.02rem;
+  color: var(--muted);
+  margin-bottom: var(--space-5, 2rem);
+}
+
+.section-title {
+  font-size: 1.45rem;
+  margin: var(--space-6, 3rem) 0 var(--space-4, 1.5rem);
+  padding-top: var(--space-4, 1.5rem);
+  border-top: 1px solid var(--border);
+  scroll-margin-top: calc(var(--header-h, 3.5rem) + var(--space-4, 1.5rem));
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5ch;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: var(--space-4, 1.5rem);
+}
+
+.crumbs [aria-current="page"] { color: var(--ink); }
+
+/* --- Pager ---------------------------------------------------------------- */
+
+.pager {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3, 1rem);
+  margin-top: var(--space-6, 3rem);
+  padding-top: var(--space-4, 1.5rem);
+  border-top: 1px solid var(--border);
+}
+
+.pager__link {
+  display: block;
+  padding: var(--space-3, 1rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.pager__link:hover {
+  border-color: var(--accent-ink);
+  background: var(--accent-wash);
+}
+
+.pager__link--prev { text-align: left; }
+
+.pager__link--next { text-align: right; }
+
+.pager__dir {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.2em;
+}
+
+.pager__title {
+  display: block;
+  font-family: var(--font-display, "Montserrat", sans-serif);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* --- Provisions ----------------------------------------------------------
+   The number is a citation handle, not decoration. From 900px up it lives in
+   its own margin slot, tabular and in the numeral face, so a column of numbers
+   reads straight down the page and the titles all start on one line. Below
+   900px the slot collapses and the number sets inline, because a 3rem gutter
+   on a phone is 3rem stolen from the measure. */
+
+.provision {
+  position: relative;
+  margin: 0 0 var(--space-5, 2rem);
+  padding-left: var(--num-slot);
+  scroll-margin-top: calc(var(--header-h, 3.5rem) + var(--space-4, 1.5rem));
+}
+
+.provision:target {
+  outline: 2px solid var(--action);
+  outline-offset: var(--space-3, 1rem);
+  border-radius: 2px;
+}
+
+.provision__heading {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5ch;
+  margin-bottom: var(--space-2, 0.5rem);
+  scroll-margin-top: calc(var(--header-h, 3.5rem) + var(--space-4, 1.5rem));
+}
+
+.provision__num {
+  font-family: var(--font-num, "Cuprum", ui-sans-serif, sans-serif);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+.provision__title { min-width: 0; }
+
+.provision--article > .provision__heading { font-size: 1.35rem; }
+
+.provision--section > .provision__heading { font-size: 1.08rem; }
+
+.provision--preamble > .provision__heading {
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.provision__body {
+  max-width: var(--measure, 68ch);
+  text-align: left;                          /* never justify legal prose      */
+  hyphens: manual;
+  overflow-wrap: break-word;
+}
+
+.provision__body > :last-child { margin-bottom: 0; }
+
+.provision__body ul,
+.provision__body ol {
+  margin: 0 0 var(--space-3, 1rem);
+  padding-left: 1.6rem;
+}
+
+.provision__body li { margin-bottom: 0.4em; }
+
+.provision__body li::marker {
+  color: var(--muted);
+  font-family: var(--font-num, "Cuprum", sans-serif);
+}
+
+.provision__body blockquote {
+  margin: 0 0 var(--space-3, 1rem);
+  padding-left: var(--space-3, 1rem);
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+.provision__body h3,
+.provision__body h4,
+.provision__body h5,
+.provision__body h6 {
+  font-size: 1.02rem;
+  margin: var(--space-4, 1.5rem) 0 var(--space-2, 0.5rem);
+}
+
+/* No wrapper element is emitted around tables, so the table itself has to be
+   the scroll container — the page body must never scroll sideways. */
+.provision__body table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin-bottom: var(--space-3, 1rem);
+  font-size: 0.95rem;
+}
+
+.provision__body th,
+.provision__body td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.7em;
+  text-align: left;
+  vertical-align: top;
+}
+
+.provision__body th {
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.provision__body caption {
+  caption-side: bottom;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-top: 0.5em;
+}
+
+.provision__meta {
+  margin: var(--space-2, 0.5rem) 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.provision__sections {
+  margin-top: var(--space-4, 1.5rem);
+  display: flow-root;
+}
+
+.provision__sections .provision {
+  margin-bottom: var(--space-4, 1.5rem);
+}
+
+/* A provision published without text, or reserved/omitted by an Act. The state
+   is part of the record, so it is shown rather than swept away. */
+.provision--reserved,
+.provision--omitted { color: var(--muted); }
+
+.provision--reserved .provision__title,
+.provision--omitted .provision__title { font-style: italic; }
+
+.no-text {
+  max-width: var(--measure, 68ch);
+  margin: 0;
+  padding: 0.4em 0.9em;
+  border-left: 3px dashed var(--border);
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+/* --- Copy-link button ---------------------------------------------------
+   Ghosted until the heading is hovered or holds focus, but never hidden from
+   the keyboard: focus-visible always brings it back at full opacity. Pointer
+   devices without hover get it permanently. */
+
+.copy {
+  flex: none;
+  padding: 0.1em 0.35em;
+  font-size: 0.75em;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 130ms ease, color 130ms ease, background-color 130ms ease;
+}
+
+.provision__heading:hover .copy,
+.provision__heading:focus-within .copy,
+.copy:focus-visible {
+  opacity: 1;
+}
+
+.copy:hover {
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+}
+
+@media (hover: none) {
+  .copy { opacity: 1; }
+}
+
+/* --- Amendment chips ------------------------------------------------------ */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  margin: 0 0 var(--space-3, 1rem);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5ch;
+  padding: 0.2em 0.65em;
+  font-size: 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.chip__label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.9em;
+}
+
+.chip__link {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+.chip__pdf {
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--action-ink);
+  text-decoration: none;
+  padding: 0 0.4em;
+  border: 1px solid var(--action);
+  border-radius: 4px;
+}
+
+.chip__pdf:hover {
+  background: var(--action-wash);
+}
+
+/* --- Amendment register --------------------------------------------------- */
+
+.act {
+  margin: 0 0 var(--space-5, 2rem);
+  padding: var(--space-4, 1.5rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  scroll-margin-top: calc(var(--header-h, 3.5rem) + var(--space-4, 1.5rem));
+}
+
+.act:target { border-color: var(--action); }
+
+.act__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6ch;
+  font-size: 1.25rem;
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.act__num {
+  font-family: var(--font-num, "Cuprum", sans-serif);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  color: var(--accent-ink);
+  white-space: nowrap;
+}
+
+.act__short {
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: var(--space-3, 1rem);
+}
+
+/* Status is the first thing a reader needs and the easiest thing to fake with
+   colour alone, so each pill carries its own words as well. */
+.act__status {
+  flex: none;
+  padding: 0.15em 0.7em;
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.act__status--applied {
+  color: var(--ok-ink);
+  background: var(--ok-wash);
+}
+
+.act__status--partially-applied {
+  color: var(--action-ink);
+  background: var(--action-wash);
+}
+
+.act__status--pending {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.act__meta {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: var(--space-4, 1.5rem);
+  row-gap: var(--space-1, 0.25rem);
+  margin: 0 0 var(--space-4, 1.5rem);
+  font-size: 0.95rem;
+}
+
+.act__meta dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 0.45em;
+}
+
+.act__meta dd { margin: 0; }
+
+.act__sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.act__provisions {
+  max-width: var(--measure, 68ch);
+  margin: 0 0 var(--space-3, 1rem);
+  padding-left: 1.4rem;
+}
+
+.act__provisions li { margin-bottom: 0.35em; }
+
+.act__none {
+  max-width: var(--measure, 68ch);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.act__unverified {
+  display: inline-block;
+  padding: 0.05em 0.5em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--action-ink);
+  background: var(--action-wash);
+  border-radius: 4px;
+}
+
+/* --- Discrepancies and approval chains (<details>) ------------------------ */
+
+.disc {
+  margin: 0 0 var(--space-3, 1rem);
+  padding: var(--space-2, 0.5rem) var(--space-3, 1rem);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+}
+
+.disc > summary {
+  cursor: pointer;
+  font-family: var(--font-display, "Montserrat", sans-serif);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.25em 0;
+  border-radius: 4px;
+}
+
+.disc > summary:hover { color: var(--accent-ink); }
+
+.disc[open] > summary {
+  margin-bottom: var(--space-2, 0.5rem);
+  padding-bottom: var(--space-2, 0.5rem);
+  border-bottom: 1px solid var(--border);
+}
+
+.disc blockquote {
+  max-width: var(--measure, 68ch);
+  margin: 0 0 var(--space-3, 1rem);
+  padding: 0.2em 0 0.2em var(--space-3, 1rem);
+  border-left: 3px solid var(--action);
+  font-size: 0.97rem;
+}
+
+.disc__label {
+  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.disc__note {
+  max-width: var(--measure, 68ch);
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.proc {
+  max-width: var(--measure, 68ch);
+  margin: var(--space-2, 0.5rem) 0 0;
+  padding-left: 1.4rem;
+  font-size: 0.95rem;
+}
+
+.proc li { margin-bottom: 0.35em; }
+
+.proc__body { font-weight: 600; }
+
+/* --- Version lists (archive, 404) ----------------------------------------- */
+
+.versions {
+  list-style: none;
+  max-width: var(--measure, 68ch);
+  margin: 0 0 var(--space-5, 2rem);
+  padding: 0;
+}
+
+.versions__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 1rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--radius, 8px);
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.versions__item a { text-decoration: none; }
+
+.versions__item a:hover { text-decoration: underline; }
+
+.versions__item--current { border-left-color: var(--accent-ink); }
+
+.versions__badge {
+  padding: 0.1em 0.6em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ok-ink);
+  background: var(--ok-wash);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.versions__badge--old {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.versions__date {
+  margin-left: auto;
+  font-family: var(--font-num, "Cuprum", sans-serif);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* --- Footer --------------------------------------------------------------- */
+
+.site-footer {
+  padding: var(--space-5, 2rem) var(--space-4, 1.5rem) calc(var(--space-6, 3rem) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.site-footer p { margin: 0 0 var(--space-2, 0.5rem); }
+
+.site-footer__meta {
+  font-family: var(--font-num, "Cuprum", sans-serif);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* --- Contents FAB (small screens only) ------------------------------------ */
+
+.toc-fab {
+  position: fixed;
+  right: var(--space-3, 1rem);
+  bottom: calc(var(--space-3, 1rem) + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5ch;
+  height: var(--fab-h);
+  padding: 0 1.1rem;
+  font-family: var(--font-display, "Montserrat", sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent-ink);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px var(--shadow, rgba(0, 0, 0, 0.18));
+  cursor: pointer;
+  transition: transform 140ms ease, background-color 140ms ease;
+}
+
+.toc-fab:hover { transform: translateY(-2px); }
+
+/* --- Bottom sheet --------------------------------------------------------- */
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.sheet[hidden] { display: none; }
+
+.sheet__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 80vh;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius, 8px) var(--radius, 8px) 0 0;
+  box-shadow: 0 -8px 30px var(--shadow, rgba(0, 0, 0, 0.18));
+}
+
+/* Animated rather than transitioned: the panel goes from display:none to
+   visible in one step when [hidden] is removed, and a transition cannot see
+   that change. */
+.sheet:not([hidden]) .sheet__panel {
+  animation: sheet-in 200ms ease-out;
+}
+
+@keyframes sheet-in {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 1rem);
+  padding: var(--space-3, 1rem) var(--space-4, 1.5rem);
+  border-bottom: 1px solid var(--border);
+}
+
+.sheet__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sheet__head .btn { border-color: var(--border); }
+
+.sheet__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-3, 1rem) var(--space-4, 1.5rem)
+           calc(var(--space-4, 1.5rem) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Inside the sheet the ToC is just a list — the sticky column behaviour and
+   its height cap belong to the desktop sidebar only. */
+.sheet .toc {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+}
+
+.sheet .toc__heading { display: none; }
+
+/* --- Search dialog (command palette) -------------------------------------- */
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(8vh, var(--space-4, 1.5rem)) var(--space-3, 1rem) var(--space-4, 1.5rem);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dialog[hidden] { display: none; }
+
+.dialog__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(40rem, 100%);
+  max-height: 78vh;
+  padding: var(--space-3, 1rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 18px 50px var(--shadow, rgba(0, 0, 0, 0.18));
+  animation: dialog-in 150ms ease-out;
+}
+
+@keyframes dialog-in {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.dialog__input {
+  width: 100%;
+  padding: 0.6em 0.8em;
+  font-family: inherit;
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  transition: border-color 140ms ease;
+}
+
+.dialog__input::placeholder { color: var(--muted); }
+
+.dialog__input:focus-visible { border-color: var(--accent-ink); }
+
+.dialog__hint {
+  margin: var(--space-2, 0.5rem) 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.dialog__results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dialog__results li + li { border-top: 1px solid var(--border); }
+
+.dialog__results a,
+.dialog__results button {
+  display: block;
+  width: 100%;
+  padding: 0.55em 0.7em;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.dialog__results a:hover,
+.dialog__results button:hover,
+.dialog__results [aria-selected="true"],
+.dialog__results .is-active {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.dialog__results small,
+.dialog__results .dialog__meta {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+/* --- Toast ---------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-4, 1.5rem) + env(safe-area-inset-bottom, 0px));
+  z-index: 400;
+  max-width: min(30rem, calc(100vw - 2rem));
+  padding: 0.6em 1.1em;
+  font-size: 0.9rem;
+  color: var(--on-accent);
+  background: var(--accent-ink);
+  border-radius: 999px;
+  box-shadow: 0 8px 26px var(--shadow, rgba(0, 0, 0, 0.18));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(0.75rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --- Back to top ---------------------------------------------------------- */
+
+.to-top {
+  position: fixed;
+  right: var(--space-3, 1rem);
+  bottom: calc(var(--space-3, 1rem) + var(--fab-h) + var(--space-2, 0.5rem) + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.87);                /* 5.2:1 on the amber, both themes */
+  background: var(--action);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 6px 20px var(--shadow, rgba(0, 0, 0, 0.18));
+  cursor: pointer;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.to-top[hidden] { display: none; }
+
+.to-top:hover { transform: translateY(-2px); }
+
+/* --- Focus mode ----------------------------------------------------------
+   Dims every provision except the one being read. The :has() rule keeps a
+   parent article lit while one of its sections is in view — opacity compounds
+   down the tree, so a dimmed parent would drag its live child down with it. */
+
+body.is-focus-mode .provision {
+  opacity: 0.38;
+  transition: opacity 200ms ease;
+}
+
+body.is-focus-mode .provision.is-in-view,
+body.is-focus-mode .provision:has(.provision.is-in-view) {
+  opacity: 1;
+}
+
+body.is-focus-mode .provision:focus-within { opacity: 1; }
+
+/* =============================================================================
+   Responsive
+   ========================================================================== */
+
+/* --- ≥600px: room for labels and two-up navigation ------------------------ */
+@media (min-width: 600px) {
+  .pager { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 599px) {
+  .btn__label { display: none; }            /* icon-only; aria-label carries it */
+
+  .btn { padding: 0.45em 0.55em; }
+
+  .shell { padding: var(--space-4, 1.5rem) var(--space-3, 1rem) var(--space-6, 3rem); }
+
+  .act { padding: var(--space-3, 1rem); }
+
+  .act__meta { grid-template-columns: minmax(0, 1fr); }
+
+  .act__meta dt { padding-top: var(--space-2, 0.5rem); }
+
+  .versions__date { margin-left: 0; width: 100%; }
+
+  .page-title { font-size: clamp(1.5rem, 1.1rem + 3vw, 2rem); }
+}
+
+/* --- ≥900px: sidebar, margin numbering, no FAB ---------------------------- */
+@media (min-width: 900px) {
+  .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+    gap: var(--space-6, 3rem);
+    align-items: start;
+  }
+
+  .shell__aside { display: block; }
+
+  /* A long table of contents must scroll on its own, not push the page. */
+  .shell__aside .toc {
+    position: sticky;
+    top: var(--header-h, 3.5rem);
+    max-height: calc(100vh - var(--header-h, 3.5rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding: var(--space-4, 1.5rem) var(--space-2, 0.5rem) var(--space-5, 2rem) 0;
+  }
+
+  /* The FAB and sheet are the small-screen route to the same navigation. */
+  .toc-fab { display: none; }
+
+  .to-top {
+    bottom: calc(var(--space-4, 1.5rem) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Numbers move into the margin. The slot is padding on the provision, so the
+     absolutely-positioned number lands inside the provision's own box and
+     never overhangs the main column. */
+  .provision--article,
+  .provision--preamble { --num-slot: 3.25rem; }
+
+  .provision--section { --num-slot: 2.75rem; }
+
+  .provision__num {
+    position: absolute;
+    left: calc(-1 * var(--num-slot));
+    top: 0;
+    width: calc(var(--num-slot) - 0.75rem);
+    text-align: right;
+    line-height: inherit;
+  }
+
+  .site-header { padding: 0 var(--space-4, 1.5rem); }
+}
+
+/* --- ≥1200px: a little more air around the column ------------------------- */
+@media (min-width: 1200px) {
+  .shell { grid-template-columns: minmax(0, 18rem) minmax(0, 1fr); }
+}

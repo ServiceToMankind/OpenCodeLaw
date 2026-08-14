@@ -1,0 +1,115 @@
+# ---------------------------------------------------------------------------
+# OpenCodeLaw starter constitution.
+#
+# Copy this to constitution/current.yaml, replace the content, and deploy.
+# Run `npx opencodelaw validate constitution/current.yaml` as you go — the
+# validator is the fastest way to learn the schema.
+#
+# Full reference: schema/SPEC.md (generated from the JSON Schema, never drifts).
+# ---------------------------------------------------------------------------
+
+# Schema version. Quoted — unquoted, YAML reads 1.0 as a float.
+opencodelaw: "1.0"
+
+info:
+  title: EXAMPLE SOCIETY                       # short name, shown in the header
+  organization: Example Society Incorporated   # full legal name
+  jurisdiction: Somewhere, Somecountry         # optional
+  # registration: SOC/1234/2020                # optional: your registration number
+
+  version: 1.0.0                               # semver; must match the filename when archived
+  status: current                              # exactly one document may be `current`
+  effective_from: 2025-01-01                   # ISO date
+
+  # Placeholders are rejected by the validator: no example.com URLs ship to
+  # production, which is how the original spec published two dead links.
+  contact:
+    name: The Secretary
+    email: secretary@example.org               # replace before deploying
+  license: CC-BY-4.0
+
+# ---------------------------------------------------------------------------
+# Optional. Include this ONLY while some enacted amendment is not yet applied.
+# The site renders a visible banner from it on every page, naming what is
+# outstanding and why. Delete the block once everything is reconciled.
+# ---------------------------------------------------------------------------
+# reconciliation_state:
+#   target_version: 2.0.0
+#   complete: false
+#   held:
+#     - provisions: [art-4]
+#       blocked_by: board sign-off
+#       note: Act 1 of 2025 substitutes Article 4; awaiting confirmation of clause 3.
+
+preamble:
+  id: preamble                                 # fixed value
+  title: Preamble
+  content: |
+    This Society exists to … .
+
+    Content is Markdown. It is sanitised at build time against a strict
+    allowlist, so a spec from an untrusted source cannot inject script.
+  adopted: 2025-01-01
+
+articles:
+  # -------------------------------------------------------------------------
+  # `id` and `number` are the citation identity and are PERMANENT.
+  #
+  # Never derive either from position in this list. Reordering these entries
+  # must change no anchor and no citation — there is a test that proves it.
+  # The validator enforces that `id` is always `art-<number>`.
+  # -------------------------------------------------------------------------
+  - id: art-1
+    number: 1
+    title: Name
+    content: |
+      The name of the society shall be Example Society Incorporated.
+
+  - id: art-2
+    number: 2
+    title: Objects
+    content: |
+      The objects of the society are:
+
+      1. to do the first thing;
+      2. to do the second thing.
+
+  # An article may hold sections instead of, or as well as, its own body.
+  # Section ids follow the article: art-3-s-1, art-3-s-2, …
+  - id: art-3
+    number: 3
+    title: Membership
+    content: |
+      Membership is open to any person who supports the objects.
+    # `amended_by` refers to an id in acts/register.yaml. It must resolve.
+    # amended_by: [act-1-2025]
+    sections:
+      - id: art-3-s-1
+        number: 1
+        title: Admission
+        content: |
+          A person becomes a member on approval by the committee.
+      - id: art-3-s-2
+        number: 2
+        title: Termination
+        content: |
+          Membership ends on resignation, death, or expulsion under Article 4.
+
+  # -------------------------------------------------------------------------
+  # A gap in numbering is legal ONLY when an entry accounts for it. This is how
+  # a statute book represents a number no provision occupies — the alternative,
+  # silently renumbering, breaks every citation ever made to the articles after
+  # the gap. `reserved` and `omitted` carry a `note` and no `content`.
+  # -------------------------------------------------------------------------
+  - id: art-4
+    number: 4
+    title: Reserved
+    status: reserved
+    note: No instrument has occupied this number.
+
+  - id: art-5
+    number: 5
+    title: Dissolution
+    content: |
+      The society may be dissolved by a resolution of three quarters of members
+      present and voting at a general meeting.

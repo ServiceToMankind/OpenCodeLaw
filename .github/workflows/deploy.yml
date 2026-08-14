@@ -2,23 +2,36 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [rebuild/v3, main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      include_cname:
+        description: >-
+          Publish the CNAME file, pointing constitution.stmorg.in at this build.
+          Leave false until the new site has been reviewed — the custom domain
+          still serves the old site.
+        type: boolean
+        default: false
+        required: false
 
-# Least privilege by default; the deploy job widens it.
 permissions:
   contents: read
 
-# Never let two deploys race the live constitution.
 concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  # Project Pages serves under /<repo>/. Change these two together to move to
+  # the apex domain; every internal link and asset is derived from them.
+  BASE_PATH: /OpenCodeLaw/
+  SITE_ORIGIN: https://servicetomankind.github.io
+
 jobs:
-  # Validation is a separate job so a schema violation blocks deployment
-  # rather than publishing a broken or legally incorrect constitution.
+  # A schema violation, a failing test or a dead internal link must block
+  # publication rather than ship a broken or legally incorrect constitution.
   validate:
     name: Validate and test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
@@ -29,38 +42,52 @@ jobs:
         node: ['20', '22']
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-
       - run: npm ci
 
-      # Schema conformance, citation-identity integrity, act cross-references,
-      # archive immutability. See schema/opencodelaw-1.0.schema.json.
       - name: Validate constitution
         run: npm run validate
 
-      - name: Run tests
+      - name: Build
+        run: npm run build
+
+      - name: Check links
+        run: npm run linkcheck
+
+      - name: Test
         run: npm test
 
   build:
-    name: Build
+    name: Build artifact
     needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-
       - run: npm ci
 
       - name: Build static site
         run: npm run build
+        env:
+          INCLUDE_CNAME: ${{ github.event.inputs.include_cname || 'false' }}
+
+      - name: Check links
+        run: npm run linkcheck
+
+      - name: Fail if the custom domain was published unintentionally
+        if: ${{ github.event.inputs.include_cname != 'true' }}
+        run: |
+          if [ -f dist/CNAME ]; then
+            echo "::error::dist/CNAME present but include_cname was not requested."
+            exit 1
+          fi
+          echo "CNAME correctly excluded; the custom domain is untouched."
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
@@ -71,7 +98,7 @@ jobs:
   deploy:
     name: Deploy to Pages
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       pages: write

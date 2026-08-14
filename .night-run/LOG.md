@@ -10,3 +10,4 @@
 | 00:51 | L3 amended_by | 5 articles (9,10,11,12,18); 6,7 untouched |
 | 00:51 | L4 version | 3.0.0-alpha.1 + reconciliation_state |
 | 00:51 | L5 validate | PASSED 0 errors, 3 warnings |
+| 01:06 | Phase 4 build+deploy pipeline | 24 pages, 41 tests, 0 internal 404s, 21 OG images |
