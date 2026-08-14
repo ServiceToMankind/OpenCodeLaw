@@ -1,2 +1,13 @@
+# Build output — published by GitHub Actions, never committed.
+dist/
+
+# Dependencies — restored with `npm ci` from the committed lockfile.
+node_modules/
+
+# Legacy SCSS source map. NOTE: css/style.css is deliberately NOT ignored;
+# ignoring the site's only stylesheet is what made a clean checkout ship
+# with no CSS. See AUDIT-CONFIRMED.md §6.
 css/style.css.map
-css/style.css
+
+*.log
+.DS_Store
