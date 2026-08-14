@@ -1425,13 +1425,16 @@ body.is-focus-mode .provision:focus-within { opacity: 1; }
 /* --- ≥900px: sidebar, margin numbering, no FAB ---------------------------- */
 @media (min-width: 900px) {
   .shell {
-    display: grid;
     grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
     gap: var(--space-6, 3rem);
     align-items: start;
   }
 
-  .shell__aside { display: block; }
+  .shell__aside {
+    order: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
 
   /* A long table of contents must scroll on its own, not push the page. */
   .shell__aside .toc {
