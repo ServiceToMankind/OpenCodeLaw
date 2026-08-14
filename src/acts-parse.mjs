@@ -25,7 +25,13 @@ export function parseAct (absPath) {
   // regexes, so a clause that happens to start a new page reads as
   // "\f      (6) ..." and never matches a `^[ \t]*\(` anchor — which silently
   // dropped Article 7 clause (6) from the analysis entirely.
-  let text = fs.readFileSync(absPath, 'utf8').replace(/\f/g, '\n')
+  //
+  // Stripped to nothing rather than to a newline: all 11 form feeds in the
+  // corpus sit at a line start, so removing them fixes the anchor while
+  // keeping line numbers identical to the file on disk. Inserting newlines
+  // would shift every subsequent line, and `source_lines` in the act register
+  // is an audit trail a human opens in an editor.
+  let text = fs.readFileSync(absPath, 'utf8').replace(/\f/g, '')
 
   // The Statement of Objects and Reasons is explanatory, not enacting.
   const sor = text.search(/STATEMENT\s+OF\s+OBJECTS\s+AND\s+REASONS/i)

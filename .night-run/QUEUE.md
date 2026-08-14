@@ -13,11 +13,11 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 
 - [x] S1 Tripwire script + baseline (82 provision strings)
 - [x] S2 QUEUE.md, LOG.md
-- [ ] S3 Commit scaffolding
+- [x] S3 Commit scaffolding
 
 ## L — Authorised legal metadata (no provision text changes except L2)
 
-- [ ] L1 `acts/register.yaml` — all three Acts; Act 1 provisions for arts. 9,10,11,12,18 only
+- [x] L1 `acts/register.yaml` — all three Acts; Act 1 provisions for arts. 9,10,11,12,18 only
 - [ ] L2 Restore `art-11` body from Act 1 (byte-identical guard; abort → mark Q11 blocked)
 - [ ] L3 `amended_by: [act-1-2024]` on arts. 9,10,11,12,18 only
 - [ ] L4 `version: 3.0.0-alpha.1` + `reconciliation_state` block

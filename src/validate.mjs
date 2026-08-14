@@ -286,7 +286,7 @@ function checkStatementOfObjects (rep, acts) {
     if (!act.source_text) continue
     const abs = path.join(ROOT, act.source_text)
     if (!fs.existsSync(abs)) continue
-    const sor = statementOfObjectsLine(fs.readFileSync(abs, 'utf8'))
+    const sor = statementOfObjectsLine(fs.readFileSync(abs, 'utf8').replace(/\f/g, ''))
     if (sor == null) continue
 
     for (const [j, p] of (act.provisions ?? []).entries()) {

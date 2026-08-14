@@ -247,6 +247,10 @@
         "year": { "type": "integer", "minimum": 1900 },
         "title": { "$ref": "#/$defs/nonEmptyText" },
         "short_title": { "type": "string" },
+        "application_status": {
+          "enum": ["applied", "partially-applied", "pending"],
+          "description": "How much of this Act the current constitution reflects. Observed state, not a legal determination: `provisions` records only what has been reconciled, and anything held is named in the constitution's `reconciliation_state`."
+        },
         "assent_date": {
           "type": "string",
           "format": "date",

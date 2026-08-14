@@ -81,7 +81,7 @@ test('a Statement of Objects is never the authority for an operation', async () 
   // Each Act's SOR boundary is found, and every operative provision the parser
   // extracted sits above it.
   for (const act of acts) {
-    const text = fs.readFileSync(path.join(ROOT, act.file), 'utf8').replace(/\f/g, '\n')
+    const text = fs.readFileSync(path.join(ROOT, act.file), 'utf8').replace(/\f/g, '')
     const sor = statementOfObjectsLine(text)
     assert.ok(sor && sor > 1, `${act.file}: Statement of Objects not located`)
     for (const p of act.provisions) {
@@ -95,7 +95,7 @@ test('a Statement of Objects is never the authority for an operation', async () 
 test('Act 2 sets 2/3rd in operative text and 3/4th only in the Statement of Objects', async () => {
   const fs = await import('node:fs')
   const act2 = acts.find(a => a.file.includes('second'))
-  const text = fs.readFileSync(path.join(ROOT, act2.file), 'utf8').replace(/\f/g, '\n')
+  const text = fs.readFileSync(path.join(ROOT, act2.file), 'utf8').replace(/\f/g, '')
   const { statementOfObjectsLine } = await import('../src/validate.mjs')
   const sor = statementOfObjectsLine(text)
   const lines = text.split('\n')
