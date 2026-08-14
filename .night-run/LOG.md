@@ -11,3 +11,6 @@
 | 00:51 | L4 version | 3.0.0-alpha.1 + reconciliation_state |
 | 00:51 | L5 validate | PASSED 0 errors, 3 warnings |
 | 01:06 | Phase 4 build+deploy pipeline | 24 pages, 41 tests, 0 internal 404s, 21 OG images |
+| 01:11 | GATE 4 PASS | live at https://servicetomankind.github.io/OpenCodeLaw/ — all pages 200, PDFs 200, CNAME 404 (correct), pages.cname=null |
+| 01:11 | Pages enabled | build_type=workflow; rebuild/v3 added to github-pages branch policy (was main-only) |
+| 01:11 | CI fix | node --test tests/ fails on Node 22 (treats dir as module); switched to shell glob |

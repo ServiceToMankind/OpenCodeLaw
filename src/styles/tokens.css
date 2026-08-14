@@ -55,12 +55,10 @@
 
   /* Interactive */
   --accent: var(--brand-accent);  /* primary            — 14.6:1 on canvas  */
-  --accent-ink: #ffffff;          /* text on an accent fill — 16.0:1        */
-  --accent-soft: rgba(50, 0, 99, 0.08);   /* accent wash: current TOC row   */
+  /* "text on an accent fill" is --on-accent, defined with the derived tokens below. */
   --accent-2: #0062cc;            /* links, shade of #007bff — 5.3:1        */
   --action: #a05f26;              /* to-top, marks, shade of #c07534 — 4.6:1 */
   --action-soft: var(--brand-action);       /* graphic ochre, 3.3:1 non-text */
-  --action-wash: rgba(192, 117, 52, 0.14);  /* search-hit highlight ground   */
 
   /* Depth */
   --shadow: rgba(0, 0, 0, 0.18);
@@ -112,12 +110,9 @@
     --border: #4f4f4f;
 
     --accent: #c79df1;            /* 5.7:1 on canvas                         */
-    --accent-ink: #333333;        /* text on an accent fill — 5.7:1          */
-    --accent-soft: rgba(199, 157, 241, 0.16);
     --accent-2: #6cb2ff;          /* 5.7:1 on canvas                         */
     --action: #e09a55;            /* 5.4:1 on canvas                         */
     --action-soft: var(--brand-action);
-    --action-wash: rgba(224, 154, 85, 0.18);
 
     --shadow: rgba(0, 0, 0, 0.45);  /* same ink, more of it: dark grounds
                                        swallow an 18% shadow entirely        */
@@ -135,12 +130,9 @@
   --border: #4f4f4f;
 
   --accent: #c79df1;
-  --accent-ink: #333333;
-  --accent-soft: rgba(199, 157, 241, 0.16);
   --accent-2: #6cb2ff;
   --action: #e09a55;
   --action-soft: var(--brand-action);
-  --action-wash: rgba(224, 154, 85, 0.18);
 
   --shadow: rgba(0, 0, 0, 0.45);
   --focus: #e09a55;
@@ -223,4 +215,55 @@ a { color: var(--accent-2); }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+/* --- Derived tokens ------------------------------------------------------
+   Two brand colours cannot carry text at 4.5:1 in both themes, so each gets a
+   text-safe tint or shade *within its own hue* — purple stays at 270°, blue at
+   211°, amber at 28°. No new hue family is introduced; the raw brand values
+   keep their jobs as fills, rules and highlights, where the bar is 3:1.
+
+   Defined here and only here. They previously lived in layout.css, which loads
+   later and silently redefined --accent-ink to mean the opposite of what this
+   file said it meant.                                                        */
+:root {
+  --accent-ink: var(--accent, #320063);      /* accent as text, light theme    */
+  --on-accent: #f5f5f5;                      /* text on an accent fill         */
+  --link-ink: #0069d9;                       /* 4.8:1 on #f5f5f5, hue 211      */
+  --action-ink: #8a5122;                     /* 5.9:1 on #f5f5f5, hue 28       */
+  --ring: var(--focus, #320063);
+
+  --accent-wash: rgba(50, 0, 99, 0.07);
+  --action-wash: rgba(192, 117, 52, 0.12);
+
+  --action-contrast: rgba(0, 0, 0, 0.87);    /* text on an --action fill      */
+  --num-slot: 0px;                           /* margin gutter; grows ≥900px    */
+  --fab-h: 3rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent-ink: #cc99ff;                   /* hsl(270 100% 80%), 5.8:1 on #333 */
+    --on-accent: #333333;
+    --link-ink: #66b2ff;                     /* 5.6:1 on #333333, hue 210      */
+    --action-ink: #e0a878;                   /* 6.0:1 on #333333, hue 28       */
+    --ring: var(--focus, #cc99ff);
+
+    --accent-wash: rgba(204, 153, 255, 0.13);
+    --action-wash: rgba(192, 117, 52, 0.22);
+  }
+}
+
+/* Repeated verbatim so an explicit toggle beats the system preference in both
+   directions — the inline head script sets data-theme before first paint. */
+:root[data-theme="dark"] {
+  --accent-ink: #cc99ff;
+  --on-accent: #333333;
+  --link-ink: #66b2ff;
+  --action-ink: #e0a878;
+  --ring: var(--focus, #cc99ff);
+
+  --accent-wash: rgba(204, 153, 255, 0.13);
+  --action-wash: rgba(192, 117, 52, 0.22);
 }

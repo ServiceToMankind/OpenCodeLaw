@@ -60,19 +60,30 @@
   :root:not([data-theme="light"]) {
     color-scheme: light !important;
 
+    /* Every token the screen stylesheets actually define, flattened to ink on
+       paper. Overriding names that no stylesheet defines leaves the real ones
+       live: a reader printing from dark mode was getting ochre-on-wash chips. */
     --canvas: #ffffff !important;
-    --canvas-raised: #ffffff !important;
-    --canvas-sunken: #ffffff !important;
+    --surface: #ffffff !important;
     --ink: #000000 !important;
-    --ink-muted: #000000 !important;
     --muted: #000000 !important;
     --border: #000000 !important;
-    --rule: #000000 !important;
     --accent: #000000 !important;
-    --accent-tint: #000000 !important;
-    --accent-secondary: #000000 !important;
+    --accent-2: #000000 !important;
     --action: #000000 !important;
+    --focus: #000000 !important;
     --shadow: transparent !important;
+
+    /* Derived tokens (tokens.css) — the ones that carry colour onto chips,
+       pills, links and the ToC. */
+    --accent-ink: #000000 !important;
+    --on-accent: #ffffff !important;
+    --link-ink: #000000 !important;
+    --action-ink: #000000 !important;
+    --action-contrast: #000000 !important;
+    --ring: #000000 !important;
+    --accent-wash: transparent !important;
+    --action-wash: transparent !important;
   }
 
   /* Motion is meaningless on paper, and a half-finished transition can be

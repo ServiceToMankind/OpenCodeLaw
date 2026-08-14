@@ -27,21 +27,7 @@
    others. Both swap: the text must be readable before the fonts land.
    Paths are relative — the site is served under a sub-path (/OpenCodeLaw/).   */
 
-@font-face {
-  font-family: "Montserrat";
-  src: url("../assets/fonts/Montserrat.ttf") format("truetype");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Cuprum";
-  src: url("../assets/fonts/cuprum-variablefont_wght-webfont.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* Fonts are declared once, in tokens.css. */
 
 /* --- Derived tokens ------------------------------------------------------
    These are additions, not overrides: tokens.css stays the source of truth for
@@ -56,52 +42,6 @@
    270°, blue at 211°, amber at 28°. No new hue family is introduced. The raw
    brand values keep their jobs as fills, rules and highlights, where 3:1 for
    non-text contrast is the bar and all three clear it.                        */
-
-:root {
-  --accent-ink: var(--accent, #320063);      /* accent as text, light theme    */
-  --on-accent: #f5f5f5;                      /* text on an accent fill         */
-  --link-ink: #0069d9;                       /* 4.8:1 on #f5f5f5, hue 211      */
-  --action-ink: #8a5122;                     /* 5.9:1 on #f5f5f5, hue 28       */
-  --ok-ink: #1e7a3c;                         /* 4.9:1 on #f5f5f5               */
-  --ring: var(--focus, #320063);
-
-  --accent-wash: rgba(50, 0, 99, 0.07);
-  --action-wash: rgba(192, 117, 52, 0.12);
-  --ok-wash: rgba(30, 122, 60, 0.12);
-
-  --num-slot: 0px;                           /* margin gutter; grows ≥900px    */
-  --fab-h: 3rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --accent-ink: #cc99ff;                   /* hsl(270 100% 80%), 5.8:1 on #333 */
-    --on-accent: #333333;
-    --link-ink: #66b2ff;                     /* 5.6:1 on #333333, hue 210      */
-    --action-ink: #e0a878;                   /* 6.0:1 on #333333, hue 28       */
-    --ok-ink: #7fd39b;                       /* 7.0:1 on #333333               */
-    --ring: var(--focus, #cc99ff);
-
-    --accent-wash: rgba(204, 153, 255, 0.13);
-    --action-wash: rgba(192, 117, 52, 0.22);
-    --ok-wash: rgba(127, 211, 155, 0.14);
-  }
-}
-
-/* Repeated verbatim so an explicit toggle beats the system preference in both
-   directions — the inline head script sets data-theme before first paint. */
-:root[data-theme="dark"] {
-  --accent-ink: #cc99ff;
-  --on-accent: #333333;
-  --link-ink: #66b2ff;
-  --action-ink: #e0a878;
-  --ok-ink: #7fd39b;
-  --ring: var(--focus, #cc99ff);
-
-  --accent-wash: rgba(204, 153, 255, 0.13);
-  --action-wash: rgba(192, 117, 52, 0.22);
-  --ok-wash: rgba(127, 211, 155, 0.14);
-}
 
 /* --- Base ---------------------------------------------------------------- */
 
@@ -924,8 +864,8 @@ hr {
 }
 
 .act__status--applied {
-  color: var(--ok-ink);
-  background: var(--ok-wash);
+  color: var(--accent-ink);
+  background: var(--accent-wash);
 }
 
 .act__status--partially-applied {
@@ -1090,8 +1030,8 @@ hr {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ok-ink);
-  background: var(--ok-wash);
+  color: var(--accent-ink);
+  background: var(--accent-wash);
   border: 1px solid currentColor;
   border-radius: 999px;
 }
@@ -1365,7 +1305,7 @@ hr {
   height: 2.75rem;
   font-size: 1.1rem;
   line-height: 1;
-  color: rgba(0, 0, 0, 0.87);                /* 5.2:1 on the amber, both themes */
+  color: var(--action-contrast);             /* 5.2:1 on the amber, both themes */
   background: var(--action);
   border: 0;
   border-radius: 50%;
@@ -1477,4 +1417,11 @@ body.is-focus-mode .provision:focus-within { opacity: 1; }
 /* --- ≥1200px: a little more air around the column ------------------------- */
 @media (min-width: 1200px) {
   .shell { grid-template-columns: minmax(0, 18rem) minmax(0, 1fr); }
+}
+
+/* Set by app.js while the search dialog or the mobile contents sheet is open.
+   Without it the page scrolls behind the overlay and the reader loses their
+   place in a long document. */
+body.is-modal-open {
+  overflow: hidden;
 }

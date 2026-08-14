@@ -36,7 +36,7 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 - [x] 4i Hash resolution after DOM ready + sticky offset + legacy `#articleN` map
 - [x] 4j Link checker — zero internal 404s
 - [x] 4k Workflow: ci → validate → test → build → linkcheck → deploy (CNAME gated off)
-- [ ] 4l **Gate 4** + enable Pages + deploy + log URL
+- [x] 4l **Gate 4** + enable Pages + deploy + log URL
 
 ## 5 — SEO
 
@@ -45,7 +45,7 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 - [x] 5c Build-time OG images (SVG→PNG, banner base plate)
 - [x] 5d JSON-LD: Legislation, Article, BreadcrumbList, Organization
 - [x] 5e `sitemap.xml` w/ per-provision lastmod + `robots.txt`
-- [ ] 5f **Gate 5** — raw curl checks, JSON-LD validates, sitemap URLs 200
+- [x] 5f **Gate 5** — raw curl checks, JSON-LD validates, sitemap URLs 200
 
 ## 6 — UI
 
@@ -64,9 +64,9 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 ## 7 — Reusability
 
 - [x] 7a `examples/starter/` minimal valid constitution
-- [ ] 7b `opencodelaw validate|build` bin entries
+- [x] 7b `opencodelaw validate|build` bin entries
 - [x] 7c `schema/SPEC.md` generated from JSON Schema (idempotent)
-- [ ] 7d `README.md` rewrite (no CDN install), `CONTRIBUTING.md`
+- [x] 7d `README.md` rewrite (no CDN install), `CONTRIBUTING.md`
 - [ ] 7e **Gate 7** — starter builds from clean checkout; SPEC.md regenerates identically twice
 
 ## V — Verification suite (add as built)
