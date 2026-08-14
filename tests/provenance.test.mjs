@@ -73,3 +73,41 @@ test('the three Acts yield the expected operative scope', () => {
   for (const t of ['art-18', 'art-20', 'art-21']) assert.equal(byTarget[t].operation, 'insert')
   assert.equal(all.length, 19, 'three Acts enact 19 operative provisions')
 })
+
+test('a Statement of Objects is never the authority for an operation', async () => {
+  const { statementOfObjectsLine } = await import('../src/validate.mjs')
+  const fs = await import('node:fs')
+
+  // Each Act's SOR boundary is found, and every operative provision the parser
+  // extracted sits above it.
+  for (const act of acts) {
+    const text = fs.readFileSync(path.join(ROOT, act.file), 'utf8').replace(/\f/g, '\n')
+    const sor = statementOfObjectsLine(text)
+    assert.ok(sor && sor > 1, `${act.file}: Statement of Objects not located`)
+    for (const p of act.provisions) {
+      assert.ok(p.source_line < sor,
+        `${act.file}: ${p.target} is sourced at line ${p.source_line}, at or after the ` +
+        `Statement of Objects (line ${sor}) — that text is explanatory, not enacting`)
+    }
+  }
+})
+
+test('Act 2 sets 2/3rd in operative text and 3/4th only in the Statement of Objects', async () => {
+  const fs = await import('node:fs')
+  const act2 = acts.find(a => a.file.includes('second'))
+  const text = fs.readFileSync(path.join(ROOT, act2.file), 'utf8').replace(/\f/g, '\n')
+  const { statementOfObjectsLine } = await import('../src/validate.mjs')
+  const sor = statementOfObjectsLine(text)
+  const lines = text.split('\n')
+
+  const twoThirds = lines.findIndex(l => /2\/3rd/.test(l)) + 1
+  const threeQuarters = lines.findIndex(l => /3\/4th/.test(l)) + 1
+
+  assert.ok(twoThirds > 0 && twoThirds < sor, '2/3rd must appear in the operative text')
+  assert.ok(threeQuarters > sor, '3/4th must appear only in the Statement of Objects')
+
+  // The operative figure is the one the register may cite.
+  const art16 = act2.provisions.find(p => p.target === 'art-16')
+  assert.ok(/2\/3rd/.test(art16.text), 'the extracted art-16 provision carries the operative figure')
+  assert.ok(!/3\/4th/.test(art16.text), 'the extracted provision must not carry the explanatory figure')
+})

@@ -8,9 +8,9 @@ the text the Act prescribes, and a verdict. Regenerate with `npm run provenance`
 
 | Verdict | Meaning | Count |
 |---|---|---|
-| 🟢 ALREADY-APPLIED | Current text matches the Act's prescribed text | 4 |
+| 🟢 ALREADY-APPLIED | Current text matches the Act's prescribed text | 5 |
 | 🟡 NOT-APPLIED | Current text is the pre-Act text, or the insertion has not been made | 19 |
-| 🔴 DIVERGENT | Matches neither — edited outside the amendment process | 1 |
+| 🔴 DIVERGENT | Matches neither — edited outside the amendment process | 0 |
 
 ## Method
 
@@ -30,24 +30,6 @@ a provision is not reported as changed merely for being formatted differently.
 Match threshold 0.94. Pre-Act baseline is `constitution/versions/v1.0.0.yaml`,
 the last version that demonstrably predates all three Acts.
 
-## 🔴 DIVERGENT — stop here
-
-1 provision(s) match neither the Act nor the pre-Act text. These are not
-classified further and must not be resolved without a decision from the board.
-
-- **art-10** (Act 1 of 2024) — reads as the Act 83.2%, the Act's words are 95.6% present, 42.4% unchanged since v1.
-
-  Splitting the provision shows where the divergence sits:
-
-  | Part | Matches the Act | Matches pre-Act text |
-  |---|---|---|
-  | Sections | **100.0%** | — |
-  | Article body | 25.0% | 89.7% |
-
-  The Act's text is present in full; the article additionally retains a body the Act
-  does not enact. Under a full substitution that body would have been deleted.
-
-
 ## Summary
 
 | | Act | Provision | Op | Scope | Current title | Act title | Reads as Act | Act words present | Unchanged since v1 | Verdict |
@@ -60,7 +42,7 @@ classified further and must not be resolved without a decision from the board.
 | 🟡 | Act 1 of 2024 | `art-7` (4) | substitute | clause | Membership | Membership | 75.0% | 75.0% | 100.0% | **NOT-APPLIED** |
 | 🟡 | Act 1 of 2024 | `art-7` (6) | substitute | clause | Membership | Membership | 44.4% | 44.4% | 100.0% | **NOT-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-9` | substitute | article | Board Members | Board Members | 100.0% | 100.0% | 28.3% | **ALREADY-APPLIED** |
-| 🔴 | Act 1 of 2024 | `art-10` | substitute | article | Intermediate Board Members | Intermediate Board Members | 83.2% | 95.6% | 42.4% | **DIVERGENT** |
+| 🟢 | Act 1 of 2024 | `art-10` | substitute | article | Intermediate Board Members | Intermediate Board Members | 100.0% | 100.0% | 32.7% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-11` | substitute | article | Units | Units | 99.4% | 99.4% | 26.8% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-12` | substitute | article | Alumini | Alumni | 100.0% | 100.0% | 47.1% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-18` | insert | article | Suspension/Termination | Suspension/Termination | 100.0% | 100.0% | 0.0% | **ALREADY-APPLIED** |
@@ -447,27 +429,15 @@ Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 
 
 </details>
 
-#### 🔴 art-10 — DIVERGENT
+#### 🟢 art-10 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-1-2024` line 77
 
-Reads as the Act **83.2%** · Act's words present 95.6% · unchanged since v1 42.4%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 32.7%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-The IBM are the members who are selected by the board of the NGO to manage the NGO and to take care of the NGO.
-They are responsible for the all legal and financial activities of the NGO.
-The IBM consists of the following members:
-  1. Human Resources Coordinator
-  2. Finance Coordinator
-  3. Designing Coordinator
-  4. Public Relations Coordinator
-  5. Technical Coordinator
-  6. Internal Compliance Coordinator
-  7. Operations Coordinator
-  8. Documentation Coordinator
-
 Eligibility
 Any person who has been selfless service to the NGO and abides by the rules and regulations of the NGO is eligible to become an IBM.
 
@@ -1096,7 +1066,7 @@ Applying an amendment already in force would duplicate or revert a provision, so
 - [ ] 🟡 `art-7(4)` — Act 1 of 2024 — NOT-APPLIED
 - [ ] 🟡 `art-7(6)` — Act 1 of 2024 — NOT-APPLIED
 - [ ] 🟢 `art-9` — Act 1 of 2024 — ALREADY-APPLIED
-- [ ] 🔴 `art-10` — Act 1 of 2024 — DIVERGENT
+- [ ] 🟢 `art-10` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-11` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-12` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-18` — Act 1 of 2024 — ALREADY-APPLIED

@@ -165,7 +165,7 @@
       },
       "allOf": [
         {
-          "$comment": "A reserved or omitted article carries a note instead of text. Everything else must carry non-empty content.",
+          "$comment": "A reserved or omitted article carries a note instead of text. Every other article must carry text somewhere: its own body, or at least one section. An article consisting only of sections is legitimate — Act 1 substitutes Article 10 as a heading followed directly by clauses (1)-(3), supplying no article-level body at all. An empty-string `content` remains an error in every case; that is the defect that published Article 11 blank.",
           "if": {
             "properties": { "status": { "enum": ["reserved", "omitted"] } },
             "required": ["status"]
@@ -177,7 +177,12 @@
               "sections": false
             }
           },
-          "else": { "required": ["content"] }
+          "else": {
+            "anyOf": [
+              { "required": ["content"] },
+              { "required": ["sections"] }
+            ]
+          }
         }
       ]
     },

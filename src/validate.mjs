@@ -72,6 +72,27 @@ function buildAjv (schema) {
   return ajv
 }
 
+/**
+ * Turn an ajv pointer into something a reviewer can act on.
+ *
+ * `/articles/10/content` is an array index, which in this document means
+ * Article *11*. Reporting a legal defect against the wrong article number is
+ * how a reviewer ends up reading the wrong provision.
+ */
+export function describePath (doc, instancePath) {
+  if (!instancePath) return '/'
+  const m = instancePath.match(/^\/articles\/(\d+)(?:\/sections\/(\d+))?(.*)$/)
+  if (!m) return instancePath
+  const art = doc?.articles?.[Number(m[1])]
+  if (!art) return instancePath
+  const rest = m[3] || ''
+  if (m[2] !== undefined) {
+    const sec = art.sections?.[Number(m[2])]
+    return `${sec?.id ?? `${art.id}?s${m[2]}`} "${sec?.title ?? ''}"${rest} (${instancePath})`
+  }
+  return `${art.id ?? `articles[${m[1]}]`} "${art.title ?? ''}"${rest} (${instancePath})`
+}
+
 let _ajv
 function ajvInstance () {
   if (!_ajv) _ajv = buildAjv(JSON.parse(fs.readFileSync(path.join(ROOT, SCHEMA_FILE), 'utf8')))
@@ -240,6 +261,56 @@ function checkVersionIdentity (rep, docs) {
 // Act register cross-references
 // ---------------------------------------------------------------------------
 
+/** First line of an Act's Statement of Objects and Reasons, or null. */
+export function statementOfObjectsLine (sourceText) {
+  const lines = sourceText.split('\n')
+  const i = lines.findIndex(l => /STATEMENT\s+OF\s+OBJECTS\s+AND\s+REASONS/i.test(l))
+  return i === -1 ? null : i + 1
+}
+
+function parseLineRange (spec) {
+  const m = String(spec).match(/^(\d+)(?:\s*-\s*(\d+))?$/)
+  if (!m) return null
+  return { from: Number(m[1]), to: Number(m[2] ?? m[1]) }
+}
+
+/**
+ * A Statement of Objects and Reasons is explanatory, never enacting. It may be
+ * cited as evidence of intent — that is what `drafting_discrepancy` is for —
+ * but it can never be the authority for an operation. If it could authorise a
+ * deletion in one article it could set a voting threshold in another, and the
+ * ruling that the operative text governs collapses.
+ */
+function checkStatementOfObjects (rep, acts) {
+  for (const [i, act] of acts.entries()) {
+    if (!act.source_text) continue
+    const abs = path.join(ROOT, act.source_text)
+    if (!fs.existsSync(abs)) continue
+    const sor = statementOfObjectsLine(fs.readFileSync(abs, 'utf8'))
+    if (sor == null) continue
+
+    for (const [j, p] of (act.provisions ?? []).entries()) {
+      if (!p.source_lines) continue
+      const range = parseLineRange(p.source_lines)
+      if (!range) {
+        rep.error(REGISTER_FILE, 'source-lines-malformed', `acts[${i}].provisions[${j}] source_lines "${p.source_lines}" is not a line or range`, `acts[${i}].provisions[${j}].source_lines`)
+        continue
+      }
+      if (range.to >= sor) {
+        rep.error(
+          REGISTER_FILE,
+          'sor-as-authority',
+          `acts[${i}] "${act.id}" cites lines ${p.source_lines} for ${p.target}, which fall in the ` +
+          `Statement of Objects and Reasons (from line ${sor} of ${act.source_text}). ` +
+          'A Statement of Objects is explanatory, not enacting; cite the operative text. ' +
+          'To record what it says, use drafting_discrepancy.',
+          `acts[${i}].provisions[${j}].source_lines`
+        )
+      }
+    }
+  }
+}
+
 function checkRegister (rep, register, docs) {
   const file = REGISTER_FILE
   const acts = register?.acts ?? []
@@ -259,6 +330,8 @@ function checkRegister (rep, register, docs) {
       }
     }
   }
+
+  checkStatementOfObjects(rep, acts)
 
   // Act references resolve against the live constitution, which is the only
   // document an Act can amend.
@@ -353,7 +426,7 @@ export function validate () {
   for (const d of docs) {
     if (!validateDoc(d.doc)) {
       for (const e of validateDoc.errors) {
-        rep.error(d.file, 'schema', `${e.message}${e.params?.allowedValues ? ` (${e.params.allowedValues.join(', ')})` : ''}`, e.instancePath || '/')
+        rep.error(d.file, 'schema', `${e.message}${e.params?.allowedValues ? ` (${e.params.allowedValues.join(', ')})` : ''}`, describePath(d.doc, e.instancePath))
       }
     }
     checkIdentity(rep, d.file, d.doc)

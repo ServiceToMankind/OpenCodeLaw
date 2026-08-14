@@ -190,18 +190,6 @@ articles:
   - id: art-10
     number: 10
     title: Intermediate Board Members
-    content: |
-      The IBM are the members who are selected by the board of the NGO to manage the NGO and to take care of the NGO.
-      They are responsible for the all legal and financial activities of the NGO.
-      The IBM consists of the following members:
-        1. Human Resources Coordinator
-        2. Finance Coordinator
-        3. Designing Coordinator
-        4. Public Relations Coordinator
-        5. Technical Coordinator
-        6. Internal Compliance Coordinator
-        7. Operations Coordinator
-        8. Documentation Coordinator
     sections:
       - id: art-10-s-1
         number: 1
@@ -250,6 +238,10 @@ articles:
             8. Documentation Coordinator:
             The Documentation Coordinator is responsible
             for all documents of the NGO and to maintain all documents secured.
+    provenance:
+      applied_outside_process: true
+      recorded: "2026-08-15"
+      note: Published v2.0.0 carried an article-level paragraph here that no instrument enacts. Act 1 of 2024 substitutes Article 10 in full, running its heading straight into clause (1) and supplying no article-level body. The paragraph had also been hand-edited by an unrecorded actor to conform to Act 1 clause (3)'s roster — HR & Internshipment Controller to Human Resources Coordinator, Content Coordinator to Documentation Coordinator, and Volunteer Coordinator dropped — all three of which the operative text of clause (3) carries. Removed on reconciliation as superseded. Its eight roles are duplicated in art-10-s-3; its unique lead-in, making the IBM responsible for "all legal and financial activities", is superseded by clause (3) and would contradict Article 21 as inserted by Act 3 of 2024. Preserved verbatim in versions/v2.0.0.yaml and quoted in RECONCILIATION.md Q14.
   - id: art-11
     number: 11
     title: Units

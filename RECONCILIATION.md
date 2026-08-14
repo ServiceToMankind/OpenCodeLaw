@@ -1,8 +1,8 @@
 # Reconciliation
 
 **Status:** open. No constitutional text has been changed.
-**Answered:** Q3, Q5, Q6, Q8, Q9, Q11 — decided 2026-08-15, recorded below and carried into Phase 3.
-**Open:** Q1, Q2, Q4, Q7, Q10, Q12, Q13, Q14.
+**Answered:** Q3, Q5, Q6, Q8, Q9, Q11, Q14 — recorded below and carried into Phase 3.
+**Open:** Q1, Q2 (blocking — holds Articles 6 and 7), Q4, Q7, Q10, Q12, Q13.
 **Branch:** `rebuild/v3` · **Raised:** 2026-08-14 · **Sign-off required from:** Pranay
 
 Phase 3's provision-by-provision table (Act, operation, target id, before, after, source line,
@@ -12,6 +12,23 @@ questions that must be answered before any text is applied.
 Evidence cites `acts/text/*.txt`, the verbatim extraction committed in `ddbffb4`, by line number.
 Short names used below: **A1** = first-constitution-amendment-act-2024.txt, **A2** = second…,
 **A3** = third….
+
+
+## Standing conventions
+
+Rules that bind every entry in this file and every entry in `acts/register.yaml`.
+
+### C1 — A Statement of Objects and Reasons is evidence of intent, never a source of authority
+
+An SOR is explanatory, not enacting. It may be cited to corroborate what an operative provision
+does; it may never be the authority for an operation. The two uses cannot be mixed: if an SOR could
+authorise a deletion in Article 10, it could set a voting threshold in Article 16, and the Q3 ruling
+that the operative text governs would collapse.
+
+Enforced, not merely stated. `src/validate.mjs` fails the build (`sor-as-authority`) if any
+`provisions[].source_lines` cites a line at or after an Act's `STATEMENT OF OBJECTS AND REASONS`.
+Where an SOR contradicts the operative text, record it under `drafting_discrepancy`, which is the
+only field permitted to point there.
 
 ---
 
@@ -35,7 +52,29 @@ left **unallocated**, not invented and not closed by renumbering.
 **Question:** does a fourth instrument exist? If not, confirm Article 19 is recorded as
 `status: reserved` with a note stating no instrument ever occupied it.
 
-### Q2 — Article 6, clause 6 (`Donor`)
+### Q2 — Article 6, clause 6 (`Donor`) — **BLOCKING: Act 1 cannot be applied to Articles 6 or 7 until this returns**
+
+Escalated from deferred. The provenance analysis found Article 6 is **100% its pre-Act text** — all
+five clauses Act 1 substitutes are unapplied. So this is no longer a question about a provision that
+was already settled by someone else; it gates a change about to be made.
+
+Article 6 must not be applied partially, and clause (6) cannot be guessed. Options for the board,
+stated neutrally:
+
+- **(a) Clause (6) survives.** A substitution of named clauses does not touch unnamed ones. Article 6
+  ends with six clauses. This is the stricter reading and the safer default: it changes nothing the
+  Act did not expressly change.
+- **(b) Clause (6) falls.** Act 1 moves the donor concept wholesale into Article 7 cl. (4) as
+  `STM DONOR`, so retaining a `Donor` *role* in Article 6 duplicates it.
+
+The tension is real either way. Under (a), `Donor` remains classified as an STM **role** while
+Article 7 states a Donor Member is not an official Member and does not work for the organisation.
+Only the board can resolve that.
+
+**Sequencing consequence:** Act 1 is applied to Articles 9, 10, 11, 12 and 18. Articles 6 and 7 are
+held. If this answer is slow, Acts 2 and 3 proceed and Act 1 stays partially applied — recorded
+explicitly in `provenance` on both held articles, naming them. The half-applied state this project
+exists to fix is not to be recreated silently.
 
 A1:18 reads *"Amendment to Article 6, clause 1,2,3,4 and 5"* and supplies replacement text for
 clauses (1)–(5) only. Clause 6 (`Donor`) is never mentioned. Separately, A1:38-39 amends Article 7
@@ -291,16 +330,89 @@ The retained paragraph was also hand-edited to match Act 1's naming without any 
 - 9. Volunteer Coordinator                          (removed)
 ```
 
-The removal of Volunteer Coordinator *is* authorised — Act 1's Statement of Objects, item 4, records
-that "the position of volunteer coordinator has been removed to optimise operational efficiency".
-The three renames are not mentioned by any instrument.
+All three edits are authorised by the **operative** text of Act 1 clause (3); see the decision below.
+Act 1's Statement of Objects, item 4, separately records that "the position of volunteer coordinator
+has been removed to optimise operational efficiency", which corroborates intent but under C1 confers
+no authority.
 
-Not resolved, per the standing instruction on DIVERGENT verdicts. The obvious remedy under Q6 is to
-delete the paragraph as superseded, but that deletes text a reader has seen published for two years,
-and the renames show someone was maintaining it deliberately.
+> **DECIDED — delete the retained paragraph from the operative text.** Applied 2026-08-15.
 
-**Question:** delete the paragraph as Q6 requires, or retain it and record it with `provenance` as
-text applied outside the amendment process?
+The three renames are **not** authorised by the Statement of Objects, and the earlier draft of this
+entry was wrong to say so (see C1). They do not need it — the operative text of Act 1 clause (3)
+carries all three:
+
+| Edit in the retained paragraph | Authority — all operative |
+|---|---|
+| `HR & Internshipment Controller` → `Human Resources Coordinator` | Act 1 cl. (3) item 1 |
+| `Content Coordinator` → `Documentation Coordinator` | Act 1 cl. (3) item 8 |
+| `Volunteer Coordinator` removed | Act 1 cl. (3) roster runs 1–8 and omits it |
+
+The SOR corroborates intent. It supplies no authority.
+
+**Grounds for deletion:**
+
+1. **Act 1 supplies no article-level body.** Its substitution runs `10. Intermediate Board Members`
+   straight into `(1) Eligibility`. A full substitution that supplies no body leaves the body empty;
+   the old one does not survive by default.
+2. **The roster is a duplicate.** All eight coordinators appear in `art-10-s-3`, in the same order
+   under the same names. Verified programmatically before deletion — the change halts if any role
+   fails to survive.
+3. **The unique part is unique because Act 1 replaced it.** The lead-in makes the IBM responsible for
+   "all legal and financial activities of the NGO"; clause (3) reframes that to "proper functioning
+   of STM units". Confirmed absent from `art-10-s-3`.
+4. **Retaining it creates a live contradiction, not a redundancy.** Article 21, inserted by Act 3,
+   gives the Treasurer and IBM-Finance Coordinator the sole right to approve funds. A surviving
+   blanket claim over "all legal and financial activities" would answer "who controls the money"
+   differently from Article 21 — and only Article 21 has an instrument behind it.
+5. **The renames are evidence, not justification.** Someone was applying Act 1 clause by clause and
+   missed that the same Act had already removed the paragraph they were conforming. Partial
+   application, not deliberate retention.
+
+**Nothing is destroyed.** Deletion is from the operative text only:
+
+- `versions/v2.0.0.yaml` keeps the paragraph verbatim — it is what was published.
+- `provenance` on `art-10` records the text, the unrecorded hand-edits, and the reason for removal.
+- Both forms are quoted below.
+
+<details><summary>Pre-Act form — <code>versions/v1.0.0.yaml</code> art-10 body</summary>
+
+```
+The IBM are the members who are selected by the board of the NGO to manage the NGO and to take care of the NGO.
+They are responsible for the all legal and financial activities of the NGO.
+The IBM consists of the following members:
+  1. HR & Internshipment Controller Coordinator
+  2. Finance Controller Coordinator
+  3. Designing Coordinator
+  4. Public Relations Coordinator
+  5. Technical Coordinator
+  6. Internal Compliance Coordinator
+  7. Operations Coordinator
+  8. Content Coordinator
+  9. Volunteer Coordinator
+```
+
+</details>
+
+<details><summary>Hand-edited form as published in v2.0.0 — the text removed</summary>
+
+```
+The IBM are the members who are selected by the board of the NGO to manage the NGO and to take care of the NGO.
+They are responsible for the all legal and financial activities of the NGO.
+The IBM consists of the following members:
+  1. Human Resources Coordinator
+  2. Finance Coordinator
+  3. Designing Coordinator
+  4. Public Relations Coordinator
+  5. Technical Coordinator
+  6. Internal Compliance Coordinator
+  7. Operations Coordinator
+  8. Documentation Coordinator
+```
+
+</details>
+
+**Board action:** ratification item, presented as a recommendation with reasons rather than an open
+question.
 
 
 ---
@@ -319,10 +431,10 @@ No text may be applied until every **blocking** question above is answered.
 Open:
 
 - [ ] Q1 Article 19 gap — does a fourth instrument exist?
-- [ ] Q2 Article 6 clause 6 (Donor)
+- [ ] Q2 Article 6 clause 6 (Donor) — **BLOCKING**, holds Articles 6 and 7
 - [ ] Q4 Article 15 amend vs insert
 - [ ] Q7 Substantive retitles
 - [ ] Q10 Original adoption record
 - [ ] Q12 Renumber and citation identity
 - [ ] Q13 Procedural validity of all three Acts
-- [ ] Q14 Article 10 retains an unenacted paragraph (**DIVERGENT**)
+- [x] Q14 Article 10 unenacted paragraph — **deleted from operative text**, ratification item for the board
