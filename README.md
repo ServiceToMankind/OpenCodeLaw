@@ -6,6 +6,38 @@
 
 OpenCodeLaw is a project that allows you to dynamically generate a constitution page based on YAML specifications. It provides a user-friendly interface for displaying constitution articles and sections.
 
+> **Rebuild in progress (branch `rebuild/v3`).** The CDN install instructions below are obsolete and
+> are removed in Phase 7. See [AUDIT-CONFIRMED.md](AUDIT-CONFIRMED.md) for what is broken and why.
+
+## Requirements
+
+Node **20 or 22**. CI runs both. `engines` allows `>=18.18.0` only so the build stays verifiable on
+the maintainer's current machine.
+
+> **Node 18 reached end of life in April 2025 and no longer receives security patches.**
+> Move the local floor to **Node 22 LTS before Phase 4 ships.** It is not a supported target — only
+> a tolerated one, and only for the remainder of this rebuild.
+
+### Deferred upgrade, gated on that floor move
+
+`sanitize-html` is pinned to **2.17.5**, two patches behind. This is deliberate and time-limited.
+
+2.17.6+ depends on `htmlparser2@^12`, which is ESM-only, so it **cannot load on Node 18 at all** —
+`require()` fails outright. It is a hard break, not an `engines` warning. 2.17.5 is the newest
+release that runs on the current floor.
+
+2.17.6/2.17.7 do carry real security fixes worth taking:
+
+- SVG SMIL animation elements (`<animate>`, `<set>`, …) can retarget another element's `href` via
+  `attributeName`/`values`, smuggling a `javascript:` URI past scheme validation.
+- Raw `<` surviving out of `<textarea>`/`<xmp>` can reopen a tag when the output is re-parsed.
+
+Neither is reachable in this engine's configuration: the sanitizer runs a strict allowlist over
+Markdown-rendered output that permits no SVG and no animation elements, so there is no element for
+the vector to retarget. The exposure is defence-in-depth, not a live hole.
+
+**When the floor moves to Node 22, bump `sanitize-html` to `2.17.7` in the same change.**
+
 ## Getting Started
 
 To use OpenCodeLaw, follow these steps:
