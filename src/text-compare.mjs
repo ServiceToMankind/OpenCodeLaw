@@ -88,6 +88,36 @@ export function similarity (a, b) {
   return 1 - tokenDistance(ta, tb) / Math.max(ta.length, tb.length)
 }
 
+/**
+ * How well `needle` appears somewhere inside `haystack`.
+ *
+ * Used for clause-scope amendments, where an Act replaces clause (4) of an
+ * article whose current text is one undivided block. Slicing the constitution
+ * into clauses to compare like with like would mean guessing where a clause
+ * begins; sliding the Act's clause over the article instead requires no guess.
+ */
+export function containment (needle, haystack) {
+  const n = tokens(needle)
+  const h = tokens(haystack)
+  if (!n.length) return 1
+  if (!h.length) return 0
+  if (h.length <= n.length) return similarity(needle, haystack)
+
+  let best = 0
+  const width = n.length
+  const stride = Math.max(1, Math.floor(width / 8))
+  for (let start = 0; start + 1 <= h.length; start += stride) {
+    for (const w of [Math.round(width * 0.85), width, Math.round(width * 1.2)]) {
+      const window = h.slice(start, start + w)
+      if (!window.length) continue
+      const score = 1 - tokenDistance(n, window) / Math.max(n.length, window.length)
+      if (score > best) best = score
+      if (best === 1) return 1
+    }
+  }
+  return best
+}
+
 export const MATCH_THRESHOLD = 0.94
 
 /**

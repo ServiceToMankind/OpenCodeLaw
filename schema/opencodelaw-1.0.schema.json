@@ -242,9 +242,81 @@
         "year": { "type": "integer", "minimum": 1900 },
         "title": { "$ref": "#/$defs/nonEmptyText" },
         "short_title": { "type": "string" },
-        "assent_date": { "type": "string", "format": "date" },
+        "assent_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of assent, as stated on the face of the instrument."
+        },
+        "passed_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of passage, a distinct event from assent. One field cannot hold both."
+        },
         "assented_by": { "type": "string" },
-        "author": { "type": "string" },
+        "signed_by": {
+          "type": "string",
+          "description": "Who signed the instrument, as printed on it."
+        },
+        "moved_by": {
+          "type": "string",
+          "description": "Who moved the Act. Leave unset rather than guessing."
+        },
+        "unverified_attribution": {
+          "type": "string",
+          "description": "An attribution recorded elsewhere but unsupported by the face of the instrument. Preserved rather than deleted or promoted, pending confirmation."
+        },
+        "drafting_discrepancy": {
+          "type": "array",
+          "description": "Where an Act contradicts itself. Recorded, never silently normalised: a reader must be able to see that the instrument disagrees with itself and which text governs.",
+          "items": {
+            "type": "object",
+            "required": ["provision", "operative", "note"],
+            "additionalProperties": false,
+            "properties": {
+              "provision": { "type": "string" },
+              "operative": {
+                "type": "string",
+                "description": "The enacted text, which governs."
+              },
+              "operative_source_lines": { "type": "string" },
+              "statement_of_objects": {
+                "type": "string",
+                "description": "The conflicting explanatory text, which does not govern."
+              },
+              "statement_source_lines": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "procedure": {
+          "type": "object",
+          "description": "The approval chain the constitution required when the Act was passed. Left explicit and unpopulated where the evidence has not been located: an empty chain of authority is visible, a missing field is not.",
+          "additionalProperties": false,
+          "properties": {
+            "required_by": {
+              "type": "string",
+              "description": "Provision id of the amendment procedure in force at the time."
+            },
+            "approvals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["body"],
+                "additionalProperties": false,
+                "properties": {
+                  "body": { "type": "string" },
+                  "date": { "type": ["string", "null"] },
+                  "evidence": {
+                    "type": ["string", "null"],
+                    "description": "Link or reference to the minutes recording this approval."
+                  }
+                }
+              }
+            },
+            "attested_by": { "type": "string" },
+            "assent_date": { "type": "string", "format": "date" }
+          }
+        },
         "pdf": {
           "type": "string",
           "description": "Repository-relative path. validate.mjs fails the build if the file is absent from disk."
@@ -262,7 +334,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["target", "operation"],
+            "required": ["target", "operation", "scope"],
             "additionalProperties": false,
             "properties": {
               "target": {
@@ -272,16 +344,29 @@
               "operation": {
                 "enum": ["substitute", "insert", "omit", "renumber"]
               },
+              "scope": {
+                "enum": ["article", "clause"],
+                "description": "Read from the instrument, not from its heading: an Act that restates the article's own heading followed by a complete clause run substitutes the whole article; an Act whose heading names clauses, and sets out only those, amends only them."
+              },
               "clauses": {
                 "type": "string",
-                "description": "Clause range the Act names, e.g. \"1-5\". Recorded verbatim from the Act."
+                "description": "Which clauses the Act names, e.g. \"1,2,3,4,5\". Required for clause scope, so a targeted amendment can never be recorded without saying what it targets."
               },
               "source_lines": {
                 "type": "string",
                 "description": "Line range in source_text supporting this assertion, e.g. \"18-33\"."
               },
               "note": { "type": "string" }
-            }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "scope": { "const": "clause" } },
+                  "required": ["scope"]
+                },
+                "then": { "required": ["clauses"] }
+              }
+            ]
           }
         }
       }

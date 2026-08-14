@@ -20,7 +20,8 @@
     "build": "node src/build.mjs",
     "test": "node --test tests/",
     "dev": "node src/build.mjs --watch --serve",
-    "spec": "node src/gen-spec.mjs"
+    "spec": "node src/gen-spec.mjs",
+    "provenance": "node src/provenance.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

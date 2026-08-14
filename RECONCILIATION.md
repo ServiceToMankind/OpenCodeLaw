@@ -1,6 +1,8 @@
 # Reconciliation
 
-**Status:** open — blocking questions only. No constitutional text has been changed.
+**Status:** open. No constitutional text has been changed.
+**Answered:** Q3, Q5, Q6, Q8, Q9, Q11 — decided 2026-08-15, recorded below and carried into Phase 3.
+**Open:** Q1, Q2, Q4, Q7, Q10, Q12, Q13, Q14.
 **Branch:** `rebuild/v3` · **Raised:** 2026-08-14 · **Sign-off required from:** Pranay
 
 Phase 3's provision-by-provision table (Act, operation, target id, before, after, source line,
@@ -47,6 +49,8 @@ Article 7? Nothing in the Act settles this.
 
 ### Q3 — Act 2 contradicts itself on the amendment threshold
 
+> **ANSWERED — 2/3rd governs. A Statement of Objects and Reasons is not enacted text and aids construction only where the operative provision is ambiguous; here it is not ambiguous, merely inconsistent with the note. The discrepancy is recorded on Act 2 as `drafting_discrepancy` with both figures and both source lines, never normalised away. Q3 stays listed for board ratification: the legal answer is settled, the political one is the board's, and this provision governs how every future amendment passes.**
+
 This is the most serious ambiguity found.
 
 | Source | Line | Text |
@@ -75,6 +79,8 @@ retained alongside the new (1) Voluntary / (2) Involuntary structure.
 
 ### Q5 — Act 1 defines `Unit Board Member` and `Coordinator` with identical words
 
+> **ANSWERED — Publish the defect; do not repair it. The engine records the law, it does not correct the law. Act 1 applies verbatim, both definitions stand as enacted, and an `editorial_note` on `art-6-s-3` and `art-6-s-4` points at the defect and at this entry. The note renders visibly. Escalated to the board as a candidate for a corrigendum or a Fourth Amendment Act.**
+
 Not previously flagged. A1:26-31, verbatim:
 
 > (3) **Unit Board Member**: Any person who is willing to serve society and abide by the rules and
@@ -92,6 +98,8 @@ extraction matches the PDF. Applying it verbatim would leave two roles legally i
 **Question:** apply verbatim as enacted, or treat as an error requiring a corrigendum?
 
 ### Q6 — Does an "Amendment to Article N" replace the whole article or only its listed clauses?
+
+> **ANSWERED — Read what the Act sets out, not what it calls itself. Where the Act restates the article's own heading and then a complete clause run, it substitutes the whole article; where the heading names clauses and only those are set out, it amends only those. This is the drafter's own convention, matching standard Indian amending practice. Encoded as `scope: article | clause` on each register entry, with `clauses` required whenever scope is `clause`. Applied mechanically, it yields: clause scope for arts. 6, 7, 16, 17; article scope for arts. 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15 and the preamble.**
 
 A1:55 (*"Amendment to Article 9"*) and A1:76 (*"Amendment to Article 10"*) give no clause
 restriction, unlike A1:18 and A1:35 which name clauses explicitly. Both then set out a complete
@@ -130,6 +138,8 @@ spelling fixes. Confirm `College Unit Board Member` → `Unit Board Member` and 
 
 ### Q8 — The amendment table names a different author than the Act
 
+> **ANSWERED — The table is unverified; split the field. `signed_by: P. Priya, Internal Compliance Coordinator` and `assented_by: Internal Compliance Committee` are both evidenced on the face of all three Acts. `moved_by` is left unset. `M. Revanth Reddy` is preserved as `unverified_attribution` — not deleted, not promoted. Confirmed independently: the string `Revanth` appears nowhere in any of the three instruments.**
+
 The register dropped from the spec during migration recorded:
 
 ```yaml
@@ -145,6 +155,8 @@ Every one of the three PDFs is signed **"P. Priya, Internal Compliance Coordinat
 signatory (P. Priya)? The schema has both `author` and `assented_by`; confirm which name goes where.
 
 ### Q9 — The amendment table dates Act 1 a day before its assent
+
+> **ANSWERED — Model both; they are not in conflict. `assent_date: 2024-05-03` is evidenced on all three Acts. The table's 2024-05-02 is most likely the date of passage, a distinct event, and is recorded as `passed_date` marked unverified. One field cannot hold two events.**
 
 The dropped register dates the First Act `2024-05-02T21:25:00+05:30`. All three PDFs state assent on
 **3rd May 2024** (A1:5-6, A2:5-6, A3:5-6).
@@ -165,6 +177,8 @@ enacting instruments? Recording it preserves the v1 adoption date, which exists 
 ## Blocking — editorial (changes what a reader sees)
 
 ### Q11 — Article 11 `Units` has no article body
+
+> **ANSWERED — Determined by the Act. Act 1 sets Article 11's text out at article level under the heading `11. Units`; whoever applied it placed that text in a subsection named `units` and left the article body empty. A transcription error, not an editorial choice. `current.yaml` restores the text to article level per Act 1. `versions/v2.0.0.yaml` keeps the empty body and gains a `publication_defect` note — an archive that silently fixes what was published is not an archive.**
 
 `art-11.content` is an empty string. This is the defect that published a blank provision for two
 years, and the new validator now rejects it as a hard error — the build cannot ship until this is
@@ -233,19 +247,82 @@ any `example.com` URL in `info`.
 
 ---
 
+### Q13 — Procedural validity of all three Acts
+
+Raised by the board, recorded here rather than resolved.
+
+Article 16(3) as it stood on 3 May 2024 required proposed amendments to be approved by the board,
+the intermediate board, and all college units. All three Acts record assent from the **Internal
+Compliance Committee** and a signature from the Internal Compliance Coordinator. None records on its
+face that the Article 16 procedure was followed.
+
+That may simply be because the instrument records only the final attesting step, with the approvals
+living in minutes. Note the circularity: **Act 2 amends Article 16(3) itself**, so it had to pass
+under the unamended procedure.
+
+Nothing here asserts the Acts are invalid; that is not a question this project can answer. The act
+register schema now carries a `procedure` block — `required_by`, an explicit list of approving
+bodies, `attested_by`, `assent_date` — which Phase 3 populates with the bodies named and the
+approvals left empty. An explicit empty chain of authority is visible and gives the board somewhere
+to file the minutes; a missing field is neither.
+
+**Question:** were the Article 16(3) approvals obtained, and do minutes exist?
+
+### Q14 — Article 10 retains a paragraph no instrument enacts (DIVERGENT)
+
+**New, found by the provenance analysis. This is the only DIVERGENT verdict in the corpus.**
+
+Article 10 splits cleanly in two, and the halves disagree:
+
+| Part | Matches Act 1 | Matches pre-Act v1 text |
+|---|---|---|
+| The three sections (Eligibility, Selection Process, Roles and Responsibilities) | **100.0%** — 318 tokens against 318 | 36.7% |
+| The article body (the "The IBM are the members…" paragraph, 64 tokens) | 25.0% | 89.7% |
+
+So Act 1 was applied to Article 10's sections **exactly**, while the pre-Act article-level
+introduction was kept. Under Q6 a full substitution deletes it.
+
+The retained paragraph was also hand-edited to match Act 1's naming without any instrument doing so:
+
+```
+- 1. HR & Internshipment Controller Coordinator     + 1. Human Resources Coordinator
+- 2. Finance Controller Coordinator                 + 2. Finance Coordinator
+- 8. Content Coordinator                            + 8. Documentation Coordinator
+- 9. Volunteer Coordinator                          (removed)
+```
+
+The removal of Volunteer Coordinator *is* authorised — Act 1's Statement of Objects, item 4, records
+that "the position of volunteer coordinator has been removed to optimise operational efficiency".
+The three renames are not mentioned by any instrument.
+
+Not resolved, per the standing instruction on DIVERGENT verdicts. The obvious remedy under Q6 is to
+delete the paragraph as superseded, but that deletes text a reader has seen published for two years,
+and the renames show someone was maintaining it deliberately.
+
+**Question:** delete the paragraph as Q6 requires, or retain it and record it with `provenance` as
+text applied outside the amendment process?
+
+
+---
+
 ## Sign-off
 
 No text may be applied until every **blocking** question above is answered.
 
-- [ ] Q1 Article 19 gap
+- [x] Q3 Amendment threshold — **2/3rd governs**, discrepancy recorded, board ratification still wanted
+- [x] Q5 Unit Board Member / Coordinator identical definitions — **publish the defect**
+- [x] Q6 Full-substitution convention — **read the body, not the heading**
+- [x] Q8 Act author vs signatory — **split the field**, Revanth preserved as unverified
+- [x] Q9 Assent date — **2024-05-03 assent, 2024-05-02 recorded as passed_date**
+- [x] Q11 Article 11 empty body — **restore in current, keep the defect in the archive**
+
+Open:
+
+- [ ] Q1 Article 19 gap — does a fourth instrument exist?
 - [ ] Q2 Article 6 clause 6 (Donor)
-- [ ] Q3 Amendment threshold — 2/3rd or 3/4th
 - [ ] Q4 Article 15 amend vs insert
-- [ ] Q5 Unit Board Member / Coordinator identical definitions
-- [ ] Q6 Full-substitution convention
 - [ ] Q7 Substantive retitles
-- [ ] Q8 Act author vs signatory
-- [ ] Q9 Assent date
 - [ ] Q10 Original adoption record
-- [ ] Q11 Article 11 empty body
 - [ ] Q12 Renumber and citation identity
+- [ ] Q13 Procedural validity of all three Acts
+- [ ] Q14 Article 10 retains an unenacted paragraph (**DIVERGENT**)
