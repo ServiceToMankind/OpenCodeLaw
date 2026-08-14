@@ -93,6 +93,16 @@ export function describePath (doc, instancePath) {
   return `${art.id ?? `articles[${m[1]}]`} "${art.title ?? ''}"${rest} (${instancePath})`
 }
 
+/**
+ * Is this schema error "a provision exists but carries no text"?
+ * Narrow on purpose: only the emptiness constraints on a `content` field, so a
+ * missing key, a wrong type or any other defect stays a hard error everywhere.
+ */
+function isBlankProvision (e) {
+  return /\/content$/.test(e.instancePath || '') &&
+    (e.keyword === 'minLength' || e.keyword === 'pattern')
+}
+
 let _ajv
 function ajvInstance () {
   if (!_ajv) _ajv = buildAjv(JSON.parse(fs.readFileSync(path.join(ROOT, SCHEMA_FILE), 'utf8')))
@@ -426,7 +436,20 @@ export function validate () {
   for (const d of docs) {
     if (!validateDoc(d.doc)) {
       for (const e of validateDoc.errors) {
-        rep.error(d.file, 'schema', `${e.message}${e.params?.allowedValues ? ` (${e.params.allowedValues.join(', ')})` : ''}`, describePath(d.doc, e.instancePath))
+        const msg = `${e.message}${e.params?.allowedValues ? ` (${e.params.allowedValues.join(', ')})` : ''}`
+        const where = describePath(d.doc, e.instancePath)
+
+        // A blank provision in an archived version is a publication defect,
+        // recorded rather than repaired: the archive must reproduce what was
+        // actually published, and Article 11 of v2.0.0 was published blank.
+        // The same blank in the live document stays a hard error — that is the
+        // defect this validator exists to catch.
+        if (d.archived && isBlankProvision(e)) {
+          rep.warn(d.file, 'archived-blank-provision',
+            'published with no text. Preserved as published; the build renders an explicit marker.', where)
+          continue
+        }
+        rep.error(d.file, 'schema', msg, where)
       }
     }
     checkIdentity(rep, d.file, d.doc)

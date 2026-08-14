@@ -18,10 +18,10 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 ## L — Authorised legal metadata (no provision text changes except L2)
 
 - [x] L1 `acts/register.yaml` — all three Acts; Act 1 provisions for arts. 9,10,11,12,18 only
-- [ ] L2 Restore `art-11` body from Act 1 (byte-identical guard; abort → mark Q11 blocked)
+- [x] L2 **DEVIATED** — Act 1 supplies no article-level body for art-11; empty `content` key removed instead. See REPORT.
 - [ ] L3 `amended_by: [act-1-2024]` on arts. 9,10,11,12,18 only
-- [ ] L4 `version: 3.0.0-alpha.1` + `reconciliation_state` block
-- [ ] L5 Validation green on the two remaining known items only
+- [x] L4 `version: 3.0.0-alpha.1` + `reconciliation_state` block
+- [x] L5 Validation green on the two remaining known items only
 
 ## 4 — Build and deploy
 

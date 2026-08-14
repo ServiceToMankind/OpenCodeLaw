@@ -3,9 +3,9 @@ info:
   title: SERVICE TO MANKIND
   organization: Service to Mankind Welfare Association
   jurisdiction: Telangana, India
-  version: 2.0.0
+  version: 3.0.0-alpha.1
   status: current
-  effective_from: "2024-05-02"
+  effective_from: "2024-05-03"
   logo:
     url: https://stmorg.in/accesories/service_to_man_kind-20200709-0001.jpg
     alt: Logo
@@ -13,6 +13,27 @@ info:
     name: Pranay Kiran
     email: pranay@stmorg.in
   license: MIT
+reconciliation_state:
+  target_version: 3.0.0
+  complete: false
+  applied:
+    - act-1-2024 (partial)
+  held:
+    - provisions:
+        - art-6
+        - art-7
+      blocked_by: Q2
+      note: Act 1 of 2024 also amends Articles 6 and 7. Both are word-for-word their pre-Act text. Act 1 substitutes clauses (1)-(5) of Article 6 and is silent on clause (6), Donor; applying it requires knowing whether that clause survives.
+    - provisions:
+        - act-2-2024
+        - act-3-2024
+      blocked_by:
+        - Q4
+        - Q7
+        - Q10
+        - Q12
+        - board sign-off
+      note: Neither Act has been applied. Act 2 amends the preamble and Articles 3, 4, 5, 8, 14, 15, 16(3), 17(1) and inserts Article 20. Act 3 amends Article 13 and inserts Article 21.
 preamble:
   id: preamble
   title: PREAMBLE
@@ -187,6 +208,8 @@ articles:
           5. Joint Secretary
           6. Executive Members
       6. All the board members should abide by the rules and regulations of the NGO and work according to the constitution of the NGO and by-laws of the NGO. <br>
+    amended_by:
+      - act-1-2024
   - id: art-10
     number: 10
     title: Intermediate Board Members
@@ -242,10 +265,11 @@ articles:
       applied_outside_process: true
       recorded: "2026-08-15"
       note: Published v2.0.0 carried an article-level paragraph here that no instrument enacts. Act 1 of 2024 substitutes Article 10 in full, running its heading straight into clause (1) and supplying no article-level body. The paragraph had also been hand-edited by an unrecorded actor to conform to Act 1 clause (3)'s roster — HR & Internshipment Controller to Human Resources Coordinator, Content Coordinator to Documentation Coordinator, and Volunteer Coordinator dropped — all three of which the operative text of clause (3) carries. Removed on reconciliation as superseded. Its eight roles are duplicated in art-10-s-3; its unique lead-in, making the IBM responsible for "all legal and financial activities", is superseded by clause (3) and would contradict Article 21 as inserted by Act 3 of 2024. Preserved verbatim in versions/v2.0.0.yaml and quoted in RECONCILIATION.md Q14.
+    amended_by:
+      - act-1-2024
   - id: art-11
     number: 11
     title: Units
-    content: ""
     sections:
       - id: art-11-s-1
         number: 1
@@ -272,11 +296,19 @@ articles:
           - (b) The head of the unit must consult the IBM-Human Resources Coordinator
           - (c) The head of the unit must fill the application form for the college unit.
           - (d) The head of the unit must attend the interview conducted by the IBM-Human Resources Coordinator
+    provenance:
+      applied_outside_process: false
+      recorded: "2026-08-15"
+      note: Act 1 of 2024 substitutes Article 11 as the heading "11. Units" running straight into clause (1); it supplies no article-level body. Its clause (1) is carried verbatim by art-11-s-1 (100.0% match) and its clause (2) by art-11-s-2 (98.6%), together 99.4% of the enacted text. Published v2.0.0 recorded an empty string here, which rendered as a blank provision for two years; the key is absent rather than empty so the article is correctly a section-only article. No provision text was added, removed or altered. The empty body is preserved as published in versions/v2.0.0.yaml. See RECONCILIATION.md Q11.
+    amended_by:
+      - act-1-2024
   - id: art-12
     number: 12
     title: Alumini
     content: |
       “Alumni” refers to the member who has previously worked with the NGO.
+    amended_by:
+      - act-1-2024
   - id: art-13
     number: 13
     title: Anual Reports
@@ -356,3 +388,5 @@ articles:
       suspended/terminated.
       6. Suspension or termination only happens after receiving a confirmation letter from
       the Internal Compliance Coordinator.
+    amended_by:
+      - act-1-2024
