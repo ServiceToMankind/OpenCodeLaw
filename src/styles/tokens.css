@@ -230,7 +230,7 @@ a { color: var(--accent-2); }
 :root {
   --accent-ink: var(--accent, #320063);      /* accent as text, light theme    */
   --on-accent: #f5f5f5;                      /* text on an accent fill         */
-  --link-ink: #0069d9;                       /* 4.8:1 on #f5f5f5, hue 211      */
+  --link-ink: #0056b3;                       /* 6.5:1 on canvas, 5.6:1 on the banner wash, hue 211 */
   --action-ink: #8a5122;                     /* 5.9:1 on #f5f5f5, hue 28       */
   --ring: var(--focus, #320063);
 
@@ -246,7 +246,7 @@ a { color: var(--accent-2); }
   :root:not([data-theme="light"]) {
     --accent-ink: #cc99ff;                   /* hsl(270 100% 80%), 5.8:1 on #333 */
     --on-accent: #333333;
-    --link-ink: #66b2ff;                     /* 5.6:1 on #333333, hue 210      */
+    --link-ink: #7cbcff;                     /* 6.3:1 on #333333, 5.0:1 on the banner wash, hue 210 */
     --action-ink: #e0a878;                   /* 6.0:1 on #333333, hue 28       */
     --ring: var(--focus, #cc99ff);
 
@@ -260,7 +260,7 @@ a { color: var(--accent-2); }
 :root[data-theme="dark"] {
   --accent-ink: #cc99ff;
   --on-accent: #333333;
-  --link-ink: #66b2ff;
+  --link-ink: #7cbcff;
   --action-ink: #e0a878;
   --ring: var(--focus, #cc99ff);
 
