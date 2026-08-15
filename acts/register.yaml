@@ -1,5 +1,8 @@
+
+
 acts:
   - id: act-1-2024
+    origin: external-pdf
     number: 1
     year: 2024
     title: First Constitution Amendment Act, 2024
@@ -76,6 +79,7 @@ acts:
         source_lines: 158-181
         note: Act restates the title as "Suspension/Termination".
   - id: act-2-2024
+    origin: external-pdf
     number: 2
     year: 2024
     title: Second Constitution Amendment Act, 2024
@@ -182,6 +186,7 @@ acts:
         source_lines: 105-113
         note: Act restates the title as "Exit Process".
   - id: act-3-2024
+    origin: external-pdf
     number: 3
     year: 2024
     title: Third Constitution Amendment Act, 2024

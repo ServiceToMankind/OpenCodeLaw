@@ -24,7 +24,8 @@
     "provenance": "node src/provenance.mjs",
     "linkcheck": "node src/linkcheck.mjs",
     "test:e2e": "node --test tests/*.e2e.mjs",
-    "sync-register": "node src/sync-register.mjs"
+    "sync-register": "node src/sync-register.mjs",
+    "bill-gate": "node src/bill-gate.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

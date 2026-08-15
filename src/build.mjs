@@ -16,6 +16,9 @@ import { toPlainText, renderMarkdown } from './lib/markdown.mjs'
 import { layout, tocSections } from './templates/layout.mjs'
 import { renderArticle, renderPreamble } from './templates/provision.mjs'
 import { generateOgImages } from './og.mjs'
+import { billsMain, billsTocItems } from './templates/bills.mjs'
+import { proposeMain, proposeTocItems } from './templates/propose.mjs'
+import { generateBillValidator } from './gen-bill-validator.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = () => path.join(ROOT, process.env.OUT_DIR ?? 'dist')
@@ -26,6 +29,22 @@ export const SITE_ORIGIN = DEFAULT_SITE_ORIGIN
 // The custom domain is live. An artifact without CNAME can drop the domain
 // setting on deploy, so this now defaults ON and must be opted OUT of.
 const INCLUDE_CNAME = process.env.INCLUDE_CNAME !== 'false'
+
+/**
+ * /bills/ and /propose/ are different kinds of surface, so they ship
+ * differently.
+ *
+ * /bills/ is RECORD, and always ships: an empty register is a true statement.
+ * "No bills are before the board" is information, not absence.
+ *
+ * /propose/ is ACTION, and an action surface opens when the desk behind it is
+ * staffed. Its one actionable instruction is "email this file to the ICC"; put
+ * that in front of the public before the ICC can receive, and the system's
+ * first impression on its first real author is silence.
+ *
+ * Flip with PROPOSE_ENABLED=true once process/ADOPTION.md is checked off.
+ */
+const PROPOSE_ENABLED = process.env.PROPOSE_ENABLED === 'true'
 
 // Engine and content are separate. Point these at your own files and the
 // engine needs no modification; versions/ and the act register are optional.
@@ -218,7 +237,7 @@ export function build () {
     ? 'editorial'
     : (headingCounts.enacted < headingCounts.editorial ? 'enacted' : 'editorial')
 
-  const shell = { info, url, absolute: abs, state, actIndex, articles: doc.articles, slugs }
+  const shell = { info, url, absolute: abs, state, actIndex, articles: doc.articles, slugs, proposeEnabled: PROPOSE_ENABLED }
 
   // ---- index: the whole constitution, every provision inline ----
   const indexMain = `
@@ -305,6 +324,53 @@ export function build () {
     ])],
     main: amendmentsMain(register, state, doc, { url, slugs, actIndex, markKind })
   })))
+
+  // ---- bills: the legislative record, including what failed ----
+  const bills = (() => {
+    const base = path.join(ROOT, 'bills')
+    if (!fs.existsSync(base)) return []
+    const out = []
+    for (const year of fs.readdirSync(base)) {
+      const dir = path.join(base, year)
+      if (!fs.statSync(dir).isDirectory()) continue
+      for (const f of fs.readdirSync(dir).filter(n => /\.ya?ml$/.test(n))) {
+        try { out.push({ file: `bills/${year}/${f}`, bill: load(`bills/${year}/${f}`) }) } catch { /* skip unreadable */ }
+      }
+    }
+    return out
+  })()
+
+  written.push(write('bills/index.html', layout({
+    ...shell,
+    showToc: false,
+    toc: tocSections(billsTocItems(bills), { heading: 'Bills' }),
+    title: `Bills — ${info.title}`,
+    description: `Proposed amendments to the constitution of ${info.organization}, including bills that were rejected or withdrawn.`,
+    canonical: abs('bills/'),
+    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Bills' },
+    jsonLd: [breadcrumbLd([
+      { name: 'Constitution', url: abs('') }, { name: 'Bills', url: abs('bills/') }
+    ])],
+    main: billsMain(bills, { url, escapeHtml, actIndex })
+  })))
+
+  // ---- propose: author a bill without editing YAML ----
+  if (PROPOSE_ENABLED) {
+  written.push(write('propose/index.html', layout({
+    ...shell,
+    showToc: false,
+    toc: tocSections(proposeTocItems(), { heading: 'Propose a bill' }),
+    title: `Propose an amendment — ${info.title}`,
+    description: `Draft a bill to amend the constitution of ${info.organization}. The page produces a draft for the Internal Compliance Committee; it does not submit, number or approve anything.`,
+    canonical: abs('propose/'),
+    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Propose an amendment' },
+    jsonLd: [breadcrumbLd([
+      { name: 'Constitution', url: abs('') }, { name: 'Propose', url: abs('propose/') }
+    ])],
+    head: `<script type="module" src="${url('scripts/propose.js')}"></script>`,
+    main: proposeMain({ url, escapeHtml, info })
+  })))
+  }
 
   // ---- archive ----
   const versions = fs.existsSync(path.join(ROOT, VERSIONS_DIR))
@@ -407,6 +473,31 @@ export function build () {
 
   // ---- data, assets, static files ----
   write('search-index.json', JSON.stringify(buildSearchIndex(doc, slugs)))
+
+  // What /propose/ needs to build an operation: the id a target is cited by,
+  // and the CURRENT text, so a substitute can be prefilled and edited into the
+  // complete resulting text. An author never types a target id or a partial edit.
+  if (PROPOSE_ENABLED) write('provisions.json', JSON.stringify({
+    base_version: info.version,
+    generated_for: 'the propose page — targets are picked from this list, never typed',
+    provisions: [
+      { id: doc.preamble.id, kind: 'preamble', number: null, title: doc.preamble.title,
+        title_source: doc.preamble.title_source ?? 'editorial', text: doc.preamble.content ?? '' },
+      ...doc.articles.flatMap(a => [
+        { id: a.id, kind: 'article', number: a.number, title: a.title,
+          title_source: a.title_source ?? 'editorial', status: a.status ?? 'active',
+          text: a.content ?? '',
+          sections: (a.sections ?? []).map(x => ({ number: x.number, title: x.title, text: x.content ?? '' })) },
+        ...(a.sections ?? []).map(x => ({
+          id: x.id, kind: 'section', number: x.number, title: x.title,
+          title_source: x.title_source ?? 'editorial', article: a.id, article_number: a.number,
+          text: x.content ?? '' }))
+      ])
+    ],
+    // The next free article number, and any reserved slot an insert may occupy.
+    next_article: Math.max(...doc.articles.map(a => a.number)) + 1,
+    reserved: doc.articles.filter(a => a.status === 'reserved').map(a => a.number)
+  }))
   write('legacy-anchors.json', JSON.stringify(legacyAnchorMap(doc)))
   for (const [from, to] of Object.entries(LEGACY_REDIRECTS)) {
     written.push(write(from, redirectStub(url(to), abs(to))))
@@ -443,6 +534,11 @@ export function build () {
   copyDir('acts/pdf', 'acts/pdf')
   copyDir('src/styles', 'styles')
   copyDir('src/scripts', 'scripts')
+
+  // The propose page enforces the same schema the CLI does, compiled to a
+  // standalone module. A second hand-written check in the page would be a
+  // second implementation, free to drift.
+  if (PROPOSE_ENABLED) write('scripts/bill-validator.mjs', generateBillValidator())
 
   // The custom domain stays on the old site until it has been reviewed.
   if (INCLUDE_CNAME && fs.existsSync(path.join(ROOT, 'CNAME'))) {
@@ -635,5 +731,6 @@ if (direct) {
   console.log(`  articles    ${doc.articles.length}`)
   console.log(`  archived    ${versions.length}`)
   console.log(`  og images   ${og.made} rendered${og.fallback ? `, ${og.fallback} fell back to the banner` : ''}${og.rasteriser ? ` (${og.rasteriser})` : ' (no rasteriser found)'}`)
+  console.log(`  /propose/   ${PROPOSE_ENABLED ? 'LIVE' : 'dark (PROPOSE_ENABLED=true to ship; see process/ADOPTION.md)'}`)
   console.log(`  CNAME       ${INCLUDE_CNAME ? 'included' : 'excluded (custom domain untouched)'}`)
 }

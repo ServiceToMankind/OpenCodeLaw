@@ -66,6 +66,7 @@ Records text that entered the constitution outside the amendment process. Its pu
 | `contact` | object | no |  <br><small>no extra keys</small> |
 | `termsOfService` | `string` (uri) | no |  |
 | `license` | `string` | no |  |
+| `instrument` | object | no | House style for rendered instruments: the wording an Act carries on its face. Content, not engine — an organisation adopting this repository replaces these and the renderer follows. <br><small>no extra keys</small> |
 
 **Conditional rules**
 
@@ -137,6 +138,10 @@ Type: `active` \| `omitted` \| `reserved`
 | Key | Type | Required | Notes |
 |---|---|---|---|
 | `id` | [actId](#actid) | **yes** |  |
+| `origin` | `bill` \| `external-pdf` | no | How the Act entered the record. `external-pdf` means it was authored as prose and transcribed — the three 2024 Acts, whose history is not rewritten into the new format. `bill` means it was born from a bill file, which is the only path available for new Acts. |
+| `bill_file` | `string` | no | Repository-relative path to the bill this Act was rendered from. Required for origin: bill. |
+| `signed_pdf_sha256` | `string` | no | Checksum of the signed instrument, so the archived PDF can be proved to be the one enacted. <br><small>pattern `^[a-f0-9]{64}$`</small> |
+| `approvals` | array of object | no | Per-body tallies under Article 16(3). Recorded for Acts born from bills; the 2024 Acts predate the pipeline and carry only the procedure block. |
 | `number` | `integer` | **yes** |  <br><small>min 1</small> |
 | `year` | `integer` | **yes** |  <br><small>min 1900</small> |
 | `title` | [nonEmptyText](#nonemptytext) | **yes** |  |
@@ -154,6 +159,10 @@ Type: `active` \| `omitted` \| `reserved`
 | `source_text` | `string` | no | Repository-relative path to the extracted plain text, so every assertion below is diffable against a source in the repo. |
 | `amends` | array of `string` | no | Provision ids this Act touches. Every entry must resolve against the constitution. |
 | `provisions` | array of object | no |  |
+
+**Conditional rules**
+
+- When `origin` is `bill`: `bill_file` becomes required.
 
 ### reconciliationState
 

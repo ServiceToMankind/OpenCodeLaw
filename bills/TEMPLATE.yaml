@@ -1,0 +1,165 @@
+# ---------------------------------------------------------------------------
+# A BILL — a proposed amendment to the constitution.
+#
+# Copy this file to bills/<year>/ and edit it. You do not need to know YAML
+# beyond "keep the indentation as you found it".
+#
+#   npx opencodelaw bill validate bills/2026/my-bill.yaml
+#
+# Run that as often as you like. It checks your drafting and prints exactly
+# what your bill would change, before and after. Read that diff — it is what
+# the approval meetings will read.
+#
+# Author's guide: process/PROPOSING.md
+# The rules this follows: process/AMENDMENT-PROCESS.md
+# ---------------------------------------------------------------------------
+
+opencodelaw_bill: "1.0"
+
+bill:
+  short_title: An Act to ...              # how the Act will be titled
+  # also_known_as: Membership Act, 2026   # optional familiar name
+  year: 2026
+  number: ~                               # leave null — the ICC assigns this at submission
+  type: amendment                         # amendment | corrigendum | revision
+
+  moved_by:
+    name: Your Name                       # recorded permanently, from the moment you draft
+    role: Member                          # e.g. Unit Head, IBM-Technical Coordinator
+    contact: you@stmorg.in
+
+  drafted: 2026-01-15
+
+  # The constitution version you wrote this against. If the constitution moves
+  # on before your bill is approved, validation will tell you to rebase — so
+  # nobody ever votes on a change written against text that no longer exists.
+  base_version: "3.0.0"
+
+  version_bump: minor                     # minor for an amendment; major only for a revision
+
+status: draft                             # you leave this alone; the pipeline moves it
+
+history: []                               # every status change is recorded here automatically
+
+# ---------------------------------------------------------------------------
+# Why you are proposing this. Explanatory ONLY.
+#
+# This becomes the STATEMENT OF OBJECTS AND REASONS at the end of the printed
+# Act. It is never operative and can never be cited as the authority for
+# anything — a rule this project learned the hard way, when Act 2 of 2024 set
+# one amendment threshold in its operative text and a different one here.
+# ---------------------------------------------------------------------------
+objects_and_reasons: |
+  1. Article N is amended to ... .
+
+# ---------------------------------------------------------------------------
+# WHAT THE BILL ACTUALLY DOES. One entry per provision you are changing.
+#
+# The single rule that matters: `text` is the COMPLETE resulting text of that
+# provision — the whole thing, as it should read after your amendment.
+#
+# Not a diff. Not "insert after the words". Not "delete the third sentence".
+# Write out the provision as you want it to end up, in full.
+#
+# That is what makes an Act safe to apply: the tool compares what the
+# provision says now with what you wrote, so applying the same Act twice
+# changes nothing the second time, and an Act that no longer matches the text
+# it was written against refuses to apply rather than corrupting it.
+# ---------------------------------------------------------------------------
+operations:
+  - id: op-1
+    operation: substitute                 # substitute | insert | omit | retitle | reserve
+    target: art-3                         # the provision id, e.g. art-3 or art-6-s-2
+    scope: article                        # article (the whole provision) | clause
+    # title: Aims and Objectives          # set this only if the Act states a heading
+    text: |
+      The complete new text of Article 3, written out in full, exactly as it
+      should read once this Act is applied.
+
+  # A second example — delete to remove it.
+  # - id: op-2
+  #   operation: insert
+  #   target: art-22
+  #   scope: article
+  #   title: Data Protection
+  #   text: |
+  #     The complete text of the new Article 22.
+
+# ---------------------------------------------------------------------------
+# APPROVALS — Article 16(3).
+#
+# All three bodies must approve. This is settled constitutional policy, not a
+# default: a bill approved by fewer than three bodies cannot be enacted, and
+# no checklist or shortcut can lower it.
+#
+# The ICC fills this in from the minutes. Leave the numbers null.
+#
+# `abstain` is excluded from the threshold — 16(3) says "present and voting".
+# ---------------------------------------------------------------------------
+approvals:
+  # One entry per body. The ICC fills these in from the signed record.
+  #
+  # `bill_sha256` is the substantive hash of the bill AS VOTED. `bill validate`
+  # prints it; the presiding officer reads it into the minutes. If the bill is
+  # edited afterwards the hash moves, the approval is void, and that body must
+  # resolve again — including when your own operations were untouched, because
+  # a provision can become contradictory purely because other articles moved.
+  #
+  # Get the text right before you circulate.
+  #
+  # `evidence.path` is a file in this repository. A live link is never evidence:
+  # a URL is mutable, unattributable, and dies with the platform.
+  - body: board
+    meeting:
+      date: ~
+      mode: in-person                   # in-person | online | hybrid
+      place: ""
+      presiding: ""
+    present: ~
+    for: ~
+    against: ~
+    abstain: ~                          # excluded from the threshold
+    bill_sha256: ~
+    # Added by the ICC once the record exists. Left out of a draft entirely:
+    # an empty path and an empty checksum are not an unfilled form, they are a
+    # claim that a record exists at "" — which is why the validator rejects it.
+    #
+    # evidence:
+    #   kind: minutes                   # minutes | ballot-tally | poll-export
+    #   path: bills/2026/evidence/bill-1-2026-board-minutes.pdf
+    #   sha256: <64 hex characters — `bill validate` will tell you if it is wrong>
+    recorded_by: ""
+  - body: intermediate-board
+    meeting: {date: ~, mode: in-person, place: "", presiding: ""}
+    present: ~
+    for: ~
+    against: ~
+    abstain: ~
+    bill_sha256: ~
+    # evidence: {kind: minutes, path: ..., sha256: ...}
+    recorded_by: ""
+  - body: units
+    meeting: {date: ~, mode: online, place: "", presiding: ""}
+    present: ~
+    for: ~
+    against: ~
+    abstain: ~
+    bill_sha256: ~
+    # Units vote online where the by-laws permit it. A poll is a voting
+    # MECHANISM, not a record: the evidence is a static export of the result,
+    # attested by the ICC coordinator, archived and hashed like minutes. The
+    # poll's URL proves nothing.
+    # evidence: {kind: poll-export, path: ..., sha256: ...}
+    recorded_by: ""
+
+# ---------------------------------------------------------------------------
+# ENACTMENT — filled in by the ICC when the Act is signed. Leave it alone.
+# ---------------------------------------------------------------------------
+enactment:
+  act_number: ~
+  act_year: ~
+  assent_date: ~
+  assented_by: ~
+  signed_by: ~
+  signed_pdf: ~
+  signed_pdf_sha256: ~

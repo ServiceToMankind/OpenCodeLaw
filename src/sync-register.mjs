@@ -28,6 +28,44 @@ const CURRENT = path.join(ROOT, 'constitution/current.yaml')
 const OPTS = { schema: yaml.CORE_SCHEMA }
 
 /** What the instruments say each Act does, and whether the text reflects it. */
+/**
+ * Acts born from bills derive their register entry from the bill file, the same
+ * way external-pdf Acts derive theirs from acts/text/. Both halves are computed,
+ * so neither kind can drift from the text it registers.
+ */
+export function deriveFromBills () {
+  const dir = path.join(ROOT, 'bills')
+  const out = new Map()
+  if (!fs.existsSync(dir)) return out
+  const doc = yaml.load(fs.readFileSync(CURRENT, 'utf8'), OPTS)
+  const amendedBy = new Map([doc.preamble, ...(doc.articles ?? [])].map(n => [n.id, new Set(n.amended_by ?? [])]))
+
+  for (const year of fs.readdirSync(dir)) {
+    const yd = path.join(dir, year)
+    if (!fs.statSync(yd).isDirectory()) continue
+    for (const f of fs.readdirSync(yd).filter(f => /\.ya?ml$/.test(f))) {
+      const bill = yaml.load(fs.readFileSync(path.join(yd, f), 'utf8'), OPTS)
+      const e = bill?.enactment
+      if (!e?.act_number || !e?.act_year) continue
+      const actId = `act-${e.act_number}-${e.act_year}`
+      const targets = [...new Set(bill.operations.map(o => o.target))]
+      const reflected = targets.filter(t => amendedBy.get(t)?.has(actId))
+      out.set(actId, {
+        amends: targets,
+        provisions: bill.operations.map(o => ({
+          target: o.target, operation: o.operation, scope: o.scope,
+          ...(o.title ? { note: `Act states the title as "${o.title}".` } : {})
+        })),
+        application_status: reflected.length === 0 ? 'pending' : (reflected.length === targets.length ? 'applied' : 'partially-applied'),
+        reflected,
+        bill_file: path.relative(ROOT, path.join(yd, f)),
+        origin: 'bill'
+      })
+    }
+  }
+  return out
+}
+
 export function derive () {
   const doc = yaml.load(fs.readFileSync(CURRENT, 'utf8'), OPTS)
   const nodes = [doc.preamble, ...doc.articles]
@@ -56,8 +94,10 @@ export function derive () {
       ? 'pending'
       : (reflected.length === targets.length ? 'applied' : 'partially-applied')
 
-    out.set(actId, { amends: targets, provisions, application_status: status, reflected })
+    out.set(actId, { amends: targets, provisions, application_status: status, reflected, origin: 'external-pdf' })
   }
+  // Acts born from bills are derived from their bill file instead.
+  for (const [id, d] of deriveFromBills()) out.set(id, d)
   return out
 }
 

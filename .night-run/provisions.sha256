@@ -1,10 +1,8 @@
 {
   "note": "Baseline for the unattended run. Any change outside PERMITTED in tripwire.mjs aborts the run.",
   "file": "constitution/current.yaml",
-  "taken_at_commit": "f36a02c",
-  "permitted": [
-    "art-11.content"
-  ],
+  "taken_at_commit": "48af740",
+  "permitted": [],
   "count": 82,
   "provisions": {
     "preamble.title": "59e371c5cac498cc5ae8361dafb8f60b4023665a8fb606860a289dc3d399a8dc",
@@ -63,7 +61,7 @@
     "art-11-s-1.content": "17612d9aca69f815ac99b45a8ac2c0e29108b3ea901880d03d95a709a1b00dde",
     "art-11-s-2.title": "d456583904a7dd394696064df1106bc90fc44eefc1e884d5420a4b0ebf7794db",
     "art-11-s-2.content": "544267149f490925bfeda78b4129a95ae7f65a58f62dd8986c630c72a56de380",
-    "art-12.title": "3303026655c83910b9a0ae51382813956e58271c276fd5a27d05f95b847b139a",
+    "art-12.title": "d10ccefc6d3a23b2fa9a1822dcddab633ccf745a419283eed73b321317088201",
     "art-12.content": "8c5ac0ac874e1d0b65dbf0a7c081db4bb42c4886967e1288982734bffc8704ad",
     "art-13.title": "8f672276e8b9971baef1e26d73b6733f436575230b342e58e5722c11536263fc",
     "art-13.content": "3124807d0cfcf79deaa8683b46627fd1859abaf233627aa69ddeb8b9e7ed75ef",

@@ -123,3 +123,28 @@ test('the engine holds no content and the content holds no engine', () => {
       `src/${f} hardcodes the organization name; it belongs in constitution/current.yaml`)
   }
 })
+
+test('documents that quote the live constitution version stay in step with it', () => {
+  // The docs quote a base_version for authors to copy. The next applied Act
+  // would make them silently wrong while the suite stayed green, and an author
+  // copying a stale version gets a rebase error on their first run.
+  //
+  // Only REAL quotes are checked. The worked example in PROPOSING.md is a
+  // fictional guild at its own version, and flagging that would be wrong.
+  const doc = yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
+  const current = doc.info.version
+
+  const template = fs.readFileSync(path.join(ROOT, 'bills/TEMPLATE.yaml'), 'utf8')
+  const inTemplate = template.match(/base_version:\s*"([^"]+)"/)?.[1]
+  assert.equal(inTemplate, current,
+    `bills/TEMPLATE.yaml quotes base_version ${inTemplate} but the constitution is at ${current}`)
+
+  // Prose of the form "Today that is `X`" is a claim about the live document.
+  for (const rel of ['process/PROPOSING.md', 'process/AMENDMENT-PROCESS.md']) {
+    const file = path.join(ROOT, rel)
+    if (!fs.existsSync(file)) continue
+    for (const m of fs.readFileSync(file, 'utf8').matchAll(/Today that is \*?\*?`([^`]+)`/g)) {
+      assert.equal(m[1], current, `${rel} says the live version is ${m[1]}; it is ${current}`)
+    }
+  }
+})
