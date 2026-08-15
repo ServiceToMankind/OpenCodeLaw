@@ -86,5 +86,14 @@ jobs:
       - name: Validate the corpus
         run: npm run validate
 
+      # The suite asserts against built output as well as source, so the build
+      # runs first — the deploy workflow does this and this one did not, which
+      # is how 29 tests failed on "dist/ missing" the first time this ran.
+      - name: Build
+        run: npm run build
+
+      - name: Check links
+        run: npm run linkcheck
+
       - name: Test
         run: npm test
