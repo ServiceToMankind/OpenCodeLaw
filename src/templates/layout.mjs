@@ -112,7 +112,7 @@ export function layout ({
   title, description, canonical, head = '', bodyClass = '',
   main, info, url, absolute, state, actIndex, articles, slugs,
   currentId = null, tocMode = 'single', showToc = true, jsonLd = [], og = {},
-  toc = null, footerInfo = null, extraHead = ''
+  toc = null, footerInfo = null, extraHead = '', proposeEnabled = false
 }) {
   // Archive pages render a different document from the one in force; the footer
   // must state THAT version, not the current one.
@@ -196,7 +196,7 @@ export function layout ({
         <a href="${url('')}">Constitution</a> ·
         <a href="${url('amendments/')}">Amendments</a> ·
         <a href="${url('bills/')}">Bills</a> ·
-        <a href="${url('propose/')}">Propose</a> ·
+        ${proposeEnabled ? `<a href="${url('propose/')}">Propose</a> ·` : ''}
         <a href="${url('archive/')}">Archive</a>
         ${info.contact?.email ? ` · <a href="mailto:${escapeHtml(info.contact.email)}">Contact</a>` : ''}
       </p>

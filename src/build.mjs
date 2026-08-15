@@ -30,6 +30,22 @@ export const SITE_ORIGIN = DEFAULT_SITE_ORIGIN
 // setting on deploy, so this now defaults ON and must be opted OUT of.
 const INCLUDE_CNAME = process.env.INCLUDE_CNAME !== 'false'
 
+/**
+ * /bills/ and /propose/ are different kinds of surface, so they ship
+ * differently.
+ *
+ * /bills/ is RECORD, and always ships: an empty register is a true statement.
+ * "No bills are before the board" is information, not absence.
+ *
+ * /propose/ is ACTION, and an action surface opens when the desk behind it is
+ * staffed. Its one actionable instruction is "email this file to the ICC"; put
+ * that in front of the public before the ICC can receive, and the system's
+ * first impression on its first real author is silence.
+ *
+ * Flip with PROPOSE_ENABLED=true once process/ADOPTION.md is checked off.
+ */
+const PROPOSE_ENABLED = process.env.PROPOSE_ENABLED === 'true'
+
 // Engine and content are separate. Point these at your own files and the
 // engine needs no modification; versions/ and the act register are optional.
 const CONSTITUTION_FILE = process.env.CONSTITUTION_FILE ?? 'constitution/current.yaml'
@@ -221,7 +237,7 @@ export function build () {
     ? 'editorial'
     : (headingCounts.enacted < headingCounts.editorial ? 'enacted' : 'editorial')
 
-  const shell = { info, url, absolute: abs, state, actIndex, articles: doc.articles, slugs }
+  const shell = { info, url, absolute: abs, state, actIndex, articles: doc.articles, slugs, proposeEnabled: PROPOSE_ENABLED }
 
   // ---- index: the whole constitution, every provision inline ----
   const indexMain = `
@@ -339,6 +355,7 @@ export function build () {
   })))
 
   // ---- propose: author a bill without editing YAML ----
+  if (PROPOSE_ENABLED) {
   written.push(write('propose/index.html', layout({
     ...shell,
     showToc: false,
@@ -353,6 +370,7 @@ export function build () {
     head: `<script type="module" src="${url('scripts/propose.js')}"></script>`,
     main: proposeMain({ url, escapeHtml, info })
   })))
+  }
 
   // ---- archive ----
   const versions = fs.existsSync(path.join(ROOT, VERSIONS_DIR))
@@ -459,7 +477,7 @@ export function build () {
   // What /propose/ needs to build an operation: the id a target is cited by,
   // and the CURRENT text, so a substitute can be prefilled and edited into the
   // complete resulting text. An author never types a target id or a partial edit.
-  write('provisions.json', JSON.stringify({
+  if (PROPOSE_ENABLED) write('provisions.json', JSON.stringify({
     base_version: info.version,
     generated_for: 'the propose page — targets are picked from this list, never typed',
     provisions: [
@@ -520,7 +538,7 @@ export function build () {
   // The propose page enforces the same schema the CLI does, compiled to a
   // standalone module. A second hand-written check in the page would be a
   // second implementation, free to drift.
-  write('scripts/bill-validator.mjs', generateBillValidator())
+  if (PROPOSE_ENABLED) write('scripts/bill-validator.mjs', generateBillValidator())
 
   // The custom domain stays on the old site until it has been reviewed.
   if (INCLUDE_CNAME && fs.existsSync(path.join(ROOT, 'CNAME'))) {
@@ -713,5 +731,6 @@ if (direct) {
   console.log(`  articles    ${doc.articles.length}`)
   console.log(`  archived    ${versions.length}`)
   console.log(`  og images   ${og.made} rendered${og.fallback ? `, ${og.fallback} fell back to the banner` : ''}${og.rasteriser ? ` (${og.rasteriser})` : ' (no rasteriser found)'}`)
+  console.log(`  /propose/   ${PROPOSE_ENABLED ? 'LIVE' : 'dark (PROPOSE_ENABLED=true to ship; see process/ADOPTION.md)'}`)
   console.log(`  CNAME       ${INCLUDE_CNAME ? 'included' : 'excluded (custom domain untouched)'}`)
 }

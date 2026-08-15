@@ -145,6 +145,12 @@ fewer.
 |---|---|
 | [process/PROPOSING.md](process/PROPOSING.md) | How to write a bill. Start here. |
 | [process/AMENDMENT-PROCESS.md](process/AMENDMENT-PROCESS.md) | Roles, lifecycle, thresholds, versioning. |
+| [process/MINUTES-TEMPLATE.md](process/MINUTES-TEMPLATE.md) | What each body's record of resolution must contain. |
+| [process/ADOPTION.md](process/ADOPTION.md) | What must be true before the in-browser bill builder goes live. |
+
+The in-browser builder at `/propose/` is built but not yet published: it is an action surface, and
+it opens when the ICC is ready to receive drafts. Authoring a bill by hand produces exactly the same
+file — copy `bills/TEMPLATE.yaml` and run `npx opencodelaw bill validate`.
 
 ## Honest limitations
 

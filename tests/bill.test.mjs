@@ -695,6 +695,12 @@ test('applying against a divergent target aborts rather than overwriting', async
     'a target that matches neither the base nor the Act must abort, never be overwritten')
 })
 
+// This test exists because the previous one AGREED WITH THE BUG: it wrote the
+// same wrong status the classifier expected, so two implementations confirmed
+// each other's error indefinitely — coherence masquerading as correctness. It
+// only broke open against an independent derivation of what the applier
+// actually writes. One source of truth (OPERATION_STATUS) plus a cross-check
+// against the applier is what stops the two sides quietly agreeing again.
 test('every operation type is idempotent against the status the applier writes', async () => {
   // Written against OPERATION_STATUS rather than a literal, because the last
   // bug here was the test and the code sharing the same wrong assumption:
