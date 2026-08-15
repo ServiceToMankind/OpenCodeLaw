@@ -12,8 +12,19 @@
  * read these, so the base path they assume cannot drift apart — a mismatch
  * ships a site whose every link points at a directory that is not there.
  */
-export const DEFAULT_BASE_PATH = process.env.BASE_PATH ?? '/'
-export const DEFAULT_SITE_ORIGIN = (process.env.SITE_ORIGIN ?? 'https://constitution.stmorg.in').replace(/\/+$/, '')
+/**
+ * Read at module load, so it must not assume a Node runtime: `escapeHtml` below
+ * is imported by bill-render.mjs, which the /propose/ and /icc/ pages serve to
+ * the browser. An unguarded `process.env` here threw a ReferenceError on import
+ * and took the whole page's module graph down with it — before any of the
+ * page's own code ran, so the failure looked like a blank page rather than a
+ * broken one.
+ */
+const env = (name, fallback) =>
+  (typeof process !== 'undefined' ? process.env?.[name] : undefined) ?? fallback
+
+export const DEFAULT_BASE_PATH = env('BASE_PATH', '/')
+export const DEFAULT_SITE_ORIGIN = env('SITE_ORIGIN', 'https://constitution.stmorg.in').replace(/\/+$/, '')
 
 /** Trailing slash, leading slash, no doubles. `/OpenCodeLaw/` or `/`. */
 export function normaliseBase (base) {

@@ -17,73 +17,26 @@ import Ajv from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 import { normalise } from './text-compare.mjs'
 import { canonicalJson, substantiveSubject, blockText, SUBSTANTIVE_FIELDS } from './scripts/bill-serialise.mjs'
+import {
+  REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, fullText, operationText,
+  classifyOperation, tally, buildBillManifest, resolutionSentenceFor
+} from './scripts/bill-core.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OPTS = { schema: yaml.CORE_SCHEMA }
 export const BILL_SCHEMA = 'schema/opencodelaw-bill-1.0.schema.json'
 
-/** The three bodies Article 16(3) names. All are required; none is inferred. */
-export const REQUIRED_BODIES = ['board', 'intermediate-board', 'units']
-
 /**
- * Article 16(3) requires "2/3rd present and voting of the board, the
- * intermediate board and units of the NGO collectively".
- *
- * "Collectively" bears two readings: a pooled vote of all three sitting
- * together, or 2/3 within each body. Until the board adopts one by resolution,
- * enactment requires the STRICTER reading — 2/3 in each body separately — and
- * both tallies are recorded, so an Act cannot later be challenged under
- * whichever reading is adopted.
- *
- * Abstentions are excluded from the denominator: the text says present AND
- * VOTING.
+ * The rules the browser needs too — the Article 16(3) arithmetic, the three-way
+ * classification, the manifest — live in scripts/bill-core.mjs and are
+ * re-exported here so every Node-side caller keeps importing them from one
+ * place. There is exactly one implementation of each; the pages import the same
+ * file the CLI does.
  */
-export const THRESHOLD = 2 / 3
-
-/** What each removing operation leaves behind on the provision it acts on. */
-export const OPERATION_STATUS = Object.freeze({ omit: 'omitted', reserve: 'reserved' })
-
-export { canonicalJson, blockText, SUBSTANTIVE_FIELDS }
-
-export function tally (approvals = []) {
-  const perBody = REQUIRED_BODIES.map(body => {
-    const a = approvals.find(x => x.body === body)
-    const forVotes = a?.for ?? null
-    const against = a?.against ?? null
-    const voting = forVotes == null || against == null ? null : forVotes + against
-    const ratio = voting ? forVotes / voting : null
-    return {
-      body,
-      recorded: !!a,
-      date: a?.date ?? null,
-      present: a?.present ?? null,
-      for: forVotes,
-      against,
-      abstain: a?.abstain ?? null,
-      voting,
-      ratio,
-      passes: ratio != null && ratio >= THRESHOLD,
-      evidence: a?.evidence ?? null,
-      billSha256: a?.bill_sha256 ?? null,
-      meeting: a?.meeting ?? null
-    }
-  })
-
-  const complete = perBody.every(b => b.recorded && b.voting != null)
-  const pooledFor = perBody.reduce((n, b) => n + (b.for ?? 0), 0)
-  const pooledVoting = perBody.reduce((n, b) => n + (b.voting ?? 0), 0)
-  const pooledRatio = pooledVoting ? pooledFor / pooledVoting : null
-
-  return {
-    perBody,
-    complete,
-    pooled: { for: pooledFor, voting: pooledVoting, ratio: pooledRatio, passes: pooledRatio != null && pooledRatio >= THRESHOLD },
-    // The stricter reading governs.
-    passes: complete && perBody.every(b => b.passes),
-    missingBodies: perBody.filter(b => !b.recorded).map(b => b.body),
-    missingEvidence: perBody.filter(b => b.recorded && !b.evidence?.path).map(b => b.body),
-    failedBodies: perBody.filter(b => b.recorded && b.voting != null && !b.passes).map(b => b.body)
-  }
+export {
+  canonicalJson, blockText, SUBSTANTIVE_FIELDS,
+  REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, fullText, operationText,
+  classifyOperation, tally, buildBillManifest
 }
 
 // ---------------------------------------------------------------------------
@@ -115,24 +68,7 @@ export function loadConstitution (rel = 'constitution/current.yaml') {
   return yaml.load(fs.readFileSync(path.join(ROOT, rel), 'utf8'), OPTS)
 }
 
-const provisionsOf = doc => {
-  const m = new Map()
-  if (doc.preamble) m.set(doc.preamble.id, { node: doc.preamble, kind: 'preamble' })
-  for (const a of doc.articles ?? []) {
-    m.set(a.id, { node: a, kind: 'article' })
-    for (const s of a.sections ?? []) m.set(s.id, { node: s, kind: 'section', parent: a })
-  }
-  return m
-}
-
-/** Everything a reader sees under a provision, for the three-way comparison. */
-export const fullText = node => node
-  ? [node.content ?? '', ...(node.sections ?? []).flatMap(s => [s.title ?? '', s.content ?? ''])].join('\n').trim()
-  : ''
-
-/** The text an operation results in, in the same shape as fullText. */
-export const operationText = op =>
-  [op.text ?? '', ...(op.sections ?? []).flatMap(s => [s.title ?? '', s.text ?? ''])].join('\n').trim()
+const provisionsOf = provisionIndex
 
 // ---------------------------------------------------------------------------
 
@@ -373,74 +309,6 @@ function knownDraftingDefects () {
   return out
 }
 
-/**
- * What the bill would change, per operation, with before and after.
- * This is what an approval meeting reads.
- */
-export function buildBillManifest (bill, doc) {
-  const provisions = provisionsOf(doc)
-  return (bill.operations ?? []).map(op => {
-    const existing = provisions.get(op.target)
-    const before = existing ? fullText(existing.node) : null
-    const after = ['omit', 'reserve'].includes(op.operation) ? null : operationText(op)
-    return {
-      id: op.id,
-      operation: op.operation,
-      target: op.target,
-      scope: op.scope,
-      exists: !!existing,
-      title_before: existing?.node.title ?? null,
-      title_after: op.title ?? existing?.node.title ?? null,
-      before,
-      after,
-      unchanged: before != null && after != null && normalise(before) === normalise(after)
-    }
-  })
-}
-
-/**
- * The three-way check that makes application idempotent.
- *
- *   current == proposed  → already applied, safe no-op
- *   current == base      → apply
- *   neither              → divergence, abort
- *
- * Re-running an applied Act cannot corrupt anything, which is the defect that
- * made re-running Act 1 of 2024 unsafe: its clause edits were line splices into
- * text that no longer existed after the first run.
- */
-export function classifyOperation (op, currentNode, baseText = null) {
-  const proposed = normalise(operationText(op))
-  const current = normalise(fullText(currentNode))
-
-  if (op.operation === 'insert') {
-    // Absent: insert it. Present and already reading as the Act prescribes:
-    // this Act has been applied, and re-running it must be a no-op like every
-    // other operation. Present and reading as something else: another
-    // provision occupies that number, and inserting would overwrite it.
-    if (!currentNode) return 'apply'
-    return current === proposed ? 'already-applied' : 'divergent'
-  }
-  if (['omit', 'reserve'].includes(op.operation)) {
-    // The provision is not deleted — its number is never reused, so the entry
-    // remains carrying a status. "Already applied" is that status being set,
-    // not the node being gone.
-    if (!currentNode) return 'already-applied'
-    // The operation is `omit`; the status it leaves behind is `omitted`.
-    // Comparing the two directly made re-applying an omission look like work
-    // forever — and the lifecycle test agreed, because it wrote the same wrong
-    // status the check expected. Both sides now name the mapping once.
-    return currentNode.status === OPERATION_STATUS[op.operation] ? 'already-applied' : 'apply'
-  }
-  if (op.operation === 'retitle') {
-    return normalise(currentNode?.title ?? '') === normalise(op.title) ? 'already-applied' : 'apply'
-  }
-  if (current === proposed) return 'already-applied'
-  if (baseText != null && current === normalise(baseText)) return 'apply'
-  if (baseText == null) return 'apply'
-  return 'divergent'
-}
-
 export function report ({ problems, manifest, tally: t, bill }) {
   const out = []
   const b = bill.bill
@@ -509,10 +377,8 @@ export function substantiveHash (bill) {
 }
 
 /** The sentence a meeting reads into its minutes. */
-export function resolutionSentence (bill) {
-  const b = bill.bill
-  const name = b.number ? `Bill ${b.number} of ${b.year}` : `the draft bill "${b.short_title}"`
-  return `This meeting resolves on ${name}, substantive hash ${substantiveHash(bill)}.`
+export function resolutionSentence (bill, hash = substantiveHash(bill)) {
+  return resolutionSentenceFor(bill, hash)
 }
 
 export function fileSha256 (abs) {

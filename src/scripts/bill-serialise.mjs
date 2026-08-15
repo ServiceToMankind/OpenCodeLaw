@@ -66,33 +66,68 @@ export function substantiveSubject (bill) {
 // ---------------------------------------------------------------------------
 
 /**
- * Keys the propose page must never emit with a value. This list IS the page's
- * authority boundary, written down: the form produces drafts, and structurally
- * cannot produce a numbered, approved or enacted bill.
+ * What each surface may not emit. These lists ARE the authority boundaries,
+ * written down where the emitter can be tested against them.
+ *
+ * They are per-surface because the surfaces have different standing. The
+ * proposer's editor produces drafts and nothing else: it cannot number a bill,
+ * cannot record a vote, cannot enact. The ICC's desk is a clerk's tool — it
+ * numbers, schedules, and writes down what three bodies resolved — but it
+ * cannot enact either, because assent, the signed instrument and the
+ * application to the constitution belong to the technical department's CLI,
+ * where every claim either page produced is independently re-verified against
+ * files on disk.
+ *
+ * Neither list is what makes any of that true. `act enact` recomputes the
+ * thresholds, re-reads the evidence files and re-checks their checksums against
+ * the bill's own hash, so a hand-forged file fails exactly as it would if these
+ * pages had never been built. The lists are here so a REGRESSION in a page is
+ * caught by a test rather than by a coordinator.
  */
-export const PAGE_EXCLUDED = Object.freeze([
-  'bill.number',        // the ICC numbers a bill at submission
-  'history',            // written by the pipeline, never by an author
-  'approvals[].meeting.mode',
-  'approvals[].meeting.place',
-  'approvals[].meeting.presiding',
-  'approvals[].present',
-  'approvals[].for',
-  'approvals[].against',
-  'approvals[].abstain',
-  'approvals[].bill_sha256',
-  'approvals[].evidence',
-  'approvals[].recorded_by',
-  'approvals[].note',
-  'enactment.act_number',
-  'enactment.act_year',
-  'enactment.assent_date',
-  'enactment.assented_by',
-  'enactment.signed_by',
-  'enactment.signed_pdf',
-  'enactment.signed_pdf_sha256',
-  'enactment.rendered_from'
-])
+export const SURFACE_EXCLUSIONS = Object.freeze({
+  propose: Object.freeze([
+    'bill.number',        // the ICC numbers a bill at submission
+    'history',            // written by the pipeline, never by an author
+    'approvals[].meeting.mode',
+    'approvals[].meeting.place',
+    'approvals[].meeting.presiding',
+    'approvals[].present',
+    'approvals[].for',
+    'approvals[].against',
+    'approvals[].abstain',
+    'approvals[].bill_sha256',
+    'approvals[].evidence',
+    'approvals[].recorded_by',
+    'approvals[].note',
+    'enactment.act_number',
+    'enactment.act_year',
+    'enactment.assent_date',
+    'enactment.assented_by',
+    'enactment.signed_by',
+    'enactment.signed_pdf',
+    'enactment.signed_pdf_sha256',
+    'enactment.rendered_from'
+  ]),
+  icc: Object.freeze([
+    // Enactment, entire. The ICC attests; it does not assent, and it does not
+    // register the signed instrument.
+    'enactment.act_number',
+    'enactment.act_year',
+    'enactment.assent_date',
+    'enactment.assented_by',
+    'enactment.signed_by',
+    'enactment.signed_pdf',
+    'enactment.signed_pdf_sha256',
+    'enactment.rendered_from'
+  ])
+})
+
+/** Fields NO surface may emit — what the serialiser is on the hook for alone. */
+export const NEVER_EMITTED = Object.freeze(
+  SURFACE_EXCLUSIONS.propose.filter(p => SURFACE_EXCLUSIONS.icc.includes(p)))
+
+/** Retained under its Phase 8 name: the propose surface is still the propose surface. */
+export const PAGE_EXCLUDED = SURFACE_EXCLUSIONS.propose
 
 /**
  * Emit an optional key only when it is PRESENT — never when it is merely
@@ -155,6 +190,7 @@ export function billToYaml (bill, { header = true } = {}) {
   out.push('  moved_by:')
   out.push(`    name: ${scalar(b.moved_by?.name)}`)
   out.push(...opt(b.moved_by ?? {}, 'role', v => `    role: ${scalar(v)}`))
+  out.push(...opt(b.moved_by ?? {}, 'membership_id', v => `    membership_id: ${scalar(v)}`))
   out.push(...opt(b.moved_by ?? {}, 'contact', v => `    contact: ${scalar(v)}`))
   out.push(`  drafted: ${b.drafted == null ? '~' : b.drafted}`)
   out.push(`  base_version: "${b.base_version}"`)

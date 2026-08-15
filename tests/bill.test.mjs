@@ -528,10 +528,16 @@ test('a resolution sheet renders only once a bill is scheduled', async () => {
   }
 
   const b = structuredClone(loadBill(BILL_FILE)); b.status = 'scheduled'
-  const html = ballotDocument(b, { info: loadConstitution().info })
-  assert.equal((html.match(/class="sheet"/g) ?? []).length, 3, 'one sheet per body')
   const { substantiveHash } = await import('../src/bill.mjs')
+  const html = ballotDocument(b, { info: loadConstitution().info, hash: substantiveHash(b) })
+  assert.equal((html.match(/class="sheet"/g) ?? []).length, 3, 'one sheet per body')
   assert.ok(html.includes(substantiveHash(b)), 'the sheet must carry the hash')
+
+  // The sheet's whole purpose is to carry the hash into the minutes, so it
+  // refuses to render without one rather than printing a blank where a meeting
+  // expects a number to read aloud.
+  assert.throws(() => ballotDocument(b, { info: loadConstitution().info }),
+    /substantive hash/i, 'a sheet with no hash must be refused, not rendered empty')
   for (const body of ['Board', 'Intermediate Board', 'Units']) {
     assert.ok(html.includes(body), `no sheet for ${body}`)
   }

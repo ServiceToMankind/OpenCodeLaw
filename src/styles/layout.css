@@ -1520,3 +1520,273 @@ body.is-modal-open {
 .bill-tally__verdict { white-space: nowrap; font-weight: 600; }
 .bill-tally__verdict--pass { color: var(--accent-ink); }
 .bill-tally__verdict--fail { color: var(--action-ink); }
+
+
+/* =============================================================================
+   /propose/ and /icc/ — the working surfaces
+   =============================================================================
+   Phase 8's propose page shipped class attributes with no matching rules at
+   all: .field, .op, .hash-line and the rest existed only in the template. The
+   page rendered as an unstyled column of controls. Same defect as the .bill-*
+   rules that lived in a <style> string nothing imported — so these live here,
+   where the stylesheet the page actually loads can be searched for them.
+   ========================================================================== */
+
+/* --- forms ---------------------------------------------------------------- */
+.field { margin: 0 0 var(--space-3, 1rem); max-width: var(--measure, 68ch); }
+
+.field > label,
+.field label > span:first-child { display: block; font-weight: 600; margin-bottom: var(--space-1, 0.25rem); }
+
+.field__opt { font-weight: 400; color: var(--muted); }
+
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="date"],
+.field input[type="number"],
+.field input[type="search"],
+.field input:not([type]),
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0.5em 0.65em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.5;
+}
+
+.field textarea { resize: vertical; min-height: 4.5em; }
+
+.field input[type="file"] {
+  width: 100%;
+  padding: 0.6em;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+  border-color: var(--accent-ink);
+}
+
+.field__help {
+  margin: var(--space-1, 0.25rem) 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: var(--measure, 68ch);
+}
+
+.field-row { display: grid; gap: var(--space-3, 1rem); }
+.field-row .field { margin-bottom: 0; }
+
+@media (min-width: 640px) {
+  .field-row { grid-template-columns: 1fr 1fr; }
+  .field-row--tally { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.btn--primary:hover { background: var(--accent); filter: brightness(1.12); }
+.btn--quiet { color: var(--muted); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* --- the document editor -------------------------------------------------- */
+.editor { margin: var(--space-4, 1.5rem) 0; }
+
+.editor__hint { max-width: var(--measure, 68ch); }
+.editor__hint--quiet { color: var(--muted); font-size: 0.92rem; }
+.editor__loading { color: var(--muted); }
+
+.editor__add {
+  margin: var(--space-3, 1rem) 0 var(--space-5, 2.5rem);
+  padding: var(--space-3, 1rem);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius, 0.5rem);
+}
+
+.editor__add--clause { margin-bottom: var(--space-2, 0.5rem); }
+
+.number-choice { border: 0; margin: 0; padding: 0; display: grid; gap: var(--space-2, 0.5rem); justify-items: start; }
+.number-choice legend { font-weight: 600; padding: 0; margin-bottom: var(--space-2, 0.5rem); }
+
+.prov {
+  margin: 0 0 var(--space-4, 1.5rem);
+  padding: var(--space-3, 1rem);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--surface);
+}
+
+.prov--clause { margin-bottom: var(--space-3, 1rem); background: transparent; }
+.prov--added { border-left-color: var(--accent); }
+.prov--removed { border-left-color: var(--action); opacity: 0.85; }
+
+.prov__badge {
+  display: inline-block;
+  margin: 0 0 var(--space-2, 0.5rem);
+  padding: 0.1em 0.5em;
+  border-radius: var(--radius, 0.5rem);
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.prov__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2, 0.5rem);
+  margin: 0 0 var(--space-2, 0.5rem);
+  font-size: 1.05rem;
+}
+
+.prov__num {
+  font-family: var(--font-num);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* The heading is an input that reads as a heading: editable in place, with the
+   document outline kept intact by the <h3> it sits inside. */
+.prov__title {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.2em 0.4em;
+  border: 1px solid transparent;
+  border-radius: var(--radius, 0.5rem);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+}
+
+.prov__title:hover { border-color: var(--border); }
+.prov__title:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; background: var(--surface); }
+.prov__title--struck { text-decoration: line-through; color: var(--muted); font-weight: 700; }
+
+.prov__text {
+  width: 100%;
+  padding: 0.6em 0.7em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.prov__text:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; background: var(--surface); }
+
+.prov__clauses { margin: var(--space-3, 1rem) 0 0; padding-left: var(--space-3, 1rem); border-left: 1px solid var(--border); }
+.prov__tools { margin-top: var(--space-2, 0.5rem); }
+.prov__removed-note { max-width: var(--measure, 68ch); }
+
+.confirm {
+  padding: var(--space-3, 1rem);
+  border: 2px solid var(--action);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--action-wash);
+}
+
+.confirm__q, .confirm__note { max-width: var(--measure, 68ch); }
+.confirm__title { font-weight: 700; margin: 0 0 var(--space-2, 0.5rem); }
+.confirm__note { font-size: 0.9rem; color: var(--muted); }
+.confirm .btn { margin-right: var(--space-2, 0.5rem); }
+
+/* --- the review, and the ICC's manifest ----------------------------------- */
+.review__count { font-weight: 600; }
+
+.change {
+  margin: 0 0 var(--space-4, 1.5rem);
+  padding: var(--space-3, 1rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--surface);
+}
+
+.change__title { margin: 0 0 var(--space-2, 0.5rem); font-size: 1.02rem; }
+.change__label { margin: var(--space-2, 0.5rem) 0 var(--space-1, 0.25rem); font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.change__heading del { color: var(--action-ink); }
+.change__heading ins { color: var(--accent-ink); text-decoration: none; font-weight: 600; }
+.change__note { font-size: 0.9rem; color: var(--muted); }
+
+.conflict {
+  margin: var(--space-3, 1rem) 0;
+  padding: var(--space-3, 1rem);
+  border: 1px solid var(--action);
+  border-radius: var(--radius, 0.5rem);
+}
+
+.conflict__what { font-weight: 700; margin: 0 0 var(--space-2, 0.5rem); }
+.conflict__pair { display: grid; gap: var(--space-3, 1rem); }
+
+@media (min-width: 800px) {
+  .conflict__pair { grid-template-columns: 1fr 1fr; }
+}
+
+.hash-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2, 0.5rem); }
+.hash-line code { font-size: 0.82rem; word-break: break-all; }
+
+.resolution-line {
+  padding: var(--space-2, 0.5rem) var(--space-3, 1rem);
+  border-left: 3px solid var(--accent);
+  background: var(--accent-wash);
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.banner--quiet { background: transparent; border-style: dashed; }
+.banner--restore { border-color: var(--accent); }
+
+/* --- the ICC's per-body cards --------------------------------------------- */
+.body-card {
+  margin: 0 0 var(--space-4, 1.5rem);
+  padding: var(--space-3, 1rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--surface);
+}
+
+.body-card__name { font-weight: 700; padding: 0 var(--space-2, 0.5rem); }
+
+.body-card__verdict {
+  margin: var(--space-3, 1rem) 0 0;
+  padding: var(--space-2, 0.5rem) var(--space-3, 1rem);
+  border-radius: var(--radius, 0.5rem);
+  background: var(--canvas);
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.body-card__verdict--pass { background: var(--accent-wash); color: var(--accent-ink); font-weight: 600; }
+.body-card__verdict--fail { background: var(--action-wash); color: var(--action-ink); font-weight: 600; }
+
+.evidence__out { display: grid; gap: var(--space-1, 0.25rem); font-size: 0.88rem; }
+.evidence__file { font-weight: 600; }
+.evidence__hash { font-family: var(--font-num); color: var(--muted); word-break: break-all; }
+.evidence__path { color: var(--muted); }
+
+/* A number held deliberately empty: reserved, or omitted by an earlier Act. It
+   is shown because a reader looking for Article 19 must find it, and it is not
+   editable because occupying a reserved number is a different act. */
+.prov--held { background: transparent; border-style: dashed; }
+.prov__title--held { color: var(--muted); font-weight: 700; }
+.prov__held-note { max-width: var(--measure, 68ch); font-size: 0.92rem; color: var(--muted); margin: 0 0 var(--space-2, 0.5rem); }

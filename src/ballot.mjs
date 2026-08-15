@@ -8,8 +8,14 @@
  * Rendered only for a bill at `scheduled` or later. Circulation is the freeze
  * point: a ballot for a bill still under form review would carry a hash that
  * the ICC is about to change.
+ *
+ * The hash is PASSED IN, never computed here, so that this file has no Node
+ * dependency and the /icc/ page downloads the same sheets `bill ballot` writes
+ * rather than a lookalike. It is required rather than defaulted: a sheet that
+ * silently printed `undefined` where the hash belongs is a sheet a meeting
+ * would sign.
  */
-import { substantiveHash, resolutionSentence, REQUIRED_BODIES } from './bill.mjs'
+import { resolutionSentenceFor, REQUIRED_BODIES } from './scripts/bill-core.mjs'
 import { houseStyle } from './bill-render.mjs'
 
 const BALLOTABLE = new Set(['scheduled', 'approved', 'enacted', 'applied'])
@@ -35,7 +41,12 @@ export function ballotGuard (bill) {
 export function ballotSheet (bill, body, options = {}) {
   const m = houseStyle(options)
   const b = bill.bill
-  const hash = substantiveHash(bill)
+  const hash = options.hash
+  if (!/^[a-f0-9]{64}$/.test(String(hash ?? ''))) {
+    throw new Error('ballotSheet needs the bill\'s substantive hash passed as options.hash — ' +
+      'the sheet exists to carry that hash into the minutes, so rendering one without it would ' +
+      'produce a resolution sheet that resolves on nothing.')
+  }
   const name = b.number ? `Bill ${b.number} of ${b.year}` : `the draft bill "${b.short_title}"`
 
   const ops = bill.operations.map((op, i) => {
@@ -54,7 +65,7 @@ export function ballotSheet (bill, body, options = {}) {
     <h2>Record of Resolution — ${esc(BODY_LABEL[body] ?? body)}</h2>
   </header>
 
-  <p class="resolution"><strong>${esc(resolutionSentence(bill))}</strong></p>
+  <p class="resolution"><strong>${esc(resolutionSentenceFor(bill, hash))}</strong></p>
   <p class="hash-note">The presiding officer reads the sentence above, including the hash, into the
   minutes. A vote binds to that hash and not to the bill's title: if the bill is edited afterwards,
   this resolution is void and this body must resolve again.</p>

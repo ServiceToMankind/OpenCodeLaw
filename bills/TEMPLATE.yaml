@@ -10,7 +10,9 @@
 # what your bill would change, before and after. Read that diff — it is what
 # the approval meetings will read.
 #
-# Author's guide: process/PROPOSING.md
+# Prefer not to write YAML? The propose page does all of this for you:
+#   https://constitution.stmorg.in/propose/
+# Writing it by hand: process/AUTHORING-BY-HAND.md
 # The rules this follows: process/AMENDMENT-PROCESS.md
 # ---------------------------------------------------------------------------
 

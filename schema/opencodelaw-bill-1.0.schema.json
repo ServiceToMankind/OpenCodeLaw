@@ -127,6 +127,10 @@
             "role": {
               "type": "string"
             },
+            "membership_id": {
+              "type": "string",
+              "description": "The mover's membership number, as they state it. Nothing in this system can verify it — the ICC checks it against the register when the draft arrives, which is its whole function. It is recorded because the surfaces that ask for it say it is recorded."
+            },
             "contact": {
               "type": "string"
             }

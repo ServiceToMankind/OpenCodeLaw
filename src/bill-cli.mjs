@@ -100,9 +100,16 @@ export function billSubmit (file, { actor = 'ICC' } = {}) {
 
 // ---------------------------------------------------------------------------
 
-export function actEnact (file, { actor = 'ICC', signedPdf, signedBy, assentDate, assentedBy } = {}) {
+/**
+ * `constitution` is a seam, not a feature: `actApply` already validates against
+ * a document it is handed, and this one could only ever validate against the
+ * real constitution — so a bill drafted on the fixture could not be enacted
+ * even in a test, and the enactment guards had no fixture coverage at all. The
+ * CLI passes nothing and the default is unchanged.
+ */
+export function actEnact (file, { actor = 'ICC', signedPdf, signedBy, assentDate, assentedBy, constitution } = {}) {
   const bill = loadBill(file)
-  const { problems, tally: t } = validateBill(file)
+  const { problems, tally: t } = validateBill(file, { constitution })
 
   const blockers = []
   if (!['approved', 'scheduled', 'submitted', 'under-review'].includes(bill.status)) {
