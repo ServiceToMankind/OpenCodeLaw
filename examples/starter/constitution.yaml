@@ -21,11 +21,14 @@ info:
   status: current                              # exactly one document may be `current`
   effective_from: 2025-01-01                   # ISO date
 
-  # Placeholders are rejected by the validator: no example.com URLs ship to
-  # production, which is how the original spec published two dead links.
+  # The validator REJECTS example.org / example.com addresses. That is
+  # deliberate: this file will not pass `opencodelaw validate` until you
+  # replace the line below with a real one. The constitution this engine was
+  # built for shipped two example.com URLs to production for two years because
+  # nothing objected.
   contact:
     name: The Secretary
-    email: secretary@example.org               # replace before deploying
+    email: secretary@example.org               # <- REPLACE ME, the build fails until you do
   license: CC-BY-4.0
 
 # ---------------------------------------------------------------------------

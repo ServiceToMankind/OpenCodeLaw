@@ -52,14 +52,14 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 - [x] 6a `tokens.css` — palette + `data-theme` + no-flash head script
 - [x] 6b Font fixes (truetype, Cuprum format, font-display, Open Sans decision)
 - [x] 6c `layout.css` — 18px/1.65/68ch, ragged-right, margin article numbers
-- [ ] 6d Desktop sticky ToC w/ overflow; **mobile bottom-sheet ToC (#1)**
-- [ ] 6e IntersectionObserver scroll-spy + auto-expand (#4)
-- [ ] 6f ⌘K search over build-time index
-- [ ] 6g Progress bar, focus mode, amended-by chips
-- [ ] 6h Copy-link toast `aria-live` (#7)
-- [ ] 6i A11y pass: skip link, landmarks, focus-visible, keyboard, reduced-motion, `<button aria-pressed>` (#25, #26)
+- [x] 6d Desktop sticky ToC w/ overflow; **mobile bottom-sheet ToC (#1)**
+- [x] 6e IntersectionObserver scroll-spy + auto-expand (#4)
+- [x] 6f ⌘K search over build-time index
+- [x] 6g Progress bar, focus mode, amended-by chips
+- [x] 6h Copy-link toast `aria-live` (#7)
+- [x] 6i A11y pass: skip link, landmarks, focus-visible, keyboard, reduced-motion, `<button aria-pressed>` (#25, #26)
 - [x] 6j `print.css`
-- [ ] 6k **Gate 6** — Lighthouse a11y ≥95 / perf ≥90, keyboard walkthrough, screenshots, zero console errors
+- [x] 6k **Gate 6** — Lighthouse a11y ≥95 / perf ≥90, keyboard walkthrough, screenshots, zero console errors
 
 ## 7 — Reusability
 
@@ -67,7 +67,7 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 - [x] 7b `opencodelaw validate|build` bin entries
 - [x] 7c `schema/SPEC.md` generated from JSON Schema (idempotent)
 - [x] 7d `README.md` rewrite (no CDN install), `CONTRIBUTING.md`
-- [ ] 7e **Gate 7** — starter builds from clean checkout; SPEC.md regenerates identically twice
+- [x] 7e **Gate 7** — starter builds from clean checkout; SPEC.md regenerates identically twice
 
 ## V — Verification suite (add as built)
 

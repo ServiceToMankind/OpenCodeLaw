@@ -14,3 +14,6 @@
 | 01:11 | GATE 4 PASS | live at https://servicetomankind.github.io/OpenCodeLaw/ — all pages 200, PDFs 200, CNAME 404 (correct), pages.cname=null |
 | 01:11 | Pages enabled | build_type=workflow; rebuild/v3 added to github-pages branch policy (was main-only) |
 | 01:11 | CI fix | node --test tests/ fails on Node 22 (treats dir as module); switched to shell glob |
+| 06:56 | GATE 6 PASS | LIVE Lighthouse 100/100/100/100 mobile AND desktop; a11y 100 in all 4 theme/viewport combos |
+| 06:56 | Keyboard walkthrough | 10/10 pass — skip link, focus trap, Escape return, legacy anchor, 0 console errors |
+| 06:56 | GATE 7 PASS | starter builds standalone (79 files, base /), SPEC.md idempotent, CLI works |

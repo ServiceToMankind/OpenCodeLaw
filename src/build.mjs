@@ -18,19 +18,26 @@ import { renderArticle, renderPreamble } from './templates/provision.mjs'
 import { generateOgImages } from './og.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const OUT = path.join(ROOT, 'dist')
+const OUT = () => path.join(ROOT, process.env.OUT_DIR ?? 'dist')
 
 // Configurable so switching to the apex domain later is a one-line change.
 export const BASE_PATH = process.env.BASE_PATH ?? '/OpenCodeLaw/'
 export const SITE_ORIGIN = (process.env.SITE_ORIGIN ?? 'https://servicetomankind.github.io').replace(/\/+$/, '')
 const INCLUDE_CNAME = process.env.INCLUDE_CNAME === 'true'
 
+// Engine and content are separate. Point these at your own files and the
+// engine needs no modification; versions/ and the act register are optional.
+const CONSTITUTION_FILE = process.env.CONSTITUTION_FILE ?? 'constitution/current.yaml'
+const VERSIONS_DIR = process.env.VERSIONS_DIR ?? 'constitution/versions'
+const REGISTER_FILE = process.env.REGISTER_FILE ?? 'acts/register.yaml'
+const OUT_DIR = process.env.OUT_DIR ?? 'dist'
+
 const url = makeUrl(BASE_PATH)
 const abs = makeAbsolute(SITE_ORIGIN, BASE_PATH)
 const load = rel => yaml.load(fs.readFileSync(path.join(ROOT, rel), 'utf8'), { schema: yaml.CORE_SCHEMA })
 
 const write = (rel, body) => {
-  const full = path.join(OUT, rel)
+  const full = path.join(OUT(), rel)
   fs.mkdirSync(path.dirname(full), { recursive: true })
   fs.writeFileSync(full, body)
   return rel
@@ -39,7 +46,7 @@ const write = (rel, body) => {
 const copyDir = (from, to) => {
   const src = path.join(ROOT, from)
   if (!fs.existsSync(src)) return 0
-  const dst = path.join(OUT, to)
+  const dst = path.join(OUT(), to)
   fs.mkdirSync(dst, { recursive: true })
   let n = 0
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
@@ -122,16 +129,16 @@ function legacyAnchorMap (doc) {
 // ---------------------------------------------------------------------------
 
 export function build () {
-  const doc = load('constitution/current.yaml')
+  const doc = load(CONSTITUTION_FILE)
   const info = doc.info
   const state = doc.reconciliation_state
-  const register = fs.existsSync(path.join(ROOT, 'acts/register.yaml')) ? load('acts/register.yaml') : { acts: [] }
+  const register = fs.existsSync(path.join(ROOT, REGISTER_FILE)) ? load(REGISTER_FILE) : { acts: [] }
   const actIndex = Object.fromEntries((register.acts ?? []).map(a => [a.id, a]))
   const slugs = slugMap(doc.articles)
   const written = []
 
-  fs.rmSync(OUT, { recursive: true, force: true })
-  fs.mkdirSync(OUT, { recursive: true })
+  fs.rmSync(OUT(), { recursive: true, force: true })
+  fs.mkdirSync(OUT(), { recursive: true })
 
   const shell = { info, url, absolute: abs, state, actIndex, articles: doc.articles, slugs }
 
@@ -214,8 +221,8 @@ export function build () {
   })))
 
   // ---- archive ----
-  const versions = fs.existsSync(path.join(ROOT, 'constitution/versions'))
-    ? fs.readdirSync(path.join(ROOT, 'constitution/versions')).filter(f => f.endsWith('.yaml')).sort()
+  const versions = fs.existsSync(path.join(ROOT, VERSIONS_DIR))
+    ? fs.readdirSync(path.join(ROOT, VERSIONS_DIR)).filter(f => f.endsWith('.yaml')).sort()
     : []
 
   written.push(write('archive/index.html', layout({
@@ -239,7 +246,7 @@ export function build () {
         </li>
         ${versions.map(f => {
           const v = f.replace(/^v|\.yaml$/g, '')
-          const d = load(`constitution/versions/${f}`)
+          const d = load(`${VERSIONS_DIR}/${f}`)
           return `<li class="versions__item">
             <a href="${url(`archive/${v}/`)}"><strong>Version ${escapeHtml(v)}</strong></a>
             <span class="versions__badge versions__badge--old">Superseded</span>
@@ -251,7 +258,7 @@ export function build () {
 
   for (const f of versions) {
     const v = f.replace(/^v|\.yaml$/g, '')
-    const d = load(`constitution/versions/${f}`)
+    const d = load(`${VERSIONS_DIR}/${f}`)
     const successor = d.info.superseded_by
     written.push(write(`archive/${v}/index.html`, layout({
       ...shell,
@@ -341,7 +348,7 @@ export function build () {
 
   // The custom domain stays on the old site until it has been reviewed.
   if (INCLUDE_CNAME && fs.existsSync(path.join(ROOT, 'CNAME'))) {
-    fs.copyFileSync(path.join(ROOT, 'CNAME'), path.join(OUT, 'CNAME'))
+    fs.copyFileSync(path.join(ROOT, 'CNAME'), path.join(OUT(), 'CNAME'))
   }
 
   return { written, doc, slugs, versions, register, og }
@@ -439,7 +446,7 @@ function sitemap (doc, slugs, versions) {
     })),
     ...versions.map(f => ({
       loc: abs(`archive/${f.replace(/^v|\.yaml$/g, '')}/`),
-      lastmod: load(`constitution/versions/${f}`).info.effective_from,
+      lastmod: load(`${VERSIONS_DIR}/${f}`).info.effective_from,
       priority: '0.3'
     }))
   ]
