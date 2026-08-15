@@ -59,6 +59,21 @@ export function reconciliationBanner (state, { url, actIndex = {} }) {
  * page. Only the article being viewed gets in-page anchors; linking a section
  * of another article to `#id` would point at an element that is not there.
  */
+/** A contents list of arbitrary in-page sections, for pages that are not the constitution. */
+export function tocSections (items, { heading = 'On this page' } = {}) {
+  if (!items?.length) return ''
+  return `<nav class="toc" id="toc" aria-labelledby="toc-heading">
+  <h2 class="toc__heading" id="toc-heading">${escapeHtml(heading)}</h2>
+  <ul class="toc__list">
+    ${items.map(i => `<li class="toc__item${i.sub ? ' toc__item--parent' : ''}">
+      <a class="toc__link" href="#${escapeHtml(i.id)}" data-anchor="${escapeHtml(i.id)}">${escapeHtml(i.label)}</a>
+      ${i.sub?.length ? `<ul class="toc__sub" id="toc-sub-${escapeHtml(i.id)}">${i.sub.map(c =>
+        `<li><a class="toc__link toc__link--sub" href="#${escapeHtml(c.id)}" data-anchor="${escapeHtml(c.id)}">${escapeHtml(c.label)}</a></li>`).join('')}</ul>` : ''}
+    </li>`).join('')}
+  </ul>
+</nav>`
+}
+
 export function tocNav (articles, { url, slugs, currentId = null, mode = 'single', homeUrl }) {
   const home = homeUrl ?? url('')
   const target = (a, frag) => {
@@ -96,14 +111,19 @@ export function tocNav (articles, { url, slugs, currentId = null, mode = 'single
 export function layout ({
   title, description, canonical, head = '', bodyClass = '',
   main, info, url, absolute, state, actIndex, articles, slugs,
-  currentId = null, tocMode = 'single', showToc = true, jsonLd = [], og = {}
+  currentId = null, tocMode = 'single', showToc = true, jsonLd = [], og = {},
+  toc = null, footerInfo = null, extraHead = ''
 }) {
+  // Archive pages render a different document from the one in force; the footer
+  // must state THAT version, not the current one.
+  const foot = footerInfo ?? info
+  const contents = toc ?? (showToc ? tocNav(articles, { url, slugs, currentId, mode: tocMode }) : '')
   const ogTags = Object.entries({
     'og:type': og.type ?? 'website',
     'og:site_name': info.title,
     'og:title': og.title ?? title,
     'og:description': og.description ?? description,
-    'og:url': canonical,
+    'og:url': og.url ?? canonical,
     'og:image': og.image,
     'og:image:alt': og.imageAlt,
     'og:locale': 'en_IN'
@@ -137,6 +157,7 @@ export function layout ({
     <link rel="stylesheet" href="${url('styles/print.css')}" media="print">
     <script>${THEME_SCRIPT}</script>
     ${ld}
+    ${extraHead}
     ${head}
   </head>
   <body class="${bodyClass}">
@@ -162,7 +183,7 @@ export function layout ({
     </header>
 
     <div class="shell">
-      ${showToc ? `<div class="shell__aside">${tocNav(articles, { url, slugs, currentId, mode: tocMode })}</div>` : ''}
+      ${contents ? `<div class="shell__aside">${contents}</div>` : ''}
       <main class="shell__main" id="main" tabindex="-1">
         ${reconciliationBanner(state, { url, actIndex })}
         ${main}
@@ -170,7 +191,7 @@ export function layout ({
     </div>
 
     <footer class="site-footer">
-      <p>${escapeHtml(info.organization)}${info.jurisdiction ? ` · ${escapeHtml(info.jurisdiction)}` : ''}</p>
+      <p>${escapeHtml(foot.organization ?? info.organization)}${(foot.jurisdiction ?? info.jurisdiction) ? ` · ${escapeHtml(foot.jurisdiction ?? info.jurisdiction)}` : ''}</p>
       <p>
         <a href="${url('')}">Constitution</a> ·
         <a href="${url('amendments/')}">Amendments</a> ·
@@ -178,14 +199,18 @@ export function layout ({
         ${info.contact?.email ? ` · <a href="mailto:${escapeHtml(info.contact.email)}">Contact</a>` : ''}
       </p>
       <p class="site-footer__meta">
-        ${info.legal_status === 'not_adopted'
-          ? `Last adopted version ${escapeHtml(info.adopted_version)} · text as at ${escapeHtml(info.text_as_of)} · not yet adopted`
-          : `Version ${escapeHtml(info.version)} · effective ${escapeHtml(info.effective_from)}`}
-        ${info.license ? ` · ${escapeHtml(info.license)}` : ''}
+        ${foot.status === 'superseded'
+          ? `Version ${escapeHtml(foot.version)} · effective ${escapeHtml(foot.effective_from)} · superseded${foot.superseded_by ? ` by version ${escapeHtml(foot.superseded_by)}` : ''}`
+          : (foot.legal_status === 'not_adopted'
+              ? `Last adopted version ${escapeHtml(foot.adopted_version)} · text as at ${escapeHtml(foot.text_as_of)} · not yet adopted`
+              : `Version ${escapeHtml(foot.version)} · effective ${escapeHtml(foot.effective_from)}`)}
+        ${(foot.license ?? info.license) ? ` · ${escapeHtml(foot.license ?? info.license)}` : ''}
       </p>
+      ${foot !== info ? `<p class="site-footer__meta">The constitution in force is
+        <a href="${url('')}">version ${escapeHtml(info.version)}</a>.</p>` : ''}
     </footer>
 
-    ${showToc ? `<button type="button" class="toc-fab" id="toc-fab" aria-expanded="false" aria-controls="toc-sheet">
+    ${contents ? `<button type="button" class="toc-fab" id="toc-fab" aria-expanded="false" aria-controls="toc-sheet">
       <span aria-hidden="true">☰</span> Contents
     </button>
     <div class="sheet" id="toc-sheet" role="dialog" aria-modal="true" aria-label="Contents" hidden>
@@ -194,7 +219,7 @@ export function layout ({
           <h2 class="sheet__title">Contents</h2>
           <button type="button" class="btn" id="toc-close" aria-label="Close contents">Close</button>
         </div>
-        <div class="sheet__body">${tocNav(articles, { url, slugs, currentId, mode: tocMode })}</div>
+        <div class="sheet__body">${contents}</div>
       </div>
     </div>` : ''}
 

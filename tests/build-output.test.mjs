@@ -382,3 +382,93 @@ test('the marked headings are the minority, whichever kind that is', () => {
   assert.ok(/unless marked/i.test(read('amendments/index.html')),
     'the default must be stated once on the amendments page')
 })
+
+test("every page's canonical is its own URL", () => {
+  // A canonical pointing elsewhere tells search engines the page is a duplicate
+  // of that target and should not be indexed. Archive pages previously pointed
+  // at the current constitution, which would have deindexed the very archives
+  // this project exists to publish. v1.0.0 and v3.0.0 are different documents.
+  const origin = 'https://constitution.stmorg.in'
+  const pages = []
+  const walk = dir => {
+    for (const e of fs.readdirSync(path.join(DIST, dir), { withFileTypes: true })) {
+      const rel = dir ? `${dir}/${e.name}` : e.name
+      if (e.isDirectory()) walk(rel)
+      else if (e.name === 'index.html') pages.push(rel)
+    }
+  }
+  walk('')
+
+  for (const rel of pages) {
+    const html = read(rel)
+    if (html.includes('name="robots" content="noindex')) continue // redirect stubs
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1]
+    assert.ok(canonical, `${rel} has no canonical`)
+    const expected = origin + BASE + rel.replace(/index\.html$/, '')
+    assert.equal(canonical, expected, `${rel} canonical points elsewhere`)
+
+    const ogUrl = html.match(/<meta property="og:url" content="([^"]+)"/)?.[1]
+    if (ogUrl) assert.equal(ogUrl, canonical, `${rel} og:url disagrees with its canonical`)
+  }
+  assert.ok(pages.length >= 25, `expected the full site, saw ${pages.length} pages`)
+})
+
+test('no page asserts a version other than the one it renders', () => {
+  const cur = doc.info.version
+  for (const [rel, version] of [['archive/1.0.0/index.html', '1.0.0'], ['archive/2.0.0/index.html', '2.0.0']]) {
+    if (!exists(rel)) continue
+    const html = read(rel)
+    const foot = html.match(/<p class="site-footer__meta">([\s\S]*?)<\/p>/)[1].replace(/<[^>]+>/g, ' ')
+    assert.ok(foot.includes(version), `${rel} footer does not name version ${version}`)
+    assert.ok(!foot.includes(cur), `${rel} footer asserts the current version ${cur} on an archived document`)
+    assert.ok(/superseded/i.test(foot), `${rel} footer must say superseded`)
+    // The current version may be named, but only as a signpost elsewhere.
+    assert.ok(html.includes('The constitution in force is'), `${rel} should signpost the version in force`)
+  }
+})
+
+test('the archive and amendments pages carry a contents region', () => {
+  // /archive/1.0.0/ is a seventeen-article constitution. Shipping it with no
+  // navigation on any viewport is issue #1 reappearing.
+  for (const rel of ['archive/1.0.0/index.html', 'archive/2.0.0/index.html', 'amendments/index.html']) {
+    if (!exists(rel)) continue
+    const html = read(rel)
+    assert.ok(html.includes('id="toc"'), `${rel} has no contents region`)
+    assert.ok(html.includes('id="toc-fab"'), `${rel} has no mobile contents control`)
+    assert.ok(html.includes('id="toc-sheet"'), `${rel} has no mobile contents sheet`)
+  }
+})
+
+test("an archive page's contents list that version's articles, not the current ones", () => {
+  const html = read('archive/1.0.0/index.html')
+  const nav = html.match(/<nav class="toc"[\s\S]*?<\/nav>/)[0]
+  const anchors = [...new Set([...nav.matchAll(/data-anchor="(art-\d+)"/g)].map(m => m[1]))]
+  const archived = yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/versions/v1.0.0.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
+  assert.equal(anchors.length, archived.articles.length,
+    `contents lists ${anchors.length} articles but v1.0.0 has ${archived.articles.length}`)
+  assert.ok(anchors.length < doc.articles.length, 'sanity: v1.0.0 has fewer articles than the current text')
+  for (const a of archived.articles) {
+    assert.ok(nav.includes(`data-anchor="${a.id}"`), `${a.id} missing from the archive contents`)
+  }
+})
+
+test('the register agrees with the instruments and the text it registers', async () => {
+  const { derive } = await import('../src/sync-register.mjs')
+  const register = yaml.load(fs.readFileSync(path.join(ROOT, 'acts/register.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
+  const derived = derive()
+
+  for (const act of register.acts) {
+    const d = derived.get(act.id)
+    assert.ok(d, `${act.id} is not derivable from acts/text`)
+    assert.equal(act.application_status, d.application_status,
+      `${act.id} declares "${act.application_status}" but the text says "${d.application_status}"`)
+    assert.deepEqual([...(act.provisions ?? []).map(p => p.target)].sort(), [...d.amends].sort(),
+      `${act.id} provisions disagree with the instrument`)
+  }
+
+  // The rendered page must not contradict itself the way it did.
+  const html = read('amendments/index.html')
+  assert.ok(!/No provisions of this Act have been reconciled/.test(html),
+    'the register page still says an Act is unreconciled')
+  assert.ok(!/>\s*pending\s*</.test(html), 'the register page still shows an Act as pending')
+})

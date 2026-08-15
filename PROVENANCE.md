@@ -44,7 +44,7 @@ the last version that demonstrably predates all three Acts.
 | 🟢 | Act 1 of 2024 | `art-9` | substitute | article | Board Members | Board Members | 100.0% | 100.0% | 28.3% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-10` | substitute | article | Intermediate Board Members | Intermediate Board Members | 100.0% | 100.0% | 32.7% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-11` | substitute | article | Units | Units | 99.4% | 100.0% | 26.8% | **ALREADY-APPLIED** |
-| 🟢 | Act 1 of 2024 | `art-12` | substitute | article | Alumini | Alumni | 100.0% | 100.0% | 47.1% | **ALREADY-APPLIED** |
+| 🟢 | Act 1 of 2024 | `art-12` | substitute | article | Alumni | Alumni | 100.0% | 100.0% | 47.1% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-18` | insert | article | Suspension/Termination | Suspension/Termination | 100.0% | 100.0% | 0.0% | **ALREADY-APPLIED** |
 | 🟢 | Act 2 of 2024 | `preamble` | substitute | article | Preamble | Preamble | 100.0% | 100.0% | 30.0% | **ALREADY-APPLIED** |
 | 🟢 | Act 2 of 2024 | `art-3` | substitute | article | Aim and Objectives | Aim and Objectives | 100.0% | 100.0% | 35.0% | **ALREADY-APPLIED** |
@@ -585,8 +585,6 @@ To establish a unit in a college, the following conditions should be satisfied:
 `substitute` · article scope · source `act-1-2024` line 153
 
 Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 47.1%
-
-> Title: current `Alumini` → enacted `Alumni`
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 

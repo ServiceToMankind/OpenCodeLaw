@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
 import { makeUrl, makeAbsolute, slugMap, escapeHtml, summarise, DEFAULT_BASE_PATH, DEFAULT_SITE_ORIGIN } from './lib/paths.mjs'
 import { toPlainText, renderMarkdown } from './lib/markdown.mjs'
-import { layout } from './templates/layout.mjs'
+import { layout, tocSections } from './templates/layout.mjs'
 import { renderArticle, renderPreamble } from './templates/provision.mjs'
 import { generateOgImages } from './og.mjs'
 
@@ -159,7 +159,10 @@ const LEGACY_REDIRECTS = {
   'archives/v2/index.html': 'archive/2.0.0/',
   'archives/v1.html': 'archive/1.0.0/',
   'archives/v2.html': 'archive/2.0.0/',
-  'archives/index.html': 'archive/'
+  'archives/index.html': 'archive/',
+  // Act 1 corrected Article 12's title from "Alumini" to "Alumni", which moves
+  // its page. The old slug redirects rather than 404s.
+  'articles/alumini/index.html': 'articles/alumni/'
 }
 
 function redirectStub (to, absTo) {
@@ -281,9 +284,17 @@ export function build () {
   }
 
   // ---- amendment register ----
+  const amendmentToc = tocSections([
+    ...(register.acts ?? []).slice().sort((a, b) => a.number - b.number)
+      .map(a => ({ id: a.id, label: `Act ${a.number} of ${a.year}` })),
+    { id: 'editorial-headings', label: 'Which headings carry legal force' },
+    { id: 'standing-notes', label: 'Standing notes for a future Act' }
+  ])
+
   written.push(write('amendments/index.html', layout({
     ...shell,
     showToc: false,
+    toc: amendmentToc,
     title: `Amendment register — ${info.title}`,
     description: `Every instrument amending the constitution of ${info.organization}, with dates of assent, the provisions each touches, and the signed Act as published.`,
     canonical: abs('amendments/'),
@@ -339,12 +350,20 @@ export function build () {
       ...shell,
       articles: d.articles,
       slugs: slugMap(d.articles),
-      showToc: false,
+      // This version's own articles, not the current ones. A seventeen-article
+      // constitution with no navigation was issue #1 reappearing.
+      showToc: true,
+      footerInfo: d.info,
       state: null,
       title: `Version ${v} (superseded) — ${info.title}`,
       description: `Version ${v} of the constitution of ${info.organization}, superseded and retained for reference. Not the text in force.`,
-      canonical: abs(''),
-      og: { image: abs('assets/og/archive.png'), imageAlt: `Version ${v}` },
+      // Self-referencing. A canonical pointing at the current constitution tells
+      // search engines this page is a duplicate of a different document and
+      // should not be indexed — which would deindex the archive this project
+      // exists to publish. v1.0.0 and v3.0.0 are different documents.
+      canonical: abs(`archive/${v}/`),
+      extraHead: `<link rel="latest-version" href="${abs('')}">`,
+      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/archive.png'), imageAlt: `Version ${v}` },
       jsonLd: [breadcrumbLd([
         { name: 'Constitution', url: abs('') },
         { name: 'Archive', url: abs('archive/') },

@@ -17,6 +17,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
 // The schema is draft 2020-12; ajv's default entry point only speaks draft-07.
+import { derive as deriveRegisterFacts } from './sync-register.mjs'
 import Ajv from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 
@@ -378,6 +379,43 @@ function checkStatementOfObjects (rep, acts) {
   }
 }
 
+/**
+ * The register must agree with the instruments it registers and the text it
+ * describes. Both halves are derived, so any hand-edit that disagrees fails.
+ *
+ * This exists because the register announced two Acts as "pending" on the same
+ * page that announced reconciliation complete — the applier wrote the
+ * constitution and left the register where it was. A register that can drift
+ * from the text is a register that will.
+ */
+function checkRegisterDrift (rep, acts, register) {
+  let derived
+  try {
+    derived = deriveRegisterFacts()
+  } catch {
+    return // derivation unavailable (e.g. no acts/text); other checks still apply
+  }
+  for (const [i, act] of (register?.acts ?? []).entries()) {
+    const d = derived.get(act.id)
+    if (!d) continue
+    if (act.application_status !== d.application_status) {
+      rep.error(REGISTER_FILE, 'register-drift',
+        `acts[${i}] "${act.id}" declares application_status "${act.application_status}" but the ` +
+        `constitution records ${d.reflected.length} of ${d.amends.length} of its provisions as applied ` +
+        `("${d.application_status}"). Run \`npm run sync-register\`.`,
+        `acts[${i}].application_status`)
+    }
+    const have = (act.provisions ?? []).map(p => p.target).sort().join(',')
+    const want = d.provisions.map(p => p.target).sort().join(',')
+    if (have !== want) {
+      rep.error(REGISTER_FILE, 'register-drift',
+        `acts[${i}] "${act.id}" lists provisions for [${have || 'none'}] but the instrument amends ` +
+        `[${want}]. Run \`npm run sync-register\`.`,
+        `acts[${i}].provisions`)
+    }
+  }
+}
+
 function checkRegister (rep, register, docs) {
   const file = REGISTER_FILE
   const acts = register?.acts ?? []
@@ -399,6 +437,7 @@ function checkRegister (rep, register, docs) {
   }
 
   checkStatementOfObjects(rep, acts)
+  checkRegisterDrift(rep, acts, register)
 
   // Act references resolve against the live constitution, which is the only
   // document an Act can amend.

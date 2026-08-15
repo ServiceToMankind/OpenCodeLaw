@@ -201,7 +201,17 @@ export function applyAct (actId, { dryRun = false } = {}) {
       insertArticle(target, doc, p.text, p.enacted_title, actId)
       applied.push(`${target} inserted`)
     } else if (alreadyApplied) {
-      applied.push(`${target} already applied`)
+      // Content already matches, but the Act may still restate the heading.
+      // Article 12's text was applied by hand before this rebuild while its
+      // title stayed "Alumini"; skipping the whole provision on a content match
+      // left the Act's own correction unapplied.
+      if (p.enacted_title && p.enacted_title !== node.title) {
+        applied.push(`${target} retitled ${JSON.stringify(node.title)} -> ${JSON.stringify(p.enacted_title)}`)
+        node.title = p.enacted_title
+        node.title_source = 'enacted'
+      } else {
+        applied.push(`${target} already applied`)
+      }
     } else if (p.scope === 'clause') {
       applyClauseEdits(target, node, p.text)
       // A clause-scope Act still restates the article heading above its

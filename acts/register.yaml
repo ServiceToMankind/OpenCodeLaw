@@ -4,7 +4,7 @@ acts:
     year: 2024
     title: First Constitution Amendment Act, 2024
     short_title: Membership Act, 2024
-    application_status: partially-applied
+    application_status: applied
     assent_date: "2024-05-03"
     passed_date: "2024-05-02"
     assented_by: Internal Compliance Committee
@@ -30,12 +30,26 @@ acts:
       complete: false
       note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
     amends:
+      - art-6
+      - art-7
       - art-9
       - art-10
       - art-11
       - art-12
       - art-18
     provisions:
+      - target: art-6
+        operation: substitute
+        scope: clause
+        source_lines: 18-34
+        clauses: 1,2,3,4,5
+        note: Act restates the title as "STM Roles".
+      - target: art-7
+        operation: substitute
+        scope: clause
+        source_lines: 35-54
+        clauses: 4,6
+        note: Act restates the title as "Membership".
       - target: art-9
         operation: substitute
         scope: article
@@ -65,7 +79,7 @@ acts:
     number: 2
     year: 2024
     title: Second Constitution Amendment Act, 2024
-    application_status: pending
+    application_status: applied
     assent_date: "2024-05-03"
     passed_date: "2024-05-02"
     assented_by: Internal Compliance Committee
@@ -102,13 +116,77 @@ acts:
         operative_source_lines: 105-105
         statement_of_objects: Article 15 has been inserted to incorporate processes for both voluntary and involuntary exit.
         statement_source_lines: 129-130
-        note: The operative heading calls this an amendment; the Statement of Objects calls it an insertion. Article 15 already exists as Resignation. Open as RECONCILIATION.md Q4.
+        note: The operative heading calls this an amendment; the Statement of Objects calls it an insertion. Article 15 already exists as Resignation. RESOLVED by convention C1 — a Statement of Objects is explanatory and never a source of authority, so the operative heading governs and this is an amendment renaming Article 15 to Exit Process. The discrepancy stays on record; see RECONCILIATION.md Q4.
+    amends:
+      - preamble
+      - art-3
+      - art-4
+      - art-5
+      - art-8
+      - art-16
+      - art-17
+      - art-14
+      - art-20
+      - art-15
+    provisions:
+      - target: preamble
+        operation: substitute
+        scope: article
+        source_lines: 17-23
+        note: Act restates the title as "Preamble".
+      - target: art-3
+        operation: substitute
+        scope: article
+        source_lines: 24-29
+        note: Act restates the title as "Aim and Objectives".
+      - target: art-4
+        operation: substitute
+        scope: article
+        source_lines: 30-35
+        note: Act restates the title as "Mission statement".
+      - target: art-5
+        operation: substitute
+        scope: article
+        source_lines: 36-46
+        note: Act restates the title as "Vision Statement".
+      - target: art-8
+        operation: substitute
+        scope: article
+        source_lines: 47-71
+        note: Act restates the title as "Internship".
+      - target: art-16
+        operation: substitute
+        scope: clause
+        source_lines: 72-82
+        clauses: "3"
+        note: Act restates the title as "Amendments".
+      - target: art-17
+        operation: substitute
+        scope: clause
+        source_lines: 83-89
+        clauses: "1"
+        note: Act restates the title as "Dissolution".
+      - target: art-14
+        operation: substitute
+        scope: article
+        source_lines: 90-96
+        note: Act restates the title as "Leaves".
+      - target: art-20
+        operation: insert
+        scope: article
+        source_lines: 97-104
+        note: Act restates the title as "Meetings and Activities".
+      - target: art-15
+        operation: substitute
+        scope: article
+        source_lines: 105-113
+        note: Act restates the title as "Exit Process".
   - id: act-3-2024
     number: 3
     year: 2024
     title: Third Constitution Amendment Act, 2024
     short_title: Finance Act, 2024
-    application_status: pending
+    application_status: applied
     assent_date: "2024-05-03"
     passed_date: "2024-05-02"
     assented_by: Internal Compliance Committee
@@ -133,3 +211,17 @@ acts:
       assent_date: "2024-05-03"
       complete: false
       note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
+    amends:
+      - art-13
+      - art-21
+    provisions:
+      - target: art-13
+        operation: substitute
+        scope: article
+        source_lines: 18-31
+        note: Act restates the title as "Annual Report".
+      - target: art-21
+        operation: insert
+        scope: article
+        source_lines: 32-51
+        note: Act restates the title as "Financial Management".
