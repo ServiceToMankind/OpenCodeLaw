@@ -22,7 +22,8 @@
     "dev": "node src/build.mjs --watch --serve",
     "spec": "node src/gen-spec.mjs",
     "provenance": "node src/provenance.mjs",
-    "linkcheck": "node src/linkcheck.mjs"
+    "linkcheck": "node src/linkcheck.mjs",
+    "test:e2e": "node --test tests/*.e2e.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -42,5 +43,8 @@
     "yaml",
     "static-site",
     "legislation"
-  ]
+  ],
+  "devDependencies": {
+    "puppeteer-core": "^25.7.0"
+  }
 }

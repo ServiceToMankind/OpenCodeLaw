@@ -244,11 +244,11 @@ a { color: var(--accent-2); }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --accent-ink: #cc99ff;                   /* hsl(270 100% 80%), 5.8:1 on #333 */
+    --accent-ink: #d9b3ff;                   /* hue 270. 7.1:1 on #333333, 4.9:1 on the accent wash a pressed control sits on */
     --on-accent: #333333;
     --link-ink: #7cbcff;                     /* 6.3:1 on #333333, 5.0:1 on the banner wash, hue 210 */
     --action-ink: #e0a878;                   /* 6.0:1 on #333333, hue 28       */
-    --ring: var(--focus, #cc99ff);
+    --ring: var(--focus, #d9b3ff);
 
     --accent-wash: rgba(204, 153, 255, 0.13);
     --action-wash: rgba(192, 117, 52, 0.22);
@@ -258,11 +258,11 @@ a { color: var(--accent-2); }
 /* Repeated verbatim so an explicit toggle beats the system preference in both
    directions — the inline head script sets data-theme before first paint. */
 :root[data-theme="dark"] {
-  --accent-ink: #cc99ff;
+  --accent-ink: #d9b3ff;
   --on-accent: #333333;
   --link-ink: #7cbcff;
   --action-ink: #e0a878;
-  --ring: var(--focus, #cc99ff);
+  --ring: var(--focus, #d9b3ff);
 
   --accent-wash: rgba(204, 153, 255, 0.13);
   --action-wash: rgba(192, 117, 52, 0.22);
