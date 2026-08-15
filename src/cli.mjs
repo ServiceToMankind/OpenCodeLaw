@@ -25,6 +25,7 @@ opencodelaw — a YAML-driven renderer for organizational constitutions
   opencodelaw bill new [--type amendment|corrigendum|revision] [--name <slug>]
   opencodelaw bill validate <file>    schema, targets, threshold, and the before/after diff
   opencodelaw bill render <file>      the instrument in house style (text and HTML)
+  opencodelaw bill ballot <file>      resolution sheets, one per approving body
   opencodelaw bill submit <file>      ICC: assign a bill number, status -> submitted
   opencodelaw act enact <file> --signed-pdf <path> [--signed-by <name>]
   opencodelaw act apply <file> [--dry-run]

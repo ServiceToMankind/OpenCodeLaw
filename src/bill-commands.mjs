@@ -58,6 +58,22 @@ export async function runBillCommand (group, args) {
       return
     }
 
+    if (group === 'bill' && sub === 'ballot') {
+      const { ballotDocument, ballotGuard } = await import('./ballot.mjs')
+      const { loadConstitution } = await import('./bill.mjs')
+      const bill = loadBill(need())
+      const blocked = ballotGuard(bill)
+      if (blocked) { console.error(blocked); process.exit(1) }
+      const c = loadConstitution()
+      const out = file.replace(/\.ya?ml$/, '-ballot.html')
+      fs.writeFileSync(out, ballotDocument(bill, { info: c.info }))
+      console.log(`Resolution sheets written to ${path.relative(ROOT, out)}`)
+      console.log('  One page per body: board, intermediate board, units.')
+      console.log('  Print it, take it to the meetings, and read the resolution sentence — hash and all —')
+      console.log('  into the minutes of each.')
+      return
+    }
+
     if (group === 'bill' && sub === 'submit') {
       const r = billSubmit(need(), { actor: flag(rest, 'actor', 'ICC') })
       console.log(`Submitted as Bill ${r.number} of ${r.year}.`)

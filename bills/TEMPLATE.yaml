@@ -97,27 +97,60 @@ operations:
 # `abstain` is excluded from the threshold — 16(3) says "present and voting".
 # ---------------------------------------------------------------------------
 approvals:
+  # One entry per body. The ICC fills these in from the signed record.
+  #
+  # `bill_sha256` is the substantive hash of the bill AS VOTED. `bill validate`
+  # prints it; the presiding officer reads it into the minutes. If the bill is
+  # edited afterwards the hash moves, the approval is void, and that body must
+  # resolve again — including when your own operations were untouched, because
+  # a provision can become contradictory purely because other articles moved.
+  #
+  # Get the text right before you circulate.
+  #
+  # `evidence.path` is a file in this repository. A live link is never evidence:
+  # a URL is mutable, unattributable, and dies with the platform.
   - body: board
-    date: ~
+    meeting:
+      date: ~
+      mode: in-person                   # in-person | online | hybrid
+      place: ""
+      presiding: ""
     present: ~
     for: ~
     against: ~
-    abstain: ~
-    evidence: ~                           # minutes reference — required to enact
+    abstain: ~                          # excluded from the threshold
+    bill_sha256: ~
+    # Added by the ICC once the record exists. Left out of a draft entirely:
+    # an empty path and an empty checksum are not an unfilled form, they are a
+    # claim that a record exists at "" — which is why the validator rejects it.
+    #
+    # evidence:
+    #   kind: minutes                   # minutes | ballot-tally | poll-export
+    #   path: bills/2026/evidence/bill-1-2026-board-minutes.pdf
+    #   sha256: <64 hex characters — `bill validate` will tell you if it is wrong>
+    recorded_by: ""
   - body: intermediate-board
-    date: ~
+    meeting: {date: ~, mode: in-person, place: "", presiding: ""}
     present: ~
     for: ~
     against: ~
     abstain: ~
-    evidence: ~
+    bill_sha256: ~
+    # evidence: {kind: minutes, path: ..., sha256: ...}
+    recorded_by: ""
   - body: units
-    date: ~
+    meeting: {date: ~, mode: online, place: "", presiding: ""}
     present: ~
     for: ~
     against: ~
     abstain: ~
-    evidence: ~
+    bill_sha256: ~
+    # Units vote online where the by-laws permit it. A poll is a voting
+    # MECHANISM, not a record: the evidence is a static export of the result,
+    # attested by the ICC coordinator, archived and hashed like minutes. The
+    # poll's URL proves nothing.
+    # evidence: {kind: poll-export, path: ..., sha256: ...}
+    recorded_by: ""
 
 # ---------------------------------------------------------------------------
 # ENACTMENT — filled in by the ICC when the Act is signed. Leave it alone.

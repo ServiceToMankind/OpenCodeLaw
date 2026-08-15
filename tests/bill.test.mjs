@@ -304,7 +304,7 @@ test('enactment is refused when a body is missing — all three are required', a
 test('enactment is refused when a body approved with no minutes behind it', async () => {
   // Q13 against the 2024 Acts: an approval with no evidence is an assertion.
   const r = await validate(variant(b => {
-    b.approvals.find(a => a.body === 'intermediate-board').evidence = null
+    delete b.approvals.find(a => a.body === 'intermediate-board').evidence
   }))
   const e = errorFor(r, 'approval-evidence-missing')
   assert.ok(e, detail(r))
@@ -346,9 +346,9 @@ test('tally computes each body and the pool, and abstentions are outside the den
   assert.equal(THRESHOLD, 2 / 3)
 
   const t = tally([
-    { body: 'board', present: 30, for: 19, against: 5, abstain: 6, evidence: 'Board minutes 1' },
-    { body: 'intermediate-board', present: 12, for: 8, against: 2, abstain: 2, evidence: 'IB minutes 1' },
-    { body: 'units', present: 15, for: 9, against: 3, abstain: 3, evidence: 'Unit poll 1' }
+    { body: 'board', present: 30, for: 19, against: 5, abstain: 6, evidence: { kind: 'minutes', path: 'Board minutes 1', sha256: 'x'.repeat(64) } },
+    { body: 'intermediate-board', present: 12, for: 8, against: 2, abstain: 2, evidence: { kind: 'minutes', path: 'IB minutes 1', sha256: 'x'.repeat(64) } },
+    { body: 'units', present: 15, for: 9, against: 3, abstain: 3, evidence: { kind: 'minutes', path: 'Unit poll 1', sha256: 'x'.repeat(64) } }
   ])
   const board = t.perBody.find(b => b.body === 'board')
 
@@ -376,11 +376,11 @@ test('tally computes each body and the pool, and abstentions are outside the den
   assert.deepEqual(t.missingEvidence, [])
 
   // Exactly two thirds carries: 16(3) says 2/3, not more than 2/3.
-  const exact = tally(REQUIRED_BODIES.map(body => ({ body, for: 6, against: 3, abstain: 4, evidence: 'm' })))
+  const exact = tally(REQUIRED_BODIES.map(body => ({ body, for: 6, against: 3, abstain: 4, evidence: { kind: 'minutes', path: 'm', sha256: 'x'.repeat(64) } })))
   assert.equal(exact.passes, true)
 
   // One vote fewer does not.
-  const short = tally(REQUIRED_BODIES.map(body => ({ body, for: 5, against: 3, abstain: 4, evidence: 'm' })))
+  const short = tally(REQUIRED_BODIES.map(body => ({ body, for: 5, against: 3, abstain: 4, evidence: { kind: 'minutes', path: 'm', sha256: 'x'.repeat(64) } })))
   assert.equal(short.passes, false)
   assert.deepEqual(short.failedBodies, REQUIRED_BODIES)
 
@@ -444,4 +444,100 @@ test('an operation may not take its authority from the Statement of Objects and 
   const e = errorFor(r, 'sor-as-authority')
   assert.ok(e, detail(r))
   assert.match(e.message, /never a source of authority/)
+})
+
+// --- the evidence model ----------------------------------------------------
+
+test('evidence must be a file in the repository, and its checksum must match', async () => {
+  // A live link is never evidence: mutable, unattributable, and dead when the
+  // platform is. The record is archived beside the instrument it approves.
+  const missing = await validate(variant(b => {
+    b.approvals[0].evidence = { kind: 'minutes', path: 'bills/2026/evidence/nope.pdf', sha256: 'a'.repeat(64) }
+  }))
+  assert.ok(codes(missing).includes('evidence-missing'), detail(missing))
+  assert.match(errorFor(missing, 'evidence-missing').message, /live link is never evidence/i)
+
+  const wrongHash = await validate(variant(b => { b.approvals[0].evidence.sha256 = 'b'.repeat(64) }))
+  assert.ok(codes(wrongHash).includes('evidence-hash-mismatch'), detail(wrongHash))
+  assert.match(errorFor(wrongHash, 'evidence-hash-mismatch').message, /not the document that was filed/i)
+})
+
+test('a vote must be bound to the text it was cast on', async () => {
+  const unbound = await validate(variant(b => { b.approvals[0].bill_sha256 = null }))
+  assert.ok(codes(unbound).includes('approval-unbound'), detail(unbound))
+  assert.match(errorFor(unbound, 'approval-unbound').message, /not bound to any particular text/i)
+})
+
+test('editing a bill voids every recorded approval, operations untouched or not', async () => {
+  const { substantiveHash } = await import('../src/bill.mjs')
+
+  // (a) an operation changes
+  const edited = await validate(variant(b => { b.operations[0].text += ' One more sentence.' }))
+  const e = errorFor(edited, 'approval-stale')
+  assert.ok(e, detail(edited))
+  for (const body of ['board', 'intermediate-board', 'units']) {
+    assert.match(e.message, new RegExp(body), `${body} must be named as voided`)
+  }
+  assert.match(e.message, /move them to history and re-collect/i)
+
+  // (b) THE HARD EDGE: base_version moves, operations byte-identical. The
+  // approvals void anyway. Whether a rebase is semantically clean requires
+  // reasoning about cross-provision interactions, which no tool can adjudicate
+  // honestly — so there is deliberately no clean-rebase exemption.
+  const before = substantiveHash(loadBill(BILL_FILE))
+  const rebased = structuredClone(loadBill(BILL_FILE))
+  rebased.bill.base_version = '2.2.0'
+  assert.notEqual(substantiveHash(rebased), before,
+    'base_version is inside the hash, so a rebase moves it even when operations do not change')
+})
+
+test('a joint sitting may share one record, but the tallies stay per body', async () => {
+  const shared = await validate(variant(b => {
+    const ev = structuredClone(b.approvals[0].evidence)
+    for (const a of b.approvals) a.evidence = structuredClone(ev)
+  }))
+  assert.deepEqual(codes(shared), [], detail(shared))
+
+  // Per-body tallies are still what the stricter reading needs.
+  const t = shared.tally
+  assert.equal(t.perBody.length, 3)
+  assert.ok(t.perBody.every(x => x.voting > 0), 'each body must carry its own tally')
+})
+
+test('the resolution sentence carries the hash the meeting reads aloud', async () => {
+  const { resolutionSentence, substantiveHash } = await import('../src/bill.mjs')
+  const b = loadBill(BILL_FILE)
+  const line = resolutionSentence(b)
+  assert.match(line, /^This meeting resolves on Bill \d+ of \d{4}, substantive hash [a-f0-9]{64}\.$/)
+  assert.ok(line.includes(substantiveHash(b)))
+})
+
+test('a resolution sheet renders only once a bill is scheduled', async () => {
+  const { ballotGuard, ballotDocument } = await import('../src/ballot.mjs')
+  const { loadConstitution } = await import('../src/bill.mjs')
+
+  for (const status of ['draft', 'submitted', 'under-review', 'returned']) {
+    const b = structuredClone(loadBill(BILL_FILE)); b.status = status
+    const g = ballotGuard(b)
+    assert.ok(g, `${status} should be refused a ballot`)
+    assert.match(g, /circulation is the freeze point/i)
+  }
+  for (const status of ['scheduled', 'approved', 'enacted']) {
+    const b = structuredClone(loadBill(BILL_FILE)); b.status = status
+    assert.equal(ballotGuard(b), null, `${status} should render`)
+  }
+
+  const b = structuredClone(loadBill(BILL_FILE)); b.status = 'scheduled'
+  const html = ballotDocument(b, { info: loadConstitution().info })
+  assert.equal((html.match(/class="sheet"/g) ?? []).length, 3, 'one sheet per body')
+  const { substantiveHash } = await import('../src/bill.mjs')
+  assert.ok(html.includes(substantiveHash(b)), 'the sheet must carry the hash')
+  for (const body of ['Board', 'Intermediate Board', 'Units']) {
+    assert.ok(html.includes(body), `no sheet for ${body}`)
+  }
+  // Collapse whitespace: the copy is wrapped in the source, so these phrases
+  // span newlines in the rendered HTML.
+  const flat = html.replace(/\s+/g, ' ')
+  assert.match(flat, /present and voting/i)
+  assert.match(flat, /individual members' votes are not published/i)
 })

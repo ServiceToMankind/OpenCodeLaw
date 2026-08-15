@@ -57,7 +57,9 @@ export function tally (approvals = []) {
       voting,
       ratio,
       passes: ratio != null && ratio >= THRESHOLD,
-      evidence: a?.evidence ?? null
+      evidence: a?.evidence ?? null,
+      billSha256: a?.bill_sha256 ?? null,
+      meeting: a?.meeting ?? null
     }
   })
 
@@ -73,7 +75,7 @@ export function tally (approvals = []) {
     // The stricter reading governs.
     passes: complete && perBody.every(b => b.passes),
     missingBodies: perBody.filter(b => !b.recorded).map(b => b.body),
-    missingEvidence: perBody.filter(b => b.recorded && !b.evidence).map(b => b.body),
+    missingEvidence: perBody.filter(b => b.recorded && !b.evidence?.path).map(b => b.body),
     failedBodies: perBody.filter(b => b.recorded && b.voting != null && !b.passes).map(b => b.body)
   }
 }
@@ -237,6 +239,51 @@ export function validateBill (file, { constitution } = {}) {
     }
   }
 
+  // --- approvals: evidence on disk, and bound to the text that was voted on --
+  const hash = substantiveHash(bill)
+  const stale = []
+  for (const [i, a] of (bill.approvals ?? []).entries()) {
+    const at = `approvals[${i}] (${a.body})`
+    const voted = a.for != null || a.against != null
+
+    if (a.evidence) {
+      const abs = path.join(ROOT, a.evidence.path)
+      if (!fs.existsSync(abs)) {
+        p.error('evidence-missing',
+          `${at}: the record of resolution ${a.evidence.path} is not in the repository. A live link ` +
+          'is never evidence — archive the signed minutes (or the attested poll export) beside the ' +
+          'bill and record its path and checksum.', at)
+      } else if (a.evidence.sha256 && fileSha256(abs) !== a.evidence.sha256) {
+        p.error('evidence-hash-mismatch',
+          `${at}: ${a.evidence.path} does not match the checksum recorded with it. The archived ` +
+          'record is not the document that was filed.', at)
+      }
+    } else if (voted) {
+      p.error('evidence-missing',
+        `${at}: a tally is recorded with no signed record of resolution. An approval without ` +
+        'evidence is an assertion.', at)
+    }
+
+    // The voting rule: an approval binds to the text as voted, never to the title.
+    if (voted && a.bill_sha256 && a.bill_sha256 !== hash) stale.push({ body: a.body, was: a.bill_sha256 })
+    else if (voted && !a.bill_sha256) {
+      p.error('approval-unbound',
+        `${at}: no bill_sha256 recorded, so this vote is not bound to any particular text. ` +
+        `The hash to record is ${hash}.`, at)
+    }
+  }
+
+  if (stale.length) {
+    p.error('approval-stale',
+      `edit recorded — approvals by ${stale.map(s2 => s2.body).join(', ')} are void; move them to ` +
+      'history and re-collect. ' +
+      stale.map(s2 => `${s2.body} resolved on ${s2.was.slice(0, 12)}…`).join('; ') +
+      `, the bill is now ${hash.slice(0, 12)}…. A rebase voids every approval, including when the ` +
+      "bill's own operations are untouched: a provision can become contradictory purely because " +
+      'other articles moved, and whether a rebase is semantically clean is not something a tool ' +
+      'can adjudicate honestly.', 'approvals')
+  }
+
   // --- lifecycle guards ----------------------------------------------------
   const t = tally(bill.approvals)
   if (['enacted', 'applied'].includes(bill.status)) {
@@ -353,6 +400,10 @@ export function report ({ problems, manifest, tally: t, bill }) {
   out.push(`  ${b.number ? `Bill ${b.number} of ${b.year}` : 'unnumbered draft'} · ${b.type} · status ${bill.status}`)
   out.push(`  moved by ${b.moved_by?.name ?? '—'} · against constitution ${b.base_version}`)
   out.push('')
+  out.push(`  ${resolutionSentence(bill)}`)
+  out.push('  Read that sentence into the minutes of every approving body: a vote binds to the')
+  out.push('  hash, not to the title. Editing the bill afterwards voids the approvals.')
+  out.push('')
   out.push(`Operations (${manifest.length}):`)
   for (const m of manifest) {
     out.push(`  ${m.id}  ${m.operation} ${m.target} (${m.scope})${m.unchanged ? '  — no change' : ''}`)
@@ -368,7 +419,10 @@ export function report ({ problems, manifest, tally: t, bill }) {
       const state = !b2.recorded ? 'not recorded'
         : b2.voting == null ? 'no tally'
           : `${b2.for}/${b2.voting} voting = ${(b2.ratio * 100).toFixed(1)}% ${b2.passes ? 'PASS' : 'BELOW 2/3'}`
-      out.push(`  ${b2.body.padEnd(19)} ${state}${b2.recorded && !b2.evidence ? '  (no minutes reference)' : ''}`)
+      const flags = []
+      if (b2.recorded && !b2.evidence?.path) flags.push('no record of resolution')
+      if (b2.billSha256 && b2.billSha256 !== substantiveHash(bill)) flags.push('VOID — voted on different text')
+      out.push(`  ${b2.body.padEnd(19)} ${state}${flags.length ? '  (' + flags.join('; ') + ')' : ''}`)
     }
     if (t.pooled.ratio != null) {
       out.push(`  pooled              ${t.pooled.for}/${t.pooled.voting} = ${(t.pooled.ratio * 100).toFixed(1)}% ${t.pooled.passes ? 'PASS' : 'BELOW 2/3'}`)
