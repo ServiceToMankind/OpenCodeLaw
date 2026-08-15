@@ -105,7 +105,11 @@ export function containment (needle, haystack) {
 
   let best = 0
   const width = n.length
-  const stride = Math.max(1, Math.floor(width / 8))
+  // Stride must be fine enough to land on the true alignment. At width/8 the
+  // window straddled the clause boundary and scored five exact-match Article 6
+  // clauses at 90-94%, which reads in PROVENANCE.md as unexplained drift.
+  // Token-by-token wherever the haystack is small enough to afford it.
+  const stride = h.length <= 4000 ? 1 : Math.max(1, Math.floor(width / 16))
   for (let start = 0; start + 1 <= h.length; start += stride) {
     for (const w of [Math.round(width * 0.85), width, Math.round(width * 1.2)]) {
       const window = h.slice(start, start + w)

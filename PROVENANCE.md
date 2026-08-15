@@ -8,9 +8,9 @@ the text the Act prescribes, and a verdict. Regenerate with `npm run provenance`
 
 | Verdict | Meaning | Count |
 |---|---|---|
-| 🟢 ALREADY-APPLIED | Current text matches the Act's prescribed text | 21 |
+| 🟢 ALREADY-APPLIED | Current text matches the Act's prescribed text | 24 |
 | 🟡 NOT-APPLIED | Current text is the pre-Act text, or the insertion has not been made | 0 |
-| 🔴 DIVERGENT | Matches neither — edited outside the amendment process | 3 |
+| 🔴 DIVERGENT | Matches neither — edited outside the amendment process | 0 |
 
 ## Method
 
@@ -30,29 +30,20 @@ a provision is not reported as changed merely for being formatted differently.
 Match threshold 0.94. Pre-Act baseline is `constitution/versions/v1.0.0.yaml`,
 the last version that demonstrably predates all three Acts.
 
-## 🔴 DIVERGENT — stop here
-
-3 provision(s) match neither the Act nor the pre-Act text. These are not
-classified further and must not be resolved without a decision from the board.
-
-- **art-6 clause (2)** (Act 1 of 2024) — reads as the Act 93.3%, the Act's words are 93.3% present, 73.4% unchanged since v1.
-- **art-6 clause (4)** (Act 1 of 2024) — reads as the Act 93.8%, the Act's words are 93.8% present, 73.4% unchanged since v1.
-- **art-6 clause (5)** (Act 1 of 2024) — reads as the Act 90.9%, the Act's words are 90.9% present, 73.4% unchanged since v1.
-
 ## Summary
 
 | | Act | Provision | Op | Scope | Current title | Act title | Reads as Act | Act words present | Unchanged since v1 | Verdict |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 🟢 | Act 1 of 2024 | `art-6` (1) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
-| 🔴 | Act 1 of 2024 | `art-6` (2) | substitute | clause | STM Roles | STM Roles | 93.3% | 93.3% | 73.4% | **DIVERGENT** |
+| 🟢 | Act 1 of 2024 | `art-6` (2) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-6` (3) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
-| 🔴 | Act 1 of 2024 | `art-6` (4) | substitute | clause | STM Roles | STM Roles | 93.8% | 93.8% | 73.4% | **DIVERGENT** |
-| 🔴 | Act 1 of 2024 | `art-6` (5) | substitute | clause | STM Roles | STM Roles | 90.9% | 90.9% | 73.4% | **DIVERGENT** |
+| 🟢 | Act 1 of 2024 | `art-6` (4) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
+| 🟢 | Act 1 of 2024 | `art-6` (5) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-7` (4) | substitute | clause | Membership | Membership | 100.0% | 100.0% | 76.2% | **ALREADY-APPLIED** |
-| 🟢 | Act 1 of 2024 | `art-7` (6) | substitute | clause | Membership | Membership | 97.4% | 97.4% | 76.2% | **ALREADY-APPLIED** |
+| 🟢 | Act 1 of 2024 | `art-7` (6) | substitute | clause | Membership | Membership | 100.0% | 100.0% | 76.2% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-9` | substitute | article | Board Members | Board Members | 100.0% | 100.0% | 28.3% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-10` | substitute | article | Intermediate Board Members | Intermediate Board Members | 100.0% | 100.0% | 32.7% | **ALREADY-APPLIED** |
-| 🟢 | Act 1 of 2024 | `art-11` | substitute | article | Units | Units | 99.4% | 99.4% | 26.8% | **ALREADY-APPLIED** |
+| 🟢 | Act 1 of 2024 | `art-11` | substitute | article | Units | Units | 99.4% | 100.0% | 26.8% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-12` | substitute | article | Alumini | Alumni | 100.0% | 100.0% | 47.1% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-18` | insert | article | Suspension/Termination | Suspension/Termination | 100.0% | 100.0% | 0.0% | **ALREADY-APPLIED** |
 | 🟢 | Act 2 of 2024 | `preamble` | substitute | article | Preamble | Preamble | 100.0% | 100.0% | 30.0% | **ALREADY-APPLIED** |
@@ -114,11 +105,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🔴 art-6 clause (2) — DIVERGENT
+#### 🟢 art-6 clause (2) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **93.3%** · Act's words present 93.3% · unchanged since v1 73.4%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -199,11 +190,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🔴 art-6 clause (4) — DIVERGENT
+#### 🟢 art-6 clause (4) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **93.8%** · Act's words present 93.8% · unchanged since v1 73.4%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -242,11 +233,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🔴 art-6 clause (5) — DIVERGENT
+#### 🟢 art-6 clause (5) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **90.9%** · Act's words present 90.9% · unchanged since v1 73.4%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -331,7 +322,7 @@ Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 
 
 `substitute` · clause scope · source `act-1-2024` line 35
 
-Reads as the Act **97.4%** · Act's words present 97.4% · unchanged since v1 76.2%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 76.2%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -528,7 +519,7 @@ The IBM are as follows:
 
 `substitute` · article scope · source `act-1-2024` line 121
 
-Reads as the Act **99.4%** · Act's words present 99.4% · unchanged since v1 26.8%
+Reads as the Act **99.4%** · Act's words present 100.0% · unchanged since v1 26.8%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -1054,10 +1045,10 @@ Applying an amendment already in force would duplicate or revert a provision, so
 🟡 NOT-APPLIED row must be confirmed before Phase 3 applies anything.
 
 - [ ] 🟢 `art-6(1)` — Act 1 of 2024 — ALREADY-APPLIED
-- [ ] 🔴 `art-6(2)` — Act 1 of 2024 — DIVERGENT
+- [ ] 🟢 `art-6(2)` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-6(3)` — Act 1 of 2024 — ALREADY-APPLIED
-- [ ] 🔴 `art-6(4)` — Act 1 of 2024 — DIVERGENT
-- [ ] 🔴 `art-6(5)` — Act 1 of 2024 — DIVERGENT
+- [ ] 🟢 `art-6(4)` — Act 1 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-6(5)` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-7(4)` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-7(6)` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-9` — Act 1 of 2024 — ALREADY-APPLIED
