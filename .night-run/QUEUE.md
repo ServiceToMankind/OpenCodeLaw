@@ -19,7 +19,7 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 
 - [x] L1 `acts/register.yaml` — all three Acts; Act 1 provisions for arts. 9,10,11,12,18 only
 - [x] L2 **DEVIATED** — Act 1 supplies no article-level body for art-11; empty `content` key removed instead. See REPORT.
-- [ ] L3 `amended_by: [act-1-2024]` on arts. 9,10,11,12,18 only
+- [x] L3 `amended_by: [act-1-2024]` on arts. 9,10,11,12,18 only
 - [x] L4 `version: 3.0.0-alpha.1` + `reconciliation_state` block
 - [x] L5 Validation green on the two remaining known items only
 
@@ -81,4 +81,4 @@ Run `node .night-run/tripwire.mjs` before **every** commit. Red = stop everythin
 
 ## R — Report
 
-- [ ] R1 `.night-run/REPORT.md`
+- [x] R1 `.night-run/REPORT.md`
