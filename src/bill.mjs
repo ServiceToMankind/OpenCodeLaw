@@ -383,3 +383,53 @@ export function report ({ problems, manifest, tally: t, bill }) {
   out.push(problems.errors.length ? `FAILED — ${problems.errors.length} error(s)` : `OK — ${problems.warnings.length} warning(s)`)
   return out.join('\n')
 }
+
+// ---------------------------------------------------------------------------
+// The substantive hash
+// ---------------------------------------------------------------------------
+
+/**
+ * The fields a body actually votes on. Everything else — number, status,
+ * history, approvals, enactment — is clerking that changes after drafting, and
+ * including it would make a vote go stale for administrative reasons.
+ */
+export const SUBSTANTIVE_FIELDS = ['short_title', 'type', 'base_version', 'objects_and_reasons', 'operations']
+
+/** RFC 8785-style canonical JSON: sorted keys, no insignificant whitespace. */
+export function canonicalJson (value) {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value ?? null)
+  if (Array.isArray(value)) return '[' + value.map(canonicalJson).join(',') + ']'
+  return '{' + Object.keys(value).sort()
+    .filter(k => value[k] !== undefined)
+    .map(k => JSON.stringify(k) + ':' + canonicalJson(value[k]))
+    .join(',') + '}'
+}
+
+/**
+ * sha256 over the canonical form of what the bill actually proposes.
+ *
+ * A vote binds to this, not to "Bill 1 of 2026" — a title is the same string
+ * before and after someone edits an operation, and an approval recorded against
+ * a title would silently survive a change to the text it approved.
+ */
+export function substantiveHash (bill) {
+  const subject = {
+    short_title: bill?.bill?.short_title ?? null,
+    type: bill?.bill?.type ?? null,
+    base_version: bill?.bill?.base_version ?? null,
+    objects_and_reasons: bill?.objects_and_reasons ?? null,
+    operations: bill?.operations ?? []
+  }
+  return crypto.createHash('sha256').update(canonicalJson(subject), 'utf8').digest('hex')
+}
+
+/** The sentence a meeting reads into its minutes. */
+export function resolutionSentence (bill) {
+  const b = bill.bill
+  const name = b.number ? `Bill ${b.number} of ${b.year}` : `the draft bill "${b.short_title}"`
+  return `This meeting resolves on ${name}, substantive hash ${substantiveHash(bill)}.`
+}
+
+export function fileSha256 (abs) {
+  return crypto.createHash('sha256').update(fs.readFileSync(abs)).digest('hex')
+}

@@ -45,12 +45,11 @@ export async function runBillCommand (group, args) {
       const bill = loadBill(need())
       const { loadConstitution } = await import('./bill.mjs')
       const c = loadConstitution()
-      // House style comes from the constitution, never from the engine.
-      const opts = {
-        organization: c.info.organization,
-        orgYear: flag(rest, 'org-year', 'Fourth'),
-        ...(c.info.instrument ?? {})
-      }
+      // Pass info itself: houseStyle() reads info.instrument (snake_case in the
+      // YAML) and maps it. Spreading the YAML keys at top level looked
+      // equivalent and silently dropped the signatory office and the whole
+      // address footer, because those options are camelCase.
+      const opts = { info: c.info, orgYear: flag(rest, 'org-year', 'Fourth') }
       const base = file.replace(/\.ya?ml$/, '')
       fs.writeFileSync(`${base}.txt`, renderBillText(bill, opts))
       fs.writeFileSync(`${base}.html`, renderBillHtml(bill, opts))

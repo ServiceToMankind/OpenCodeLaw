@@ -1446,3 +1446,77 @@ body.is-modal-open {
   vertical-align: 0.28em;
   cursor: help;
 }
+
+
+/* --- /bills/ ------------------------------------------------------------
+   Lifted from bills.mjs, which exported these rules as a <style> string that
+   nothing imported: the page shipped with class attributes and no matching
+   rules, including a focusable overflow container that could never scroll. */
+.bill-year { margin-bottom: var(--space-5, 2.5rem); }
+.bill-note {
+  max-width: var(--measure, 68ch);
+  margin: 0 0 var(--space-3, 1rem);
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+.bill-empty { max-width: var(--measure, 68ch); }
+.bill-new {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--action-ink);
+}
+.bill-text {
+  max-width: var(--measure, 68ch);
+  margin: 0 0 var(--space-3, 1rem);
+  padding: 0.2em 0 0.2em var(--space-3, 1rem);
+  border-left: 3px solid var(--action);
+  font-size: 0.97rem;
+}
+.bill-text p { margin: 0 0 var(--space-2, 0.5rem); }
+.bill-text p:last-child { margin-bottom: 0; }
+.bill-status--enacted, .bill-status--applied { color: var(--accent-ink); background: var(--accent-wash); }
+.bill-status--approved, .bill-status--scheduled { color: var(--action-ink); background: var(--action-wash); }
+.bill-status--rejected, .bill-status--withdrawn, .bill-status--lapsed,
+.bill-status--draft, .bill-status--returned { color: var(--muted); background: transparent; }
+/* A tally is wide by nature; it scrolls inside itself rather than pushing the page sideways. */
+.bill-scroll { overflow-x: auto; margin-bottom: var(--space-3, 1rem); }
+.bill-tally {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 40rem;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.bill-tally th, .bill-tally td {
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+/* Only the minutes reference is prose, so only it wraps. */
+.bill-tally__evidence {
+  display: block;
+  max-width: 14rem;
+  white-space: normal;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.bill-tally thead th {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.bill-tally tbody th { white-space: nowrap; }
+.bill-tally__pooled th, .bill-tally__pooled td {
+  border-top: 2px solid var(--border);
+  border-bottom: 0;
+  color: var(--muted);
+}
+.bill-tally__verdict { white-space: nowrap; font-weight: 600; }
+.bill-tally__verdict--pass { color: var(--accent-ink); }
+.bill-tally__verdict--fail { color: var(--action-ink); }

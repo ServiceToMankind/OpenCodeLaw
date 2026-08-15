@@ -12,29 +12,29 @@
  * application, the art-7 line splice and the fourteen reconciliation questions
  * came from. Inverting it is the whole point of this phase.
  *
- * House style is not invented here. It is copied from the extracted text of the
+ * The LAYOUT is not invented here. It is taken from the extracted text of the
  * 2024 Acts — acts/text/first-…, second-… and third-constitution-amendment-act-
- * 2024.txt — down to the wording of the assent line, the operative item
- * phrasings ("Amendment to Article 13:", "Insertion of new Article 21 - Financial
- * Management:", "Amendment of Preamble:"), the ————— separator, the signature
- * block and the address footer.
+ * 2024.txt — down to the assent line, the operative item phrasings ("Amendment
+ * to Article 13:", "Insertion of new Article 21 - Financial Management:",
+ * "Amendment of Preamble:", "Amendment to Article 6, clause 1,2,3,4 and 5:"),
+ * the restated provision beneath each item, the ————— separator and the name
+ * standing over the office in the signature block.
+ *
+ * The WORDING that belongs to one organisation is not. Committee, signatory
+ * title, Act title pattern, enacting formula and the address footer are CONTENT:
+ * they live in the constitution's `info.instrument` and are passed in —
+ *
+ *   renderBillText(bill, { info: doc.info, orgYear: 2, titles })
+ *
+ * — or given directly as `organization`, `committee`, `signatoryTitle`,
+ * `footer`, `actTitlePattern`, `enactingFormula`, which override the block. A
+ * fork replaces the YAML and the renderer follows without being edited.
  *
  * Two things are deliberately NOT printed:
  *   - `operations[].note` — a drafting note is explanatory, and convention C1
  *     keeps explanation out of operative text.
  *   - approval tallies — Article 16(3) approvals live in the bill record and in
  *     the register, not on the face of the instrument.
- *
- * None of that wording is hardcoded here. House style is CONTENT: it lives in
- * the constitution's `info.instrument` — committee, signatory_title,
- * act_title_pattern, enacting_formula, footer_lines — and is passed in:
- *
- *   renderBillText(bill, { info: doc.info, orgYear: 2, titles })
- *
- * `organization`, `committee`, `signatoryTitle`, `footer`, `actTitlePattern`
- * and `enactingFormula` may also be passed directly and override the block. An
- * organisation adopting this repository replaces the YAML and the renderer
- * follows without being edited.
  */
 import { escapeHtml } from './lib/paths.mjs'
 
@@ -49,7 +49,9 @@ export const PAGE_WIDTH = 90
 export const FOOTER_LINES = Object.freeze([])
 
 export const DEFAULT_ORGANIZATION = ''
-export const DEFAULT_COMMITTEE = 'Internal Compliance Committee'
+// No default: a fork with no info.instrument must not print another
+// organisation's committee on its masthead.
+export const DEFAULT_COMMITTEE = ''
 export const DEFAULT_SIGNATORY_TITLE = ''
 export const DEFAULT_ACT_TITLE_PATTERN = '{ordinal} Constitution Amendment Act, {year}'
 export const SEPARATOR = '—'.repeat(5)
@@ -348,6 +350,11 @@ export function billInstrument (bill, options = {}) {
     enacting,
     items,
     objectsAndReasons: (bill?.objects_and_reasons ?? '').trim() || null,
+    // The mover is printed on the face of the instrument. The 2024 Acts named
+    // nobody, so their proposer had to be reconstructed afterwards and never
+    // was (Q8); recording moved_by in the bill only fixes that if the signed
+    // paper carries it too.
+    movedBy: meta.moved_by ?? null,
     signature: signatureOf(enactment.signed_by, signatoryTitle),
     renderedFrom: options.renderedFrom ?? enactment.rendered_from ?? null,
     footer
@@ -497,6 +504,10 @@ export function renderBillText (bill, options = {}) {
     out.push('')
   }
 
+  if (m.movedBy?.name) {
+    out.push('')
+    out.push(pad(3) + `Moved by ${m.movedBy.name}${m.movedBy.role ? `, ${m.movedBy.role}` : ''}`)
+  }
   out.push('', centre(SEPARATOR, width), '', '')
   out.push(right(m.signature.name ? `${m.signature.name},` : m.signature.placeholder, width - 2))
   if (m.signature.title) out.push(right(m.signature.title, width - 2))
@@ -644,6 +655,9 @@ ${m.objectsAndReasons
     </section>`
     : ''}
 
+    ${m.movedBy?.name
+      ? `<p class="moved">Moved by ${escapeHtml(m.movedBy.name)}${m.movedBy.role ? `, ${escapeHtml(m.movedBy.role)}` : ''}</p>`
+      : ''}
     <p class="rule">${SEPARATOR}</p>
 
     <div class="sign">

@@ -22,8 +22,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { escapeHtml as defaultEscapeHtml } from '../lib/paths.mjs'
-import { tally, buildBillManifest, REQUIRED_BODIES, THRESHOLD } from '../bill.mjs'
+import { escapeHtml as defaultEscapeHtml, slugMap } from '../lib/paths.mjs'
+import { tally, buildBillManifest, loadConstitution, REQUIRED_BODIES, THRESHOLD } from '../bill.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -104,6 +104,26 @@ function repositorySourceBase () {
     }
   } catch { /* no package.json, or an unreadable one: fall back to plain text */ }
   return _sourceBase
+}
+
+/**
+ * The document the diffs are taken against, when the caller does not pass one.
+ *
+ * It reads the same file the build renders — `CONSTITUTION_FILE`, with the same
+ * default — because a bills page showing a "before" from some other document
+ * would be a lie of exactly the kind this pipeline exists to stop. It is never
+ * a hardcoded path: a build pointed at another constitution diffs against that
+ * one, and a build pointed at none simply shows no before-text.
+ */
+let _fallbackDoc
+function fallbackConstitution () {
+  if (_fallbackDoc !== undefined) return _fallbackDoc
+  try {
+    _fallbackDoc = loadConstitution(process.env.CONSTITUTION_FILE ?? 'constitution/current.yaml')
+  } catch {
+    _fallbackDoc = null
+  }
+  return _fallbackDoc
 }
 
 /** A repository file, linked where we know the repository and set in code where we do not. */
@@ -390,7 +410,7 @@ function approvalsBlock (item, { esc }) {
 
   return `
       <h4 class="act__sub">Approvals — Article 16(3)</h4>
-      <div class="bill-scroll">
+      <div class="bill-scroll" role="region" aria-label="Approval tallies" tabindex="0">
         <table class="bill-tally">
           <caption class="visually-hidden">Approval tallies by body, with the minutes reference and the
           pooled vote</caption>
@@ -591,11 +611,16 @@ export function billsMain (bills = [], {
 } = {}) {
   const groups = groupByYear(bills)
   const counted = bills.length
+  // Only look for a constitution if there is a bill to diff against it.
+  const doc = constitution ?? (counted ? fallbackConstitution() : null)
+  // Article pages are the better link target where the caller knows the slugs;
+  // where it does not, they are derivable from the same document.
+  const slugIndex = slugs ?? (doc?.articles ? slugMap(doc.articles) : null)
 
   const body = groups.map(g => `
     <section class="bill-year" aria-labelledby="${esc(groupId(g))}">
       <h2 class="act__sub" id="${esc(groupId(g))}">${esc(groupLabel(g))}</h2>
-      ${g.items.map(item => billCard(item, constitution, { url, esc, actIndex, slugs, sourceBase })).join('')}
+      ${g.items.map(item => billCard(item, doc, { url, esc, actIndex, slugs: slugIndex, sourceBase })).join('')}
     </section>`).join('')
 
   return `
@@ -604,7 +629,7 @@ export function billsMain (bills = [], {
     bill file is the instrument: the before-and-after a bill publishes here is the same comparison made
     when it is applied, so what the approving bodies read is exactly what lands in the text.</p>
     <p>Every bill needs the approval of the board, the intermediate board and the units under
-    <a href="${targetHref('art-16', { url, slugs })}">Article 16(3)</a>. <strong>Bills that were rejected, withdrawn or lapsed
+    <a href="${targetHref('art-16', { url, slugs: slugIndex })}">Article 16(3)</a>. <strong>Bills that were rejected, withdrawn or lapsed
     stay on this page.</strong> A legislature's failed bills are part of its record — what was proposed and
     refused says as much as what was carried, and a register that quietly drops them is a register that
     only ever agrees with itself.</p>
@@ -612,7 +637,7 @@ export function billsMain (bills = [], {
       ? `<p class="bill-note">${counted} bill${counted === 1 ? '' : 's'} on record.
       Signed Acts are on the <a href="${url('amendments/')}">amendment register</a>.</p>${body}`
       : emptyState({ url, esc, actIndex, sourceBase })}
-    ${standingSections({ esc, url, slugs, sourceBase })}`
+    ${standingSections({ esc, url, slugs: slugIndex, sourceBase })}`
 }
 
 /**
@@ -623,75 +648,7 @@ export function billsMain (bills = [], {
  * have to wait on a stylesheet to look finished, and can move into
  * src/styles/layout.css unchanged whenever styling catches up.
  */
-export const BILLS_CSS = `<style>
-.bill-year { margin-bottom: var(--space-5, 2.5rem); }
-.bill-note {
-  max-width: var(--measure, 68ch);
-  margin: 0 0 var(--space-3, 1rem);
-  font-size: 0.92rem;
-  color: var(--muted);
-}
-.bill-empty { max-width: var(--measure, 68ch); }
-.bill-new {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--action-ink);
-}
-.bill-text {
-  max-width: var(--measure, 68ch);
-  margin: 0 0 var(--space-3, 1rem);
-  padding: 0.2em 0 0.2em var(--space-3, 1rem);
-  border-left: 3px solid var(--action);
-  font-size: 0.97rem;
-}
-.bill-text p { margin: 0 0 var(--space-2, 0.5rem); }
-.bill-text p:last-child { margin-bottom: 0; }
-.bill-status--enacted, .bill-status--applied { color: var(--accent-ink); background: var(--accent-wash); }
-.bill-status--approved, .bill-status--scheduled { color: var(--action-ink); background: var(--action-wash); }
-.bill-status--rejected, .bill-status--withdrawn, .bill-status--lapsed,
-.bill-status--draft, .bill-status--returned { color: var(--muted); background: transparent; }
-/* A tally is wide by nature; it scrolls inside itself rather than pushing the page sideways. */
-.bill-scroll { overflow-x: auto; margin-bottom: var(--space-3, 1rem); }
-.bill-tally {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 40rem;
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-}
-.bill-tally th, .bill-tally td {
-  padding: 0.4rem 0.6rem;
-  text-align: left;
-  vertical-align: top;
-  white-space: nowrap;
-  border-bottom: 1px solid var(--border);
-}
-/* Only the minutes reference is prose, so only it wraps. */
-.bill-tally__evidence {
-  display: block;
-  max-width: 14rem;
-  white-space: normal;
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: var(--muted);
-}
-.bill-tally thead th {
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.bill-tally tbody th { white-space: nowrap; }
-.bill-tally__pooled th, .bill-tally__pooled td {
-  border-top: 2px solid var(--border);
-  border-bottom: 0;
-  color: var(--muted);
-}
-.bill-tally__verdict { white-space: nowrap; font-weight: 600; }
-.bill-tally__verdict--pass { color: var(--accent-ink); }
-.bill-tally__verdict--fail { color: var(--action-ink); }
-</style>`
-
+// The /bills/ rules now live in src/styles/layout.css with every other
+// component. They were exported here as a <style> string that no page
+// imported, so the page shipped unstyled.
 export default billsMain
