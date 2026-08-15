@@ -67,6 +67,18 @@ tests/        run against both the source and the built output
 - Accessibility is not optional: landmarks, visible focus, full keyboard operation,
   4.5:1 contrast in both themes, `prefers-reduced-motion` honoured.
 
+## Testing a guard
+
+Guards are tested on **throwaway branches with the synthetic edit committed** — never by stashing
+around uncommitted work. Commit first; destructive git operations near an uncommitted tree are how a
+careful process loses something.
+
+```bash
+git commit -am "wip"                 # your real work is safe
+# make the synthetic bad edit, commit it, run the guard, then:
+git reset --hard <the commit before> # the synthetic edit is gone
+```
+
 ## Pull requests
 
 - Branch from `main`. Reference the issue number.

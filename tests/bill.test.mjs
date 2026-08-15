@@ -580,3 +580,42 @@ test('the gate reports validator warnings, not only errors', async () => {
   assert.equal(typeof r.errors, 'number')
   assert.match(r.text, /Bill gate —/)
 })
+
+test('the constitution guard compares content, not names', async () => {
+  // Named-by is necessary and not sufficient. CI cannot assume the diff in
+  // front of it came from `act apply` — replacing that assumption is the
+  // guard's whole job — so a named provision is compared three ways, using the
+  // same classify the applier uses.
+  const { classifyOperation } = await import('../src/bill.mjs')
+  const op = { id: 'op-1', operation: 'substitute', target: 'art-5', scope: 'article', text: 'What the Act prescribes.\n' }
+  const base = 'What it said before.\n'
+
+  // The PR applied it: the provision now reads as prescribed.
+  assert.equal(classifyOperation(op, { content: 'What the Act prescribes.\n' }, base), 'already-applied')
+  // The PR did not apply it: still the base text.
+  assert.equal(classifyOperation(op, { content: base }, base), 'apply')
+  // The PR hand-edited it to something the Act never said.
+  assert.equal(classifyOperation(op, { content: 'Something else entirely.\n' }, base), 'divergent')
+})
+
+test('the record is append-only', async () => {
+  const { APPEND_ONLY, TERMINAL } = await import('../src/bill-gate.mjs')
+  const covered = p => APPEND_ONLY.some(r => (r.prefix && p.startsWith(r.prefix)) || (r.match && r.match.test(p)))
+
+  // Archives, signed instruments, extracted text and evidence may only grow.
+  for (const p of [
+    'constitution/versions/v1.0.0.yaml',
+    'acts/pdf/first-constitution-amendment-act-2024.pdf',
+    'acts/text/third-constitution-amendment-act-2024.txt',
+    'bills/2026/evidence/board-minutes.pdf'
+  ]) {
+    assert.ok(covered(p), `${p} must be append-only`)
+  }
+  // Ordinary engine and content paths are not frozen.
+  for (const p of ['src/bill.mjs', 'constitution/current.yaml', 'bills/2026/a-draft.yaml']) {
+    assert.ok(!covered(p), `${p} must remain editable`)
+  }
+  // A concluded bill is record; a resubmission is a new bill, not an edit.
+  for (const s of ['applied', 'rejected', 'withdrawn', 'lapsed']) assert.ok(TERMINAL.has(s))
+  for (const s of ['draft', 'submitted', 'scheduled', 'approved', 'enacted']) assert.ok(!TERMINAL.has(s))
+})
