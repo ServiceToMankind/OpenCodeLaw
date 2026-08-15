@@ -1,0 +1,50 @@
+{
+  "name": "opencodelaw",
+  "version": "1.0.0",
+  "description": "A YAML-driven static renderer for organizational constitutions, with permanent citation identifiers and schema-validated amendment tracking.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ServiceToMankind/OpenCodeLaw.git"
+  },
+  "homepage": "https://constitution.stmorg.in",
+  "bin": {
+    "opencodelaw": "src/cli.mjs"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "validate": "node src/validate.mjs",
+    "build": "node src/build.mjs",
+    "test": "node --test",
+    "dev": "node src/build.mjs --watch --serve",
+    "spec": "node src/gen-spec.mjs",
+    "provenance": "node src/provenance.mjs",
+    "linkcheck": "node src/linkcheck.mjs",
+    "test:e2e": "node --test tests/*.e2e.mjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "js-yaml": "4.3.1",
+    "marked": "15.0.12",
+    "sanitize-html": "2.17.5"
+  },
+  "files": [
+    "src/",
+    "schema/",
+    "examples/"
+  ],
+  "keywords": [
+    "constitution",
+    "governance",
+    "yaml",
+    "static-site",
+    "legislation"
+  ],
+  "devDependencies": {
+    "puppeteer-core": "^25.7.0"
+  }
+}

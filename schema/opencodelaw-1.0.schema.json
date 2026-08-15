@@ -1,0 +1,743 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://constitution.stmorg.in/schema/opencodelaw-1.0.schema.json",
+  "title": "OpenCodeLaw 1.0",
+  "description": "Machine-readable organizational constitution with permanent citation identifiers. Root key is `opencodelaw`, resolving the historical three-way disagreement between the docs (`OpenCodeLaw`), the specs (`openconstitution`) and the renderer (`ammendments`). The amendment register is a separate document; see $defs/actRegister.",
+  "type": "object",
+  "required": [
+    "opencodelaw",
+    "info",
+    "preamble",
+    "articles"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "opencodelaw": {
+      "const": "1.0",
+      "description": "Schema version. Quoted so YAML does not coerce it to a float."
+    },
+    "info": {
+      "$ref": "#/$defs/info"
+    },
+    "preamble": {
+      "$ref": "#/$defs/preamble"
+    },
+    "articles": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Order is presentational only. Identity comes from `id`/`number`, never from array position, so reordering this list changes no citation and no anchor.",
+      "items": {
+        "$ref": "#/$defs/article"
+      }
+    },
+    "reconciliation_state": {
+      "$ref": "#/$defs/reconciliationState"
+    }
+  },
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "description": "Semantic version. A prerelease suffix is how a document states that it is mid-reconciliation: 3.0.0-alpha.1 is not 3.0.0."
+    },
+    "actId": {
+      "type": "string",
+      "pattern": "^act-[1-9]\\d*-[12]\\d{3}$",
+      "description": "Stable Act identifier: act-<number>-<year>, e.g. act-1-2024."
+    },
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Provision text. Must contain at least one non-whitespace character. An empty string is rejected: Article 11 published a blank body for two years because nothing checked this."
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Records text that entered the constitution outside the amendment process. Its purpose is to preserve a half-amended state rather than erase it: an edit with no enacting instrument must be visible, not silently normalised.",
+      "required": [
+        "note"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "applied_outside_process": {
+          "type": "boolean",
+          "description": "True when this text was hand-applied with no recorded amendment."
+        },
+        "matches_act": {
+          "$ref": "#/$defs/actId",
+          "description": "Act whose prescribed text this current text matches, where one was identified."
+        },
+        "recorded": {
+          "type": "string",
+          "format": "date"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "info": {
+      "type": "object",
+      "required": [
+        "title",
+        "organization",
+        "version",
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "organization": {
+          "$ref": "#/$defs/nonEmptyText",
+          "description": "Full legal name of the body the constitution governs."
+        },
+        "jurisdiction": {
+          "type": "string"
+        },
+        "registration": {
+          "type": "string",
+          "description": "Registration identifier under the governing statute."
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "status": {
+          "enum": [
+            "current",
+            "superseded"
+          ],
+          "description": "Exactly one document in the corpus may be `current`."
+        },
+        "legal_status": {
+          "$ref": "#/$defs/legalStatus"
+        },
+        "adopted_version": {
+          "$ref": "#/$defs/semver",
+          "description": "The last version the board actually adopted. Required when legal_status is not_adopted."
+        },
+        "text_as_of": {
+          "type": "string",
+          "format": "date",
+          "description": "The date the displayed text reflects, which is not the same as the date any instrument took effect. Required when legal_status is not_adopted."
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "superseded_by": {
+          "$ref": "#/$defs/semver",
+          "description": "Version that replaced this one. Required in practice for archived pages, which must name their successor in a visible banner."
+        },
+        "logo": {
+          "type": "object",
+          "required": [
+            "url",
+            "alt"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "alt": {
+              "type": "string"
+            }
+          }
+        },
+        "contact": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        },
+        "termsOfService": {
+          "type": "string",
+          "format": "uri"
+        },
+        "license": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "An unadopted document must say what WAS adopted and what the text reflects. An adopted one must state the date it took effect.",
+          "if": {
+            "properties": {
+              "legal_status": {
+                "const": "not_adopted"
+              }
+            },
+            "required": [
+              "legal_status"
+            ]
+          },
+          "then": {
+            "required": [
+              "adopted_version",
+              "text_as_of"
+            ]
+          },
+          "else": {
+            "required": [
+              "effective_from"
+            ]
+          }
+        }
+      ]
+    },
+    "preamble": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "content"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "preamble"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "title_source": {
+          "$ref": "#/$defs/titleSource"
+        },
+        "content": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "adopted": {
+          "type": "string"
+        },
+        "amended_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actId"
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "provisionStatus": {
+      "enum": [
+        "active",
+        "omitted",
+        "reserved"
+      ],
+      "description": "`active` (default when absent) carries text. `reserved` holds a number that no provision occupies \u2014 this is how a statute book represents a gap without renumbering. `omitted` marks a provision repealed by an Act; its number is never reused."
+    },
+    "article": {
+      "type": "object",
+      "required": [
+        "id",
+        "number",
+        "title"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^art-[1-9]\\d*$",
+          "description": "Permanent citation identifier and public URL anchor. Treat as a public API: never regenerate, never derive from array position."
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The number the Acts cite. Explicit, never derived from index. Article 21 is `number: 21` even when it is the 20th element of the list."
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "title_source": {
+          "$ref": "#/$defs/titleSource"
+        },
+        "content": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "status": {
+          "$ref": "#/$defs/provisionStatus"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required for `reserved`/`omitted`: why this number carries no text."
+        },
+        "amended_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actId"
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/section"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "A reserved or omitted article carries a note instead of text. Every other article must carry text somewhere: its own body, or at least one section. An article consisting only of sections is legitimate \u2014 Act 1 substitutes Article 10 as a heading followed directly by clauses (1)-(3), supplying no article-level body at all. An empty-string `content` remains an error in every case; that is the defect that published Article 11 blank.",
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "reserved",
+                  "omitted"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "note"
+            ],
+            "properties": {
+              "content": false,
+              "sections": false
+            }
+          },
+          "else": {
+            "anyOf": [
+              {
+                "required": [
+                  "content"
+                ]
+              },
+              {
+                "required": [
+                  "sections"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "section": {
+      "type": "object",
+      "required": [
+        "id",
+        "number",
+        "title"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^art-[1-9]\\d*-s-[1-9]\\d*$",
+          "description": "Permanent citation identifier, e.g. art-6-s-1. Must agree with the parent article's number and this section's number; validate.mjs enforces the relationship."
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "title_source": {
+          "$ref": "#/$defs/titleSource"
+        },
+        "content": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "status": {
+          "$ref": "#/$defs/provisionStatus"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amended_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actId"
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "reserved",
+                  "omitted"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "note"
+            ],
+            "properties": {
+              "content": false
+            }
+          },
+          "else": {
+            "required": [
+              "content"
+            ]
+          }
+        }
+      ]
+    },
+    "actRegister": {
+      "$comment": "Root schema for acts/register.yaml. Validated separately by validate.mjs, versioned in this file so the register and the constitution cannot drift apart.",
+      "type": "object",
+      "required": [
+        "acts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "acts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/act"
+          }
+        }
+      }
+    },
+    "act": {
+      "type": "object",
+      "required": [
+        "id",
+        "number",
+        "year",
+        "title",
+        "assent_date",
+        "pdf"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/actId"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1900
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "short_title": {
+          "type": "string"
+        },
+        "application_status": {
+          "enum": [
+            "applied",
+            "partially-applied",
+            "pending"
+          ],
+          "description": "How much of this Act the current constitution reflects. Observed state, not a legal determination: `provisions` records only what has been reconciled, and anything held is named in the constitution's `reconciliation_state`."
+        },
+        "assent_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of assent, as stated on the face of the instrument."
+        },
+        "passed_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of passage, a distinct event from assent. One field cannot hold both."
+        },
+        "assented_by": {
+          "type": "string"
+        },
+        "signed_by": {
+          "type": "string",
+          "description": "Who signed the instrument, as printed on it."
+        },
+        "moved_by": {
+          "type": "string",
+          "description": "Who moved the Act. Leave unset rather than guessing."
+        },
+        "unverified_attribution": {
+          "type": "string",
+          "description": "An attribution recorded elsewhere but unsupported by the face of the instrument. Preserved rather than deleted or promoted, pending confirmation."
+        },
+        "drafting_discrepancy": {
+          "type": "array",
+          "description": "Where an Act contradicts itself. Recorded, never silently normalised: a reader must be able to see that the instrument disagrees with itself and which text governs.",
+          "items": {
+            "type": "object",
+            "required": [
+              "provision",
+              "operative",
+              "note"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "provision": {
+                "type": "string"
+              },
+              "operative": {
+                "type": "string",
+                "description": "The enacted text, which governs."
+              },
+              "operative_source_lines": {
+                "type": "string"
+              },
+              "statement_of_objects": {
+                "type": "string",
+                "description": "The conflicting explanatory text, which does not govern."
+              },
+              "statement_source_lines": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "procedure": {
+          "type": "object",
+          "description": "The approval chain the constitution required when the Act was passed. Left explicit and unpopulated where the evidence has not been located: an empty chain of authority is visible, a missing field is not.",
+          "additionalProperties": false,
+          "properties": {
+            "required_by": {
+              "type": "string",
+              "description": "Provision id of the amendment procedure in force at the time."
+            },
+            "approvals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "body"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "body": {
+                    "type": "string"
+                  },
+                  "date": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "evidence": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Link or reference to the minutes recording this approval."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Recorded as approving. Absent means not recorded, which is not the same as not approved."
+                  }
+                }
+              }
+            },
+            "attested_by": {
+              "type": "string"
+            },
+            "assent_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "complete": {
+              "type": "boolean",
+              "description": "Whether every body the procedure required has been recorded as approving. Never inferred from a partial chain."
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "pdf": {
+          "type": "string",
+          "description": "Repository-relative path. validate.mjs fails the build if the file is absent from disk."
+        },
+        "source_text": {
+          "type": "string",
+          "description": "Repository-relative path to the extracted plain text, so every assertion below is diffable against a source in the repo."
+        },
+        "amends": {
+          "type": "array",
+          "description": "Provision ids this Act touches. Every entry must resolve against the constitution.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "target",
+              "operation",
+              "scope"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "target": {
+                "type": "string",
+                "description": "Provision id, e.g. art-6-s-1 or `preamble`. Must resolve."
+              },
+              "operation": {
+                "enum": [
+                  "substitute",
+                  "insert",
+                  "omit",
+                  "renumber"
+                ]
+              },
+              "scope": {
+                "enum": [
+                  "article",
+                  "clause"
+                ],
+                "description": "Read from the instrument, not from its heading: an Act that restates the article's own heading followed by a complete clause run substitutes the whole article; an Act whose heading names clauses, and sets out only those, amends only them."
+              },
+              "clauses": {
+                "type": "string",
+                "description": "Which clauses the Act names, e.g. \"1,2,3,4,5\". Required for clause scope, so a targeted amendment can never be recorded without saying what it targets."
+              },
+              "source_lines": {
+                "type": "string",
+                "description": "Line range in source_text supporting this assertion, e.g. \"18-33\"."
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "scope": {
+                      "const": "clause"
+                    }
+                  },
+                  "required": [
+                    "scope"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "clauses"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "reconciliationState": {
+      "type": "object",
+      "description": "Declares that this document does not yet reflect every instrument that amends it. Rendered as a visible banner on every page; the banner is generated from this block and is never hardcoded, so it cannot fall out of date with the document it describes.",
+      "required": [
+        "target_version",
+        "complete"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "target_version": {
+          "$ref": "#/$defs/semver",
+          "description": "The version this document becomes once reconciliation completes."
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Instruments reflected in this text, annotated where only partly so."
+        },
+        "held": {
+          "type": "array",
+          "description": "What is not yet applied and why. Naming the blocker is the point: an unreconciled state that does not say what it is waiting for is indistinguishable from an oversight.",
+          "items": {
+            "type": "object",
+            "required": [
+              "provisions",
+              "blocked_by"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "provisions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "blocked_by": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "titleSource": {
+      "enum": [
+        "enacted",
+        "editorial"
+      ],
+      "description": "Whether this heading carries legal force. `enacted` means the title appears as a heading in an instrument already applied to this provision. `editorial` means an editor supplied it \u2014 Act 1 titles Article 11's clause (2) `Establishment` but gives clause (1) no title at all, and the lowercase `units` above it is editorial. Optional in the schema so frozen archives stay valid unedited; validate.mjs requires it on the current document."
+    },
+    "legalStatus": {
+      "enum": [
+        "adopted",
+        "not_adopted"
+      ],
+      "description": "Whether the board has adopted the text as published at `version`. `not_adopted` means the version string is a working publication label and NOT an assertion about what is in force; the document must then declare `adopted_version` and `text_as_of`, and the renderer must lead with the adopted position rather than the label. Optional in the schema so frozen archives stay valid unedited; validate.mjs requires it on the current document."
+    }
+  }
+}

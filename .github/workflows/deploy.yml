@@ -1,0 +1,124 @@
+name: Deploy
+
+on:
+  push:
+    branches: [rebuild/v3, main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_cname:
+        description: >-
+          Omit the CNAME file. Only for a deliberate rollback to the
+          servicetomankind.github.io URL — constitution.stmorg.in points here now
+          and a deploy without CNAME can drop the domain setting.
+        type: boolean
+        default: false
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # The custom domain serves from the root, so the base path is "/". Every
+  # internal link and asset derives from these two; changing one without the
+  # other ships a site whose links point at a directory that is not there.
+  BASE_PATH: /
+  SITE_ORIGIN: https://constitution.stmorg.in
+
+jobs:
+  # A schema violation, a failing test or a dead internal link must block
+  # publication rather than ship a broken or legally incorrect constitution.
+  validate:
+    name: Validate and test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 is the target floor; 20 stays until the local floor moves. See README.
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+
+      - name: Validate constitution
+        run: npm run validate
+
+      - name: Build
+        run: npm run build
+
+      - name: Check links
+        run: npm run linkcheck
+
+      - name: Test
+        run: npm test
+
+  build:
+    name: Build artifact
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Check links
+        run: npm run linkcheck
+
+      # The validate matrix already tested both runtimes, but it builds its own
+      # copy. Running the suite here means the exact artifact that ships was
+      # tested against the exact Node it was produced on.
+      - name: Test the artifact build
+        run: npm test
+
+      # constitution.stmorg.in is live. An Actions deploy whose artifact has no
+      # CNAME can drop the custom domain setting, so its absence is now the
+      # failure — the opposite of the pre-cutover rule.
+      - name: Guard the custom domain
+        run: |
+          if [ ! -f dist/CNAME ]; then
+            echo "::error::dist/CNAME missing — a deploy without it can drop the custom domain."
+            exit 1
+          fi
+          echo "CNAME present: $(cat dist/CNAME)"
+          if grep -rqE 'href="/OpenCodeLaw/|src="/OpenCodeLaw/' dist; then
+            echo "::error::Built pages still carry the /OpenCodeLaw/ prefix but the site serves from /."
+            exit 1
+          fi
+          echo "No stale project-Pages prefix in the output."
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

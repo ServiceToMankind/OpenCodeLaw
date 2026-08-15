@@ -1,0 +1,842 @@
+/* =========================================================================
+   print.css — the constitution on paper.
+
+   Loaded with media="print", and every rule is additionally wrapped in
+   @media print so the file stays inert if it is ever concatenated, inlined,
+   or linked without its media attribute.
+
+   The printed sheet is a legal instrument, not a screenshot of a website.
+   Chrome and every other browser is asked for the same thing: black ink on
+   white paper, one column, article numbers in the margin where a reader can
+   run a finger down them, and nothing on the page that only exists because
+   there was a pointer and a viewport.
+
+   This file loads after tokens.css and layout.css, so equal-specificity
+   rules here win on order. `!important` is reserved for the two places the
+   cascade cannot be won cleanly: the chrome that must never print, and the
+   theme tokens set under a dark-mode media query.
+   ========================================================================= */
+
+@media print {
+
+  /* -----------------------------------------------------------------------
+     1. Page box
+     -------------------------------------------------------------------- */
+
+  @page {
+    margin: 18mm;
+  }
+
+  /* Paged-media engines (Prince, WeasyPrint, PagedJS) fold a page number
+     into the bottom margin. Browsers drop this at-rule and print their own
+     header/footer instead, so the two never double up. Kept in its own
+     @page rule so a parser that chokes on the margin box still gets the
+     18mm margin above. */
+  @page {
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      font: 9pt Georgia, "Times New Roman", serif;
+      color: #000;
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+     2. Theme neutralisation
+
+     The document may be printed from either theme, and Chrome still
+     evaluates prefers-color-scheme while printing. Rather than fight each
+     colour declaration downstream, the tokens themselves are collapsed to
+     print values across every selector layout.css can define them on —
+     bare :root, both explicit data-theme values, and the JS-failed case
+     where no attribute was ever stamped.
+
+     Names that do not exist in tokens.css simply go unused; custom
+     properties never invalidate a rule.
+     -------------------------------------------------------------------- */
+
+  :root,
+  :root[data-theme="light"],
+  :root[data-theme="dark"],
+  :root:not([data-theme="light"]) {
+    color-scheme: light !important;
+
+    /* Every token the screen stylesheets actually define, flattened to ink on
+       paper. Overriding names that no stylesheet defines leaves the real ones
+       live: a reader printing from dark mode was getting ochre-on-wash chips. */
+    --canvas: #ffffff !important;
+    --surface: #ffffff !important;
+    --ink: #000000 !important;
+    --muted: #000000 !important;
+    --border: #000000 !important;
+    --accent: #000000 !important;
+    --accent-2: #000000 !important;
+    --action: #000000 !important;
+    --focus: #000000 !important;
+    --shadow: transparent !important;
+
+    /* Derived tokens (tokens.css) — the ones that carry colour onto chips,
+       pills, links and the ToC. */
+    --accent-ink: #000000 !important;
+    --on-accent: #ffffff !important;
+    --link-ink: #000000 !important;
+    --action-ink: #000000 !important;
+    --action-contrast: #000000 !important;
+    --ring: #000000 !important;
+    --accent-wash: transparent !important;
+    --action-wash: transparent !important;
+  }
+
+  /* Motion is meaningless on paper, and a half-finished transition can be
+     captured mid-flight by the print snapshot. */
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* -----------------------------------------------------------------------
+     3. Canvas and base prose
+
+     11pt on paper reads at roughly the same angular size as 18pt on a desk
+     monitor; the 1.65 leading is carried over unchanged because that is
+     what makes long statutory sentences trackable.
+     -------------------------------------------------------------------- */
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  body {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype",
+                 "Book Antiqua", "Times New Roman", Times, serif;
+    font-size: 11pt;
+    line-height: 1.65;
+    /* Ragged right. Legal prose is never justified: the rivers and the
+       stretched interword space cost more than the flush edge buys. */
+    text-align: left;
+    text-rendering: optimizeLegibility;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
+
+  p,
+  li,
+  dd,
+  dt,
+  blockquote {
+    text-align: left;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Focus mode, scroll-spy dimming and any other reading aid must not
+     follow the document onto paper. */
+  .shell__main,
+  .shell__main * {
+    opacity: 1 !important;
+    filter: none !important;
+    visibility: visible;
+  }
+
+  /* -----------------------------------------------------------------------
+     4. Interface that does not print
+
+     Navigation, controls, overlays and progress. Everything here exists to
+     move around a scrolling viewport; paper has no viewport.
+     -------------------------------------------------------------------- */
+
+  .skip-link,
+  .progress,
+  .progress__bar,
+  .site-header,
+  .shell__aside,
+  .toc,
+  .toc-fab,
+  .sheet,
+  .dialog,
+  .toast,
+  .to-top,
+  .copy,
+  .btn,
+  .pager {
+    display: none !important;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  /* -----------------------------------------------------------------------
+     5. Single column
+
+     The shell is a two-track grid on screen. With the aside gone it
+     collapses to one full-bleed column; the page box supplies the margins.
+     -------------------------------------------------------------------- */
+
+  .shell {
+    display: block;
+    grid-template-columns: none;
+    gap: 0;
+    max-width: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  .shell__main {
+    display: block;
+    max-width: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  /* -----------------------------------------------------------------------
+     6. Headings and titles
+     -------------------------------------------------------------------- */
+
+  h1, h2, h3, h4, h5, h6,
+  .page-title,
+  .section-title,
+  .provision__heading,
+  .act__title,
+  .banner__title {
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+    color: #000;
+    font-weight: 700;
+    text-align: left;
+    /* A heading stranded at the foot of a page is a heading for nothing. */
+    break-after: avoid;
+    page-break-after: avoid;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .page-title {
+    font-size: 20pt;
+    line-height: 1.25;
+    margin: 0 0 3mm;
+  }
+
+  /* On a single-article page the citation handle leads the title rather
+     than sitting inside it. */
+  .page-title__num {
+    display: block;
+    font-family: "Cuprum", "Montserrat", Georgia, serif;
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5mm;
+  }
+
+  .page-lead {
+    max-width: 68ch;
+    font-size: 10pt;
+    margin: 0 0 8mm;
+  }
+
+  .crumbs {
+    font-size: 9pt;
+    margin: 0 0 3mm;
+  }
+
+  /* "Articles" opens the articles on a fresh sheet and stays welded to the
+     first article, which would otherwise be torn away by the page break
+     rule in section 7. */
+  .section-title {
+    font-size: 14pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 6mm;
+    padding-bottom: 2mm;
+    border-bottom: 1pt solid #000;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* -----------------------------------------------------------------------
+     7. Provisions
+
+     Article numbers are citation handles. On paper they are the only way
+     back into the document, so they keep their own slot hanging in the
+     margin, at full weight, never suppressed and never inlined into the
+     title.
+
+     The gutter is built from a hanging indent rather than absolute
+     positioning: it survives page breaks, and it degrades by nudging the
+     title rather than by overlapping it if a number runs long.
+     -------------------------------------------------------------------- */
+
+  .provision {
+    margin: 0 0 7mm;
+  }
+
+  .provision--article {
+    padding-left: 18mm;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* The lone article on its own page, and the first article under the
+     "Articles" rule, must not push a blank sheet ahead of themselves. */
+  .page-title + .provision--article,
+  .section-title + .provision--article {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  .provision--article > .provision__heading {
+    margin-left: -18mm;
+    padding-left: 18mm;
+    text-indent: -18mm;
+    font-size: 15pt;
+    line-height: 1.3;
+    margin-bottom: 4mm;
+  }
+
+  .provision--article > .provision__heading > .provision__num {
+    min-width: 14mm;
+    margin-right: 4mm;
+  }
+
+  /* A section is the unit a reader cites and quotes; it is kept whole on
+     one sheet wherever it will fit. */
+  .provision--section {
+    padding-left: 14mm;
+    margin: 0 0 5mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .provision--section > .provision__heading {
+    margin-left: -14mm;
+    padding-left: 14mm;
+    text-indent: -14mm;
+    font-size: 12pt;
+    line-height: 1.35;
+    margin-bottom: 2mm;
+  }
+
+  .provision--section > .provision__heading > .provision__num {
+    min-width: 10mm;
+    margin-right: 4mm;
+  }
+
+  .provision__num {
+    display: inline-block;
+    text-align: right;
+    font-family: "Cuprum", "Montserrat", Georgia, serif;
+    font-weight: 700;
+    font-variant-numeric: lining-nums tabular-nums;
+    color: #000;
+  }
+
+  .provision__title {
+    font-weight: 700;
+  }
+
+  .provision--preamble > .provision__heading {
+    font-size: 15pt;
+    letter-spacing: 0.08em;
+    margin-bottom: 4mm;
+  }
+
+  .provision__sections {
+    margin-top: 5mm;
+  }
+
+  .provision__body {
+    max-width: 68ch;
+    text-indent: 0;
+  }
+
+  .provision__body > :first-child { margin-top: 0; }
+  .provision__body > :last-child  { margin-bottom: 0; }
+
+  .provision__body p,
+  .provision__body ul,
+  .provision__body ol {
+    margin: 0 0 3mm;
+  }
+
+  .provision__body ul,
+  .provision__body ol {
+    padding-left: 7mm;
+  }
+
+  .provision__body li {
+    margin-bottom: 1.5mm;
+  }
+
+  .provision__meta {
+    max-width: 68ch;
+    font-size: 9pt;
+    font-style: italic;
+    margin: 3mm 0 0;
+  }
+
+  /* A provision published with no recorded text is a fact about the
+     document; it prints. */
+  .no-text {
+    max-width: 68ch;
+    font-style: italic;
+  }
+
+  .provision--reserved > .provision__heading,
+  .provision--omitted > .provision__heading {
+    font-style: italic;
+  }
+
+  /* -----------------------------------------------------------------------
+     8. Amendment provenance chips
+
+     "Amended by Act 1 of 2024" is the audit trail. It prints as plain
+     bracketed text — no pills, no fills, nothing that disappears when the
+     reader has background graphics switched off.
+     -------------------------------------------------------------------- */
+
+  .chips {
+    max-width: 68ch;
+    margin: 0 0 3mm;
+    font-size: 9pt;
+  }
+
+  .chip {
+    display: inline;
+    margin-right: 4mm;
+    border: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .chip::before { content: "["; }
+  .chip::after  { content: "]"; }
+
+  .chip__label {
+    font-style: italic;
+  }
+
+  .chip__label::after {
+    content: " ";
+  }
+
+  .chip__pdf {
+    font-size: 8pt;
+  }
+
+  .chip__pdf::before {
+    content: " · ";
+  }
+
+  /* -----------------------------------------------------------------------
+     9. Banners
+
+     The reconciliation notice and the superseded-version notice both print.
+     A reader holding a paper copy has no other way of learning that the
+     text in their hands is mid-reconciliation or out of force, and that is
+     the single most important thing on the sheet.
+
+     Drawn with rules rather than a background fill, because background
+     graphics are off by default in most print dialogs.
+     -------------------------------------------------------------------- */
+
+  .banner {
+    display: block;
+    max-width: 68ch;
+    margin: 0 0 8mm;
+    padding: 4mm 5mm;
+    border: 1pt solid #000;
+    border-left-width: 3pt;
+    background: none;
+    color: #000;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .banner--superseded {
+    border-width: 2pt;
+    border-left-width: 5pt;
+  }
+
+  .banner__title {
+    font-size: 12pt;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 2mm;
+  }
+
+  .banner__lead {
+    margin: 0 0 2mm;
+  }
+
+  .banner__list {
+    margin: 0 0 2mm;
+    padding-left: 6mm;
+  }
+
+  .banner__list li {
+    margin-bottom: 1.5mm;
+  }
+
+  .banner__note {
+    display: block;
+    font-size: 9pt;
+    font-style: italic;
+  }
+
+  .banner__more {
+    margin: 0;
+    font-size: 10pt;
+  }
+
+  /* -----------------------------------------------------------------------
+     10. Amendment register
+     -------------------------------------------------------------------- */
+
+  .act {
+    margin: 0 0 8mm;
+    padding-top: 4mm;
+    border-top: 0.5pt solid #000;
+  }
+
+  .act__title {
+    font-size: 13pt;
+    line-height: 1.35;
+    margin: 0 0 2mm;
+  }
+
+  .act__num {
+    display: block;
+    font-family: "Cuprum", "Montserrat", Georgia, serif;
+    font-size: 10pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .act__status {
+    display: inline-block;
+    margin-left: 2mm;
+    padding: 0 1.5mm;
+    border: 0.5pt solid #000;
+    background: none;
+    color: #000;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 8pt;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: 0.15em;
+  }
+
+  .act__short {
+    margin: 0 0 3mm;
+    font-style: italic;
+  }
+
+  .act__meta {
+    max-width: 68ch;
+    margin: 0 0 4mm;
+    font-size: 10pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .act__meta dt {
+    float: left;
+    clear: left;
+    width: 32mm;
+    font-weight: 700;
+  }
+
+  .act__meta dd {
+    margin: 0 0 1mm 34mm;
+  }
+
+  .act__meta::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+  .act__sub {
+    font-size: 11pt;
+    margin: 0 0 2mm;
+  }
+
+  .act__provisions {
+    max-width: 68ch;
+    margin: 0 0 4mm;
+    padding-left: 7mm;
+  }
+
+  .act__none {
+    max-width: 68ch;
+    font-style: italic;
+  }
+
+  .act__unverified {
+    font-size: 9pt;
+    font-style: italic;
+  }
+
+  .act__unverified::before { content: "("; }
+  .act__unverified::after  { content: ")"; }
+
+  /* Drafting discrepancies and approval chains are folded away on screen.
+     On paper nothing can be unfolded, so they are forced open: a
+     discrepancy between operative text and the statement of objects is
+     exactly the sort of thing a printed copy is made to carry.
+
+     Two mechanisms, because engines disagree on how a closed <details>
+     hides its contents. ::details-content lives in its own rule so older
+     parsers drop only that rule. */
+  details.disc,
+  details {
+    display: block;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  details > *:not(summary) {
+    display: block !important;
+  }
+
+  details::details-content {
+    display: block !important;
+    content-visibility: visible !important;
+  }
+
+  .disc {
+    max-width: 68ch;
+    margin: 0 0 4mm;
+    padding-left: 4mm;
+    border-left: 0.5pt solid #000;
+  }
+
+  .disc summary {
+    display: block;
+    list-style: none;
+    font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    font-size: 10pt;
+    margin-bottom: 2mm;
+  }
+
+  .disc summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .disc__label {
+    margin: 0 0 1mm;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .disc__note {
+    margin: 2mm 0 0;
+    font-size: 10pt;
+    font-style: italic;
+  }
+
+  .proc {
+    margin: 0;
+    padding-left: 7mm;
+    font-size: 10pt;
+  }
+
+  .proc__body {
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  /* -----------------------------------------------------------------------
+     11. Archive and 404 lists
+     -------------------------------------------------------------------- */
+
+  .versions {
+    max-width: 68ch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .versions__item {
+    padding: 2mm 0;
+    border-bottom: 0.5pt solid #000;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .versions__badge {
+    margin-left: 2mm;
+    padding: 0 1.5mm;
+    border: 0.5pt solid #000;
+    background: none;
+    color: #000;
+    font-size: 8pt;
+    text-transform: uppercase;
+  }
+
+  .versions__date {
+    margin-left: 2mm;
+    font-size: 9pt;
+    font-style: italic;
+  }
+
+  /* -----------------------------------------------------------------------
+     12. Links
+
+     Internal links print as plain black text — their targets are elsewhere
+     in the same document, and an underline on every cross-reference turns
+     a statute into a rash. External links keep an underline and carry their
+     destination in brackets, because that URL cannot be recovered from
+     paper any other way.
+     -------------------------------------------------------------------- */
+
+  a,
+  a:link,
+  a:visited {
+    color: #000 !important;
+    background: none;
+    text-decoration: none;
+  }
+
+  a[href^="http"] {
+    text-decoration: underline;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    font-style: normal;
+    font-weight: 400;
+    text-decoration: none;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* -----------------------------------------------------------------------
+     13. Quotations, tables, code
+
+     Everything the Markdown allowlist can emit inside a provision.
+     -------------------------------------------------------------------- */
+
+  blockquote {
+    max-width: 68ch;
+    margin: 0 0 3mm;
+    padding-left: 4mm;
+    border-left: 2pt solid #000;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  table {
+    width: auto;
+    max-width: 100%;
+    margin: 0 0 4mm;
+    border-collapse: collapse;
+    font-size: 10pt;
+  }
+
+  th,
+  td {
+    padding: 1.5mm 2.5mm;
+    border: 0.5pt solid #000;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 700;
+  }
+
+  caption {
+    margin-bottom: 1.5mm;
+    font-size: 9pt;
+    font-style: italic;
+    text-align: left;
+  }
+
+  /* Repeat the header on every sheet a long table spills across. */
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr    { break-inside: avoid; page-break-inside: avoid; }
+
+  code,
+  pre {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+                 monospace;
+    font-size: 9.5pt;
+    background: none;
+    border: 0;
+    color: #000;
+  }
+
+  pre {
+    max-width: 68ch;
+    padding: 2mm 3mm;
+    border: 0.5pt solid #000;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  hr {
+    height: 0;
+    margin: 4mm 0;
+    border: 0;
+    border-top: 0.5pt solid #000;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* -----------------------------------------------------------------------
+     14. Footer
+
+     Kept: it is the colophon. Version, effective date and licence are what
+     make a loose printed sheet identifiable months later.
+     -------------------------------------------------------------------- */
+
+  .site-footer {
+    margin-top: 10mm;
+    padding-top: 3mm;
+    border-top: 0.5pt solid #000;
+    background: none;
+    color: #000;
+    font-size: 9pt;
+    text-align: left;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .site-footer p {
+    margin: 0 0 1mm;
+  }
+
+  .site-footer__meta {
+    font-style: italic;
+  }
+}

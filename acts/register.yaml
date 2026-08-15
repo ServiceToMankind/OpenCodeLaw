@@ -1,0 +1,135 @@
+acts:
+  - id: act-1-2024
+    number: 1
+    year: 2024
+    title: First Constitution Amendment Act, 2024
+    short_title: Membership Act, 2024
+    application_status: partially-applied
+    assent_date: "2024-05-03"
+    passed_date: "2024-05-02"
+    assented_by: Internal Compliance Committee
+    signed_by: P. Priya, Internal Compliance Coordinator
+    unverified_attribution: M. Revanth Reddy
+    pdf: acts/pdf/first-constitution-amendment-act-2024.pdf
+    source_text: acts/text/first-constitution-amendment-act-2024.txt
+    procedure:
+      required_by: art-16-s-3
+      approvals:
+        - body: board
+          approved: true
+          date: null
+          evidence: "Stated by Pranay (project owner, contact of record), 2026-08-15: the amendments were authored long ago and approved by every member of the board."
+        - body: intermediate-board
+          date: null
+          evidence: null
+        - body: units
+          date: null
+          evidence: null
+      attested_by: P. Priya, Internal Compliance Coordinator
+      assent_date: "2024-05-03"
+      complete: false
+      note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
+    amends:
+      - art-9
+      - art-10
+      - art-11
+      - art-12
+      - art-18
+    provisions:
+      - target: art-9
+        operation: substitute
+        scope: article
+        source_lines: 55-75
+        note: Act restates the title as "Board Members".
+      - target: art-10
+        operation: substitute
+        scope: article
+        source_lines: 76-120
+        note: Act restates the title as "Intermediate Board Members".
+      - target: art-11
+        operation: substitute
+        scope: article
+        source_lines: 121-152
+        note: Act restates the title as "Units".
+      - target: art-12
+        operation: substitute
+        scope: article
+        source_lines: 153-157
+        note: Act restates the title as "Alumni".
+      - target: art-18
+        operation: insert
+        scope: article
+        source_lines: 158-181
+        note: Act restates the title as "Suspension/Termination".
+  - id: act-2-2024
+    number: 2
+    year: 2024
+    title: Second Constitution Amendment Act, 2024
+    application_status: pending
+    assent_date: "2024-05-03"
+    passed_date: "2024-05-02"
+    assented_by: Internal Compliance Committee
+    signed_by: P. Priya, Internal Compliance Coordinator
+    unverified_attribution: M. Revanth Reddy
+    pdf: acts/pdf/second-constitution-amendment-act-2024.pdf
+    source_text: acts/text/second-constitution-amendment-act-2024.txt
+    procedure:
+      required_by: art-16-s-3
+      approvals:
+        - body: board
+          approved: true
+          date: null
+          evidence: "Stated by Pranay (project owner, contact of record), 2026-08-15: the amendments were authored long ago and approved by every member of the board."
+        - body: intermediate-board
+          date: null
+          evidence: null
+        - body: units
+          date: null
+          evidence: null
+      attested_by: P. Priya, Internal Compliance Coordinator
+      assent_date: "2024-05-03"
+      complete: false
+      note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
+    drafting_discrepancy:
+      - provision: art-16
+        operative: All proposed amendments must be approved by a 2/3rd present and voting of the board of the NGO, the intermediate board of the NGO and units of the NGO collectively.
+        operative_source_lines: 74-76
+        statement_of_objects: Article 16, Clause (3) has been amended with a 3/4th majority present and voting for bills to be enforced in time, and any changes shall be done in the presence of a meeting.
+        statement_source_lines: 119-121
+        note: The Act states two different thresholds for amending the constitution. The operative provision governs; a Statement of Objects and Reasons is explanatory, not enacting. Recorded rather than normalised away, and listed in RECONCILIATION.md Q3 for board ratification.
+      - provision: art-15
+        operative: Amendment of Article 15 - Exit Process
+        operative_source_lines: 105-105
+        statement_of_objects: Article 15 has been inserted to incorporate processes for both voluntary and involuntary exit.
+        statement_source_lines: 129-130
+        note: The operative heading calls this an amendment; the Statement of Objects calls it an insertion. Article 15 already exists as Resignation. Open as RECONCILIATION.md Q4.
+  - id: act-3-2024
+    number: 3
+    year: 2024
+    title: Third Constitution Amendment Act, 2024
+    short_title: Finance Act, 2024
+    application_status: pending
+    assent_date: "2024-05-03"
+    passed_date: "2024-05-02"
+    assented_by: Internal Compliance Committee
+    signed_by: P. Priya, Internal Compliance Coordinator
+    unverified_attribution: M. Revanth Reddy
+    pdf: acts/pdf/third-constitution-amendment-act-2024.pdf
+    source_text: acts/text/third-constitution-amendment-act-2024.txt
+    procedure:
+      required_by: art-16-s-3
+      approvals:
+        - body: board
+          approved: true
+          date: null
+          evidence: "Stated by Pranay (project owner, contact of record), 2026-08-15: the amendments were authored long ago and approved by every member of the board."
+        - body: intermediate-board
+          date: null
+          evidence: null
+        - body: units
+          date: null
+          evidence: null
+      attested_by: P. Priya, Internal Compliance Coordinator
+      assent_date: "2024-05-03"
+      complete: false
+      note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
