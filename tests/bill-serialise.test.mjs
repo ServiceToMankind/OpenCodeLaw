@@ -136,8 +136,13 @@ test('every field the schema defines is either serialised or deliberately exclud
   const emitted = billToYaml(MAXIMAL, { header: false })
   const round = yaml.load(emitted, { schema: yaml.CORE_SCHEMA })
 
-  // A path is covered if ANY element of an array carries it — the voided
-  // approval sits on a later history entry than the first.
+  // A path is covered if ANY element of an array carries it.
+  //
+  // This walker originally inspected only element [0], and reported
+  // history[].approval as uncovered because the voided approval sits on a later
+  // entry. Guards are code and get the same scrutiny as what they guard: an
+  // array is inspected across all its elements, or across their merged shape,
+  // never just the first.
   const present = (value, parts) => {
     if (!parts.length) return value !== undefined
     const [head, ...rest] = parts
