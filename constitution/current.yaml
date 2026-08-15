@@ -14,6 +14,14 @@ info:
     name: Pranay Kiran
     email: pranay@stmorg.in
   license: MIT
+  instrument:
+    committee: Internal Compliance Committee
+    signatory_title: Internal Compliance Coordinator of the STM
+    act_title_pattern: "{ordinal} Constitution Amendment Act, {year}"
+    enacting_formula: "BE IT ENACTED by the boards in the {ordinal_year} Year of the {organization} as follows:"
+    footer_lines:
+      - Flat no:- 25/24, Bowrampet, Quthbullapur (M), Medchal (D), Telangana State -500043
+      - Website:- www.stmorg.in
 preamble:
   id: preamble
   title: Preamble

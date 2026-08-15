@@ -43,10 +43,14 @@ export async function runBillCommand (group, args) {
     if (group === 'bill' && sub === 'render') {
       const { renderBillText, renderBillHtml } = await import('./bill-render.mjs')
       const bill = loadBill(need())
-      const doc = JSON.parse(JSON.stringify({}))
       const { loadConstitution } = await import('./bill.mjs')
       const c = loadConstitution()
-      const opts = { organization: c.info.organization, orgYear: 'Fourth' }
+      // House style comes from the constitution, never from the engine.
+      const opts = {
+        organization: c.info.organization,
+        orgYear: flag(rest, 'org-year', 'Fourth'),
+        ...(c.info.instrument ?? {})
+      }
       const base = file.replace(/\.ya?ml$/, '')
       fs.writeFileSync(`${base}.txt`, renderBillText(bill, opts))
       fs.writeFileSync(`${base}.html`, renderBillHtml(bill, opts))

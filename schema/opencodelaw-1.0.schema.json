@@ -171,6 +171,36 @@
         },
         "license": {
           "type": "string"
+        },
+        "instrument": {
+          "type": "object",
+          "description": "House style for rendered instruments: the wording an Act carries on its face. Content, not engine \u2014 an organisation adopting this repository replaces these and the renderer follows.",
+          "additionalProperties": false,
+          "properties": {
+            "committee": {
+              "type": "string",
+              "description": "The body whose assent an Act records, e.g. \"Internal Compliance Committee\"."
+            },
+            "signatory_title": {
+              "type": "string",
+              "description": "Printed under the signature, e.g. \"Internal Compliance Coordinator of the STM\"."
+            },
+            "act_title_pattern": {
+              "type": "string",
+              "description": "How an Act is titled; {ordinal} and {year} are substituted. Default \"{ordinal} Constitution Amendment Act, {year}\"."
+            },
+            "enacting_formula": {
+              "type": "string",
+              "description": "The BE IT ENACTED line; {ordinal_year} and {organization} are substituted."
+            },
+            "footer_lines": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Address and contact lines printed at the foot of every page of an instrument."
+            }
+          }
         }
       },
       "allOf": [

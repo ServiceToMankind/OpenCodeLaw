@@ -16,6 +16,7 @@ import { toPlainText, renderMarkdown } from './lib/markdown.mjs'
 import { layout, tocSections } from './templates/layout.mjs'
 import { renderArticle, renderPreamble } from './templates/provision.mjs'
 import { generateOgImages } from './og.mjs'
+import { billsMain, billsTocItems } from './templates/bills.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = () => path.join(ROOT, process.env.OUT_DIR ?? 'dist')
@@ -304,6 +305,35 @@ export function build () {
       { name: 'Amendments', url: abs('amendments/') }
     ])],
     main: amendmentsMain(register, state, doc, { url, slugs, actIndex, markKind })
+  })))
+
+  // ---- bills: the legislative record, including what failed ----
+  const bills = (() => {
+    const base = path.join(ROOT, 'bills')
+    if (!fs.existsSync(base)) return []
+    const out = []
+    for (const year of fs.readdirSync(base)) {
+      const dir = path.join(base, year)
+      if (!fs.statSync(dir).isDirectory()) continue
+      for (const f of fs.readdirSync(dir).filter(n => /\.ya?ml$/.test(n))) {
+        try { out.push({ file: `bills/${year}/${f}`, bill: load(`bills/${year}/${f}`) }) } catch { /* skip unreadable */ }
+      }
+    }
+    return out
+  })()
+
+  written.push(write('bills/index.html', layout({
+    ...shell,
+    showToc: false,
+    toc: tocSections(billsTocItems(bills), { heading: 'Bills' }),
+    title: `Bills — ${info.title}`,
+    description: `Proposed amendments to the constitution of ${info.organization}, including bills that were rejected or withdrawn.`,
+    canonical: abs('bills/'),
+    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Bills' },
+    jsonLd: [breadcrumbLd([
+      { name: 'Constitution', url: abs('') }, { name: 'Bills', url: abs('bills/') }
+    ])],
+    main: billsMain(bills, { url, escapeHtml, actIndex })
   })))
 
   // ---- archive ----

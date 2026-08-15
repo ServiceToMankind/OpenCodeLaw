@@ -1,0 +1,214 @@
+# ---------------------------------------------------------------------------
+# A FIXTURE bill, drafted against examples/starter/fixture-constitution.yaml.
+#
+# The Marrow Vale Lamplighters' Guild does not exist. This bill amends nothing
+# real and must never be pointed at constitution/current.yaml.
+#
+# It carries ONE operation of every kind the schema allows — substitute,
+# insert, omit, retitle, reserve — and a complete set of approvals that clears
+# two thirds in each of the three bodies separately as well as pooled, so
+# tests/bill.test.mjs has a bill that is valid in every respect and can be
+# broken one field at a time to prove each rule.
+# ---------------------------------------------------------------------------
+
+opencodelaw_bill: "1.0"
+
+bill:
+  short_title: An Act to amend the Constitution of the Marrow Vale Lamplighters' Guild
+  also_known_as: Lantern Oil Fund Act, 2026
+  year: 2026
+  number: 1
+  type: amendment
+
+  moved_by:
+    name: Orla Fenn
+    role: Keeper of the Oil
+    contact: orla.fenn@marrowvalelamplighters.org
+
+  drafted: 2026-02-03
+
+  base_version: "2.1.0"
+  version_bump: minor
+
+status: enacted
+
+history:
+  - date: 2026-02-03
+    to: draft
+    actor: Orla Fenn
+    note: Drafted against version 2.1.0 of the articles.
+  - date: 2026-02-10
+    from: draft
+    to: submitted
+    actor: Orla Fenn
+    evidence: Lamp House register, entry 2026/14
+  - date: 2026-02-12
+    from: submitted
+    to: under-review
+    actor: The Keeper of the Roll
+    note: Numbered Bill 1 of 2026 on submission.
+  - date: 2026-02-26
+    from: under-review
+    to: returned
+    actor: The Keeper of the Roll
+    evidence: Council minutes 2026/03, item 4
+    note: Returned for the mover to set out Article 3 in full rather than by reference.
+  - date: 2026-03-09
+    from: returned
+    to: under-review
+    actor: Orla Fenn
+    evidence: Lamp House register, entry 2026/31
+  - date: 2026-03-20
+    from: under-review
+    to: scheduled
+    actor: The Keeper of the Roll
+    evidence: Notice of meeting, 2026-03-20
+  - date: 2026-04-14
+    from: scheduled
+    to: approved
+    actor: The Keeper of the Roll
+    evidence: Joint minutes 2026/07
+  - date: 2026-04-21
+    from: approved
+    to: enacted
+    actor: The Council of Wicks
+    evidence: Act 1 of 2026, assented 2026-04-21
+
+# Explanatory only. Nothing below is operative, and no operation may take its
+# content from here — the operations carry their own text, and the validator
+# refuses any that reaches back into this block.
+objects_and_reasons: |
+  1. Article 3 is set out afresh so that the duties of a lamplighter and the
+     position of apprentices appear in the article itself rather than in the
+     by-laws.
+  2. Article 6 is cleared and its number held, meetings of the Council having
+     been moved to the by-laws.
+  3. Article 7 is repealed, the Taper Fund being absorbed into the fund
+     established by the new Article 10.
+  4. The heading of Article 8, section 1 is given by this Act, the existing
+     heading having been supplied by an editor.
+  5. Article 10 is inserted to establish the Lantern Oil Fund.
+
+operations:
+  # substitute — the whole article, sections and all, written out in full.
+  - id: op-1
+    operation: substitute
+    target: art-3
+    scope: article
+    title: Membership
+    text: |
+      Membership of the Guild is open to any person of the Vale who keeps a
+      lamp, abides by these articles, and is entered in the Lantern Roll.
+    sections:
+      - number: 1
+        title: Admission
+        text: |
+          A person becomes a lamplighter on being entered in the Lantern Roll
+          by the Council, and not before.
+      - number: 2
+        title: Duties
+        text: |
+          A lamplighter shall light the lamps of their assigned round at dusk,
+          extinguish them at dawn, and report a broken glass to the Keeper of
+          the Oil within three days.
+      - number: 3
+        title: Apprentices
+        text: |
+          An apprentice may be entered in the Lantern Roll on the
+          recommendation of two lamplighters, and shall not climb a ladder
+          unaccompanied until their second Michaelmas.
+      - number: 4
+        title: Withdrawal
+        text: |
+          A lamplighter may withdraw at any time by returning their taper to
+          the Keeper of the Roll, who shall record the date in the Lantern
+          Roll.
+
+  # insert — a provision that does not yet exist at the base version.
+  - id: op-2
+    operation: insert
+    target: art-10
+    scope: article
+    title: The Lantern Oil Fund
+    text: |
+      1. There shall be a Lantern Oil Fund, held by the Keeper of the Oil, into
+         which are paid the admission pennies of lamplighters and any gift made
+         to the Guild for the buying of oil.
+      2. The Fund may be expended only on oil, wicks, glass, tapers and the
+         repair of ladders.
+      3. The Keeper of the Oil shall lay an account of the Fund before the
+         Guild at each Michaelmas meeting.
+
+  # omit — the provision is repealed. Its number is never reused, so no text
+  # is supplied and none may be.
+  - id: op-3
+    operation: omit
+    target: art-7
+    scope: article
+    note: |
+      The Taper Fund is absorbed into the Lantern Oil Fund established by
+      Article 10. Article 7 keeps its number as an omitted provision so that
+      every citation ever made to it still resolves.
+
+  # retitle — the heading only. The text of the section is untouched, and the
+  # heading stops being editorial and becomes enacted.
+  - id: op-4
+    operation: retitle
+    target: art-8-s-1
+    scope: clause
+    title: The Lantern Roll
+    note: |
+      The existing heading was supplied by an editor. This Act states it, so
+      that the heading a reader sees is the heading the Guild passed.
+
+  # reserve — the number is held against a future instrument, and carries no
+  # text in the meantime.
+  - id: op-5
+    operation: reserve
+    target: art-6
+    scope: article
+    note: |
+      Meetings of the Council pass to the by-laws. Article 6 is reserved
+      rather than omitted because the Guild intends to occupy the number again
+      when the by-laws are settled.
+
+# Article 16(3) of the enacting organization's constitution requires the board,
+# the intermediate board and the units. All three are recorded here, with the
+# minutes that evidence each. Abstentions are excluded from the threshold: the
+# requirement is of those present AND VOTING.
+#
+# Each body clears two thirds on its own (86.4%, 78.6%, 75.7%), and the pooled
+# vote clears it too (58 of 73, 79.5%), so this bill is properly passed on
+# either reading of "collectively".
+approvals:
+  - body: board
+    date: 2026-04-11
+    present: 24
+    for: 19
+    against: 3
+    abstain: 2
+    evidence: Board minutes 2026/09, item 2
+  - body: intermediate-board
+    date: 2026-04-12
+    present: 15
+    for: 11
+    against: 3
+    abstain: 1
+    evidence: Intermediate board minutes 2026/04, item 5
+  - body: units
+    date: 2026-04-14
+    present: 41
+    for: 28
+    against: 9
+    abstain: 4
+    evidence: Joint minutes 2026/07, annexure B (unit-by-unit poll)
+
+enactment:
+  act_number: 1
+  act_year: 2026
+  assent_date: 2026-04-21
+  assented_by: The Council of Wicks
+  signed_by: Orla Fenn, Keeper of the Oil
+  signed_pdf: ~
+  signed_pdf_sha256: ~
+  rendered_from: examples/starter/bills/fixture-bill.yaml

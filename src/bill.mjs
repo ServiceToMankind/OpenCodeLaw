@@ -80,13 +80,23 @@ export function tally (approvals = []) {
 
 // ---------------------------------------------------------------------------
 
-let _ajv
-function ajv () {
-  if (!_ajv) {
-    _ajv = new Ajv({ allErrors: true, strict: false })
-    addFormats(_ajv)
+/**
+ * The COMPILED validator is memoised, not just the Ajv instance.
+ *
+ * Ajv registers a schema under its `$id` on compile, so compiling the same
+ * schema twice against one instance throws "schema with key or id … already
+ * exists". That made validating two bills in a single process fail on the
+ * second — which a CLI that validates a directory, or the site build, would hit
+ * immediately.
+ */
+let _validateBillSchema
+function billValidator () {
+  if (!_validateBillSchema) {
+    const ajv = new Ajv({ allErrors: true, strict: false })
+    addFormats(ajv)
+    _validateBillSchema = ajv.compile(JSON.parse(fs.readFileSync(path.join(ROOT, BILL_SCHEMA), 'utf8')))
   }
-  return _ajv
+  return _validateBillSchema
 }
 
 export function loadBill (file) {
@@ -133,8 +143,7 @@ class Problems {
 export function validateBill (file, { constitution } = {}) {
   const p = new Problems()
   const bill = loadBill(file)
-  const schema = JSON.parse(fs.readFileSync(path.join(ROOT, BILL_SCHEMA), 'utf8'))
-  const validate = ajv().compile(schema)
+  const validate = billValidator()
 
   if (!validate(bill)) {
     for (const e of validate.errors) {
