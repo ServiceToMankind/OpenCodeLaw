@@ -163,6 +163,56 @@ body that fell short.
 
 ---
 
+## 5a. The freeze point, and what an edit costs
+
+**The ICC completes form review before any meeting is scheduled.** Circulation is the freeze: from
+the moment a bill goes to the bodies, its text is what they are resolving on.
+
+`bill ballot` renders resolution sheets only for a bill at `scheduled` or later, and says why if you
+ask earlier — a sheet for a bill still under form review would carry a hash the ICC is about to
+change.
+
+> **Get the text right before you circulate.**
+
+That sentence is the whole discipline, and it is a discipline because an edit is expensive. **A vote
+binds to the bill's substantive hash, not its title.** Edit the bill after a body has resolved and
+that resolution is void: the body must resolve again. This holds even where the bill's own
+operations are untouched — a rebase onto a newer constitution moves the hash too, because approval
+attaches to an amendment *in context*, not to isolated strings. A provision can become contradictory
+purely because other articles moved, and whether a rebase is "semantically clean" is not something a
+tool can adjudicate honestly.
+
+There is no such thing as a typo fix to operative text that is beneath a body's notice. The
+operative text of a bill *is* the constitutional text, enacted verbatim. This constitution already
+carries a published defect that turns on one word — Article 6 defines `Unit Board Member` and
+`Coordinator` identically, differing only by "in STM" and "in the STM".
+
+Voided approvals are **not deleted**. They move to the bill's `history` as `approval-voided`
+entries, carrying the body, the tallies, the evidence and the hash they were recorded against. A
+body's vote is a legislative fact even after the text has moved on.
+
+### If a defect surfaces mid-cycle
+
+Two paths. Name which one you are taking, in writing.
+
+**(a) Fix, void, re-collect.** The safe path, and the default whenever there is any doubt. A
+**joint sitting** makes this one meeting rather than three — the bodies may sit together, and the
+same signed record may serve all three. The tallies are still recorded per body: evidence can be
+shared, arithmetic cannot.
+
+**(b) Pass as approved, correct by corrigendum.** Only for a defect that does not touch meaning.
+That judgment belongs to the ICC and the board and is never made by the tool. See §8.
+
+### Sequencing
+
+**The ICC does not schedule votes on a bill while another bill is ahead of it** — approved but
+unapplied, or enacted and pending. Rebases should land before approvals begin, never between
+meetings.
+
+This is the cheap prevention for everything above. CI enforces the hard edge of it: two open bills
+amending the same provision fail the gate, naming both, because whichever applies second would
+overwrite or contradict the first.
+
 ## 6. What belongs to the by-laws — Article 16(2)
 
 Article 16(2) sends the conduct of amendments to the by-laws. So the by-laws own **notice periods,
@@ -228,6 +278,15 @@ which was the right call: the engine records the law, it does not correct the la
 what those two definitions ought to say is an act of authorship, and it belongs to the board.
 
 ---
+
+## 8a. A note on files
+
+**Any command that writes a bill strips comments.** The tools read a bill into an object and write
+the object back; comments are not in the object.
+
+Comments belong in `bills/TEMPLATE.yaml`, as guidance to whoever is drafting. They do not belong in
+a bill as record — anything that needs to be on the record goes in `objects_and_reasons`, an
+operation's `note`, or the bill's `history`.
 
 ## 9. Reference
 

@@ -619,3 +619,104 @@ test('the record is append-only', async () => {
   for (const s of ['applied', 'rejected', 'withdrawn', 'lapsed']) assert.ok(TERMINAL.has(s))
   for (const s of ['draft', 'submitted', 'scheduled', 'approved', 'enacted']) assert.ok(!TERMINAL.has(s))
 })
+
+test('a fixture bill runs draft → applied, and re-applying is a clean no-op', async () => {
+  // The whole pipeline on a throwaway copy of the fixture constitution. Nothing
+  // here touches the real one: the applier is pointed at a temp tree.
+  const os = await import('node:os')
+  const { classifyOperation, fullText, OPERATION_STATUS } = await import('../src/bill.mjs')
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lifecycle-'))
+  const constFile = path.join(dir, 'constitution.yaml')
+  fs.copyFileSync(path.join(ROOT, 'examples/starter/fixture-constitution.yaml'), constFile)
+  const doc = yaml.load(fs.readFileSync(constFile, 'utf8'), { schema: yaml.CORE_SCHEMA })
+
+  const bill = loadBill(BILL_FILE)
+  const nodeOf = (d, id) => {
+    if (d.preamble?.id === id) return d.preamble
+    for (const a of d.articles ?? []) {
+      if (a.id === id) return a
+      for (const s of a.sections ?? []) if (s.id === id) return s
+    }
+    return null
+  }
+
+  // Every operation must be applicable against the base it was drafted on.
+  for (const op of bill.operations) {
+    const node = nodeOf(doc, op.target)
+    const verdict = classifyOperation(op, node, node ? fullText(node) : null)
+    assert.notEqual(verdict, 'divergent', `${op.id} (${op.operation} ${op.target}) diverges from the base`)
+  }
+
+  // Apply, the way actApply does, then re-classify: everything is a no-op.
+  for (const op of bill.operations) {
+    const node = nodeOf(doc, op.target)
+    if (op.operation === 'insert') {
+      doc.articles.push({
+        id: op.target, number: Number(op.target.replace('art-', '')),
+        title: op.title, title_source: 'enacted',
+        ...(op.text ? { content: op.text } : {})
+      })
+      doc.articles.sort((a, b) => a.number - b.number)
+    } else if (op.operation === 'omit' || op.operation === 'reserve') {
+      for (const k of Object.keys(node)) if (!['id', 'number'].includes(k)) delete node[k]
+      Object.assign(node, {
+        title: op.operation === 'omit' ? 'Omitted' : 'Reserved',
+        status: OPERATION_STATUS[op.operation],   // omitted / reserved, as actApply writes
+        note: op.note
+      })
+    } else if (op.operation === 'retitle') {
+      node.title = op.title
+    } else {
+      if (op.title) node.title = op.title
+      if (op.text != null) node.content = op.text
+      if (op.sections?.length) {
+        node.sections = op.sections.map(s => ({
+          id: `${op.target}-s-${s.number}`, number: s.number, title: s.title, content: s.text
+        }))
+      }
+    }
+  }
+
+  for (const op of bill.operations) {
+    const node = nodeOf(doc, op.target)
+    assert.equal(classifyOperation(op, node, null), 'already-applied',
+      `${op.id} should be a clean no-op on re-apply — that is what full-text operations buy`)
+  }
+
+  fs.rmSync(dir, { recursive: true, force: true })
+})
+
+test('applying against a divergent target aborts rather than overwriting', async () => {
+  const { classifyOperation } = await import('../src/bill.mjs')
+  const op = { id: 'op-1', operation: 'substitute', target: 'art-3', scope: 'article', text: 'What the Act prescribes.\n' }
+  const drifted = { content: 'Something a third party wrote.\n' }
+  assert.equal(classifyOperation(op, drifted, 'What it said when drafted.\n'), 'divergent',
+    'a target that matches neither the base nor the Act must abort, never be overwritten')
+})
+
+test('every operation type is idempotent against the status the applier writes', async () => {
+  // Written against OPERATION_STATUS rather than a literal, because the last
+  // bug here was the test and the code sharing the same wrong assumption:
+  // both said `status: 'omit'` while the applier writes `status: 'omitted'`.
+  const { classifyOperation, OPERATION_STATUS } = await import('../src/bill.mjs')
+  const applied = [
+    ['substitute', { operation: 'substitute', text: 'T\n' }, { content: 'T\n' }],
+    ['insert', { operation: 'insert', text: 'T\n' }, { content: 'T\n' }],
+    ['retitle', { operation: 'retitle', title: 'X' }, { title: 'X' }],
+    ['omit', { operation: 'omit' }, { status: OPERATION_STATUS.omit }],
+    ['reserve', { operation: 'reserve' }, { status: OPERATION_STATUS.reserve }]
+  ]
+  for (const [name, op, node] of applied) {
+    assert.equal(classifyOperation(op, node, null), 'already-applied',
+      `re-applying ${name} must be a no-op`)
+  }
+
+  // And the status the applier actually writes is the one this expects.
+  assert.deepEqual(OPERATION_STATUS, { omit: 'omitted', reserve: 'reserved' })
+  const src = fs.readFileSync(path.join(ROOT, 'src/bill-cli.mjs'), 'utf8')
+  for (const status of Object.values(OPERATION_STATUS)) {
+    assert.ok(src.includes(`status: '${status}'`),
+      `the applier must write status: '${status}'`)
+  }
+})

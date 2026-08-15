@@ -193,6 +193,18 @@ are the ICC's problem, not yours. You will not see them on a draft.
 
 ---
 
+### Before you circulate — the text freezes
+
+Once your bill goes to the approving bodies, its text is frozen. A vote binds to the bill's
+**substantive hash** — printed by `bill validate` and read into the minutes — not to its title. Edit
+the bill afterwards and every recorded approval is void; those bodies must meet again.
+
+That is true even for a typo, and even when a rebase leaves your own operations untouched. **Get the
+text right before you circulate.**
+
+Also worth knowing: any command that writes your bill strips comments. Notes for the record go in
+`objects_and_reasons` or an operation's `note`.
+
 ## 7. Submitting
 
 Send the file to the **Internal Compliance Coordinator**. If you do not know who holds

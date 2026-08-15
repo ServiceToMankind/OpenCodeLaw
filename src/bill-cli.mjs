@@ -9,13 +9,29 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import yaml from 'js-yaml'
 import { ROOT, loadBill, loadConstitution, validateBill, report, tally, classifyOperation, fullText, operationText, REQUIRED_BODIES } from './bill.mjs'
+import { billToYaml } from './scripts/bill-serialise.mjs'
 import { normalise } from './text-compare.mjs'
 
 const OPTS = { schema: yaml.CORE_SCHEMA }
 const DUMP = { lineWidth: -1, noRefs: true, quotingType: '"' }
 const today = () => new Date().toISOString().slice(0, 10)
 
-const save = (file, bill) => fs.writeFileSync(file, yaml.dump(bill, DUMP))
+/**
+ * Bill files are written through the same emitter the propose page uses.
+ *
+ * Not for the hash — that is computed from parsed content and never depended on
+ * serialisation. The reasons are operational: a page-authored draft re-dumped
+ * by a different dumper is wholly reformatted at submission, so the gate's
+ * reviewer sees style noise burying the one substantive change, and this
+ * system's review culture is "read the diff". It also puts both producers under
+ * the round-trip guard, which previously covered only the browser's path.
+ *
+ * Register and constitution writes keep js-yaml; they were never part of this.
+ *
+ * Note that any write strips comments: an emitter emits an object, and comments
+ * are not in the object.
+ */
+const save = (file, bill) => fs.writeFileSync(file, billToYaml(bill, { header: false }))
 
 function push (bill, from, to, actor, evidence, note) {
   bill.history ??= []

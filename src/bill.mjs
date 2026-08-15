@@ -40,6 +40,9 @@ export const REQUIRED_BODIES = ['board', 'intermediate-board', 'units']
  */
 export const THRESHOLD = 2 / 3
 
+/** What each removing operation leaves behind on the provision it acts on. */
+export const OPERATION_STATUS = Object.freeze({ omit: 'omitted', reserve: 'reserved' })
+
 export { canonicalJson, blockText, SUBSTANTIVE_FIELDS }
 
 export function tally (approvals = []) {
@@ -410,8 +413,25 @@ export function classifyOperation (op, currentNode, baseText = null) {
   const proposed = normalise(operationText(op))
   const current = normalise(fullText(currentNode))
 
-  if (op.operation === 'insert') return currentNode ? 'divergent' : 'apply'
-  if (['omit', 'reserve'].includes(op.operation)) return currentNode ? 'apply' : 'already-applied'
+  if (op.operation === 'insert') {
+    // Absent: insert it. Present and already reading as the Act prescribes:
+    // this Act has been applied, and re-running it must be a no-op like every
+    // other operation. Present and reading as something else: another
+    // provision occupies that number, and inserting would overwrite it.
+    if (!currentNode) return 'apply'
+    return current === proposed ? 'already-applied' : 'divergent'
+  }
+  if (['omit', 'reserve'].includes(op.operation)) {
+    // The provision is not deleted — its number is never reused, so the entry
+    // remains carrying a status. "Already applied" is that status being set,
+    // not the node being gone.
+    if (!currentNode) return 'already-applied'
+    // The operation is `omit`; the status it leaves behind is `omitted`.
+    // Comparing the two directly made re-applying an omission look like work
+    // forever — and the lifecycle test agreed, because it wrote the same wrong
+    // status the check expected. Both sides now name the mapping once.
+    return currentNode.status === OPERATION_STATUS[op.operation] ? 'already-applied' : 'apply'
+  }
   if (op.operation === 'retitle') {
     return normalise(currentNode?.title ?? '') === normalise(op.title) ? 'already-applied' : 'apply'
   }

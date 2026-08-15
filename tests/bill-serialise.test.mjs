@@ -25,7 +25,8 @@ const SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'schema/opencodelaw-bi
 const MAXIMAL = {
   opencodelaw_bill: '1.0',
   bill: {
-    short_title: 'An Act to exercise every field',
+    // Adversarial on purpose: a hand-written emitter's real risk is quoting.
+    short_title: 'An Act: with a colon-space, a # hash, "double" and \'single\' quotes',
     also_known_as: 'Maximal Act, 2026',
     year: 2026,
     number: 4,
@@ -66,12 +67,17 @@ const MAXIMAL = {
       scope: 'clause',
       clauses: '1,2',
       title: 'A Restated Heading',
-      note: 'A drafting note.',
+      note: '  leading and trailing spaces  ',
       source_lines: '10-20',
-      text: 'The complete resulting text.\n',
+      text: 'The complete resulting text.\n' +
+        'key: value — a line that looks like YAML syntax\n' +
+        '- and one that looks like a list item\n' +
+        '# and one that looks like a comment\n' +
+        'unicode: ₹ — “curly” ’apostrophes’ and an em dash\n' +
+        ('a very long line ' .repeat(40)) + '\n',
       sections: [
         { number: 1, title: 'First', text: 'First section text.\n' },
-        { number: 2, title: 'Second', text: 'Second section text.\n' }
+        { number: 2, title: 'Second: with a colon', text: '\n' }
       ]
     },
     { id: 'op-2', operation: 'omit', target: 'art-7', scope: 'article', note: 'Removed for the fixture.' }
@@ -83,7 +89,7 @@ const MAXIMAL = {
       present: 12, for: 9, against: 2, abstain: 1,
       bill_sha256: 'a'.repeat(64),
       evidence: { kind: 'minutes', path: 'bills/2026/evidence/x.pdf', sha256: 'b'.repeat(64), url: 'https://example.org/minutes' },
-      recorded_by: 'ICC Coordinator',
+      recorded_by: '',
       note: 'An approval note.'
     }
   ],
@@ -197,4 +203,82 @@ test('the exclusion list is the page authority boundary, and it holds', async ()
   for (const v of Object.values(round.enactment)) {
     assert.equal(v, null, 'the page must not record any enactment field')
   }
+})
+
+test('emitting is idempotent, so successive clerking writes do not churn', () => {
+  // submit, then approvals recorded, then enact — each re-writes the file. If
+  // the emitter's output shifted between saves, every clerking step would carry
+  // formatting noise into the diff the gate reviewer reads.
+  const once = billToYaml(MAXIMAL, { header: false })
+  const twice = billToYaml(yaml.load(once, { schema: yaml.CORE_SCHEMA }), { header: false })
+  const thrice = billToYaml(yaml.load(twice, { schema: yaml.CORE_SCHEMA }), { header: false })
+  assert.equal(twice, once, 'emit(parse(emit(x))) must equal emit(x)')
+  assert.equal(thrice, twice, 'and must stay stable across further writes')
+})
+
+test('adversarial scalars survive the round trip', () => {
+  const round = yaml.load(billToYaml(MAXIMAL, { header: false }), { schema: yaml.CORE_SCHEMA })
+  assert.equal(round.bill.short_title, MAXIMAL.bill.short_title, 'colons, hashes and quotes')
+  assert.equal(round.operations[0].note, MAXIMAL.operations[0].note, 'leading/trailing spaces')
+  assert.equal(round.operations[0].sections[1].title, 'Second: with a colon')
+  assert.match(round.operations[0].text, /key: value/, 'a line that looks like YAML syntax')
+  assert.match(round.operations[0].text, /^# and one that looks like a comment$/m)
+  assert.match(round.operations[0].text, /₹ — “curly”/, 'unicode')
+  assert.ok(round.operations[0].text.split('\n').some(l => l.length > 500), 'a very long line')
+  assert.equal(round.approvals[0].recorded_by, '', 'an empty string is not absence')
+})
+
+test('submitting a page-authored draft changes only number, status and history', async () => {
+  // The operational reason for one serialiser, expressed as a test: if a
+  // clerking write reformats the file, the gate reviewer reads style noise
+  // instead of the substantive change.
+  const os = await import('node:os')
+  const { billSubmit } = await import('../src/bill-cli.mjs')
+  const liveVersion = yaml.load(
+    fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'),
+    { schema: yaml.CORE_SCHEMA }).info.version
+
+  const draft = {
+    opencodelaw_bill: '1.0',
+    bill: {
+      short_title: 'An Act from the page', year: 2026, number: null, type: 'amendment',
+      moved_by: { name: 'Orla Fenn', role: 'Unit Head' }, drafted: '2026-01-15',
+      base_version: liveVersion,
+      version_bump: 'minor'
+    },
+    status: 'draft',
+    history: [],
+    objects_and_reasons: 'Because the diff must stay readable.\n',
+    operations: [{ id: 'op-1', operation: 'substitute', target: 'art-13', scope: 'article', text: 'New text for the annual report.\n' }],
+    approvals: ['board', 'intermediate-board', 'units'].map(body => ({
+      body, meeting: { date: null }, present: null, for: null, against: null, abstain: null, bill_sha256: null
+    })),
+    enactment: { act_number: null, act_year: null, assent_date: null, assented_by: null, signed_by: null, signed_pdf: null, signed_pdf_sha256: null }
+  }
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'submit-'))
+  const file = path.join(dir, 'draft.yaml')
+  const before = billToYaml(draft)          // exactly what the page would hand over
+  fs.writeFileSync(file, before)
+
+  billSubmit(file, { actor: 'ICC' })
+  const after = fs.readFileSync(file, 'utf8')
+
+  const beforeLines = before.split('\n').filter(l => !l.startsWith('#'))
+  const afterLines = after.split('\n')
+  const removed = beforeLines.filter(l => !afterLines.includes(l))
+  const added = afterLines.filter(l => !beforeLines.includes(l))
+
+  // Only the number, the status and the new history entry may move.
+  const allowed = /^(\s*number:|status:|history:|\s+- date:|\s+from:|\s+to:|\s+actor:|\s+note:)/
+  for (const l of [...removed, ...added]) {
+    if (!l.trim()) continue
+    assert.match(l, allowed, `submission changed a line it should not have: ${JSON.stringify(l)}`)
+  }
+  const parsed = yaml.load(after, { schema: yaml.CORE_SCHEMA })
+  assert.equal(parsed.status, 'submitted')
+  assert.equal(typeof parsed.bill.number, 'number')
+  assert.equal(parsed.history.length, 1)
+  assert.equal(parsed.operations[0].text, draft.operations[0].text, 'operation text must be untouched')
+
+  fs.rmSync(dir, { recursive: true, force: true })
 })

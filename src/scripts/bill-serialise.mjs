@@ -30,7 +30,13 @@
  * Normalising here, in one place used by both sides, is what keeps
  * "unchanged text" comparing equal.
  */
-export const blockText = s => String(s ?? '').replace(/\s+$/, '') + '\n'
+export const blockText = s => {
+  const body = String(s ?? '').replace(/\s+$/, '')
+  // Empty stays empty. A YAML `|` block with no content yields '', not '\n',
+  // so claiming a newline here would be a value the format cannot round-trip —
+  // and a provision with no text is empty, not "a newline".
+  return body === '' ? '' : body + '\n'
+}
 
 /** RFC 8785-style canonical JSON: sorted keys, no insignificant whitespace. */
 export function canonicalJson (value) {
@@ -88,6 +94,15 @@ export const PAGE_EXCLUDED = Object.freeze([
   'enactment.rendered_from'
 ])
 
+/**
+ * Emit an optional key only when it is PRESENT — never when it is merely
+ * truthy. An empty string is not absence, and neither is null: both record
+ * something (a field deliberately left blank, a transition with no evidence)
+ * that a falsy test would erase. This is the same defect twice over, so it is
+ * funnelled through one helper.
+ */
+const opt = (obj, key, line) => (key in obj && obj[key] !== undefined) ? [line(obj[key])] : []
+
 const scalar = s => {
   const str = String(s ?? '')
   return /^[\w .,'’()\-/&:]+$/.test(str) && !/^\s|\s$/.test(str) && !/:\s/.test(str)
@@ -133,14 +148,14 @@ export function billToYaml (bill, { header = true } = {}) {
   }
   out.push('opencodelaw_bill: "1.0"', 'bill:')
   out.push(`  short_title: ${scalar(b.short_title)}`)
-  if (b.also_known_as) out.push(`  also_known_as: ${scalar(b.also_known_as)}`)
+  out.push(...opt(b, 'also_known_as', v => `  also_known_as: ${scalar(v)}`))
   out.push(`  year: ${b.year}`)
   out.push(`  number: ${b.number == null ? '~' : b.number}`)
   out.push(`  type: ${b.type}`)
   out.push('  moved_by:')
   out.push(`    name: ${scalar(b.moved_by?.name)}`)
-  if (b.moved_by?.role) out.push(`    role: ${scalar(b.moved_by.role)}`)
-  if (b.moved_by?.contact) out.push(`    contact: ${scalar(b.moved_by.contact)}`)
+  out.push(...opt(b.moved_by ?? {}, 'role', v => `    role: ${scalar(v)}`))
+  out.push(...opt(b.moved_by ?? {}, 'contact', v => `    contact: ${scalar(v)}`))
   out.push(`  drafted: ${b.drafted == null ? '~' : b.drafted}`)
   out.push(`  base_version: "${b.base_version}"`)
   out.push(`  version_bump: ${b.version_bump}`)
@@ -151,19 +166,19 @@ export function billToYaml (bill, { header = true } = {}) {
     out.push('history:')
     for (const h of bill.history) {
       out.push(`  - date: ${h.date}`)
-      if (h.from) out.push(`    from: ${h.from}`)
+      out.push(...opt(h, 'from', v => `    from: ${v}`))
       out.push(`    to: ${h.to}`)
       out.push(`    actor: ${scalar(h.actor)}`)
       // Present-but-null is not the same as absent: dropping it loses the
       // record that this transition had no evidence, which is itself a fact.
       if ('evidence' in h) out.push(`    evidence: ${h.evidence == null ? '~' : scalar(h.evidence)}`)
-      if (h.note) out.push(`    note: ${scalar(h.note)}`)
-      if (h.approval) out.push(`    approval:${anyValue(h.approval, 6)}`)
+      out.push(...opt(h, 'note', v => `    note: ${scalar(v)}`))
+      out.push(...opt(h, 'approval', v => `    approval:${anyValue(v, 6)}`))
     }
   }
 
-  out.push('objects_and_reasons: |')
-  out.push(indentBlock(bill.objects_and_reasons ?? '', 2))
+  if (blockText(bill.objects_and_reasons) === '') out.push('objects_and_reasons: ""')
+  else { out.push('objects_and_reasons: |'); out.push(indentBlock(bill.objects_and_reasons, 2)) }
 
   out.push('operations:')
   for (const op of bill.operations ?? []) {
@@ -171,18 +186,23 @@ export function billToYaml (bill, { header = true } = {}) {
     out.push(`    operation: ${op.operation}`)
     out.push(`    target: ${op.target}`)
     out.push(`    scope: ${op.scope}`)
-    if (op.clauses) out.push(`    clauses: ${scalar(op.clauses)}`)
-    if (op.title) out.push(`    title: ${scalar(op.title)}`)
-    if (op.note) out.push(`    note: ${scalar(op.note)}`)
-    if (op.source_lines) out.push(`    source_lines: ${scalar(op.source_lines)}`)
-    if (op.text != null) { out.push('    text: |'); out.push(indentBlock(op.text, 6)) }
+    out.push(...opt(op, 'clauses', v => `    clauses: ${scalar(v)}`))
+    out.push(...opt(op, 'title', v => `    title: ${scalar(v)}`))
+    out.push(...opt(op, 'note', v => `    note: ${scalar(v)}`))
+    out.push(...opt(op, 'source_lines', v => `    source_lines: ${scalar(v)}`))
+    if (op.text != null) {
+      const t = blockText(op.text)
+      if (t === '') out.push('    text: ""')
+      else { out.push('    text: |'); out.push(indentBlock(op.text, 6)) }
+    }
     if (op.sections?.length) {
       out.push('    sections:')
       for (const s of op.sections) {
         out.push(`      - number: ${s.number}`)
         out.push(`        title: ${scalar(s.title)}`)
-        out.push('        text: |')
-        out.push(indentBlock(s.text, 10))
+        const st = blockText(s.text)
+        if (st === '') out.push('        text: ""')
+        else { out.push('        text: |'); out.push(indentBlock(s.text, 10)) }
       }
     }
   }
@@ -194,9 +214,9 @@ export function billToYaml (bill, { header = true } = {}) {
       if (a.meeting) {
         const m = a.meeting
         const bits = [`date: ${m.date == null ? '~' : m.date}`]
-        if (m.mode) bits.push(`mode: ${m.mode}`)
-        if (m.place) bits.push(`place: ${scalar(m.place)}`)
-        if (m.presiding) bits.push(`presiding: ${scalar(m.presiding)}`)
+        bits.push(...opt(m, 'mode', v => `mode: ${v}`))
+        bits.push(...opt(m, 'place', v => `place: ${scalar(v)}`))
+        bits.push(...opt(m, 'presiding', v => `presiding: ${scalar(v)}`))
         out.push(`    meeting: {${bits.join(', ')}}`)
       }
       for (const k of ['present', 'for', 'against', 'abstain']) {
@@ -208,10 +228,10 @@ export function billToYaml (bill, { header = true } = {}) {
         out.push(`      kind: ${a.evidence.kind}`)
         out.push(`      path: ${scalar(a.evidence.path)}`)
         out.push(`      sha256: "${a.evidence.sha256}"`)
-        if (a.evidence.url) out.push(`      url: ${scalar(a.evidence.url)}`)
+        out.push(...opt(a.evidence, 'url', v => `      url: ${scalar(v)}`))
       }
-      if (a.recorded_by) out.push(`    recorded_by: ${scalar(a.recorded_by)}`)
-      if (a.note) out.push(`    note: ${scalar(a.note)}`)
+      out.push(...opt(a, 'recorded_by', v => `    recorded_by: ${scalar(v)}`))
+      out.push(...opt(a, 'note', v => `    note: ${scalar(v)}`))
     }
   }
 
