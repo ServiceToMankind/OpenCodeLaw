@@ -14,6 +14,8 @@
  * would be free to drift, which is the class of failure this project began with.
  */
 
+import { blockText, canonicalJson, substantiveSubject, billToYaml } from './bill-serialise.mjs'
+
 const $ = (sel, root = document) => root.querySelector(sel)
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
 
@@ -276,32 +278,11 @@ function buildBill () {
   return bill
 }
 
-/**
- * The exact string a YAML `|` block yields on the way back in: trailing
- * whitespace stripped, then one newline. Hash what will be written, not what
- * the textarea happens to hold.
- */
-const blockText = s => String(s ?? '').replace(/\s+$/, '') + '\n'
 
-/** Byte-identical to canonicalJson in src/bill.mjs. */
-function canonicalJson (value) {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value ?? null)
-  if (Array.isArray(value)) return '[' + value.map(canonicalJson).join(',') + ']'
-  return '{' + Object.keys(value).sort()
-    .filter(k => value[k] !== undefined)
-    .map(k => JSON.stringify(k) + ':' + canonicalJson(value[k]))
-    .join(',') + '}'
-}
 
 async function substantiveHash (bill) {
-  const subject = {
-    short_title: bill.bill.short_title ?? null,
-    type: bill.bill.type ?? null,
-    base_version: bill.bill.base_version ?? null,
-    objects_and_reasons: bill.objects_and_reasons ?? null,
-    operations: bill.operations ?? []
-  }
-  const bytes = new TextEncoder().encode(canonicalJson(subject))
+  // Hash what will be parsed, never what is displayed — see bill-serialise.mjs.
+  const bytes = new TextEncoder().encode(canonicalJson(substantiveSubject(bill)))
   const digest = await crypto.subtle.digest('SHA-256', bytes)
   return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('')
 }
@@ -374,70 +355,12 @@ const verbFor = op => op.operation === 'insert'
 
 // ---------------------------------------------------------------------------
 
-function yamlOf (bill) {
-  const q = s => {
-    const str = String(s ?? '')
-    return /^[\w .,'’()\-\/&]+$/.test(str) && !/^\s|\s$/.test(str) ? str : JSON.stringify(str)
-  }
-  const block = (text, indent) => String(text ?? '').replace(/\s+$/, '')
-    .split('\n').map(l => ' '.repeat(indent) + l).join('\n')
-
-  const b = bill.bill
-  const out = [
-    '# Drafted with the propose page. Review it, then send it to the ICC.',
-    '# The bill file is the source of truth; the signed PDF is a rendering of it.',
-    '',
-    'opencodelaw_bill: "1.0"',
-    'bill:',
-    `  short_title: ${q(b.short_title)}`,
-    ...(b.also_known_as ? [`  also_known_as: ${q(b.also_known_as)}`] : []),
-    `  year: ${b.year}`,
-    '  number: ~',
-    `  type: ${b.type}`,
-    '  moved_by:',
-    `    name: ${q(b.moved_by.name)}`,
-    ...(b.moved_by.role ? [`    role: ${q(b.moved_by.role)}`] : []),
-    ...(b.moved_by.contact ? [`    contact: ${q(b.moved_by.contact)}`] : []),
-    `  drafted: ${b.drafted}`,
-    `  base_version: "${b.base_version}"`,
-    `  version_bump: ${b.version_bump}`,
-    'status: draft',
-    'history: []',
-    'objects_and_reasons: |',
-    block(bill.objects_and_reasons || '(none given)', 2),
-    'operations:'
-  ]
-  for (const op of bill.operations) {
-    out.push(`  - id: ${op.id}`)
-    out.push(`    operation: ${op.operation}`)
-    out.push(`    target: ${op.target}`)
-    out.push(`    scope: ${op.scope}`)
-    if (op.title) out.push(`    title: ${q(op.title)}`)
-    if (op.note) out.push(`    note: ${q(op.note)}`)
-    if (op.text != null) { out.push('    text: |'); out.push(block(op.text, 6)) }
-  }
-  out.push('approvals:')
-  for (const a of bill.approvals) {
-    out.push(`  - body: ${a.body}`)
-    out.push('    meeting: {date: ~}')
-    out.push('    present: ~')
-    out.push('    for: ~')
-    out.push('    against: ~')
-    out.push('    abstain: ~')
-    out.push('    bill_sha256: ~')
-  }
-  out.push('enactment:')
-  for (const k of ['act_number', 'act_year', 'assent_date', 'assented_by', 'signed_by', 'signed_pdf', 'signed_pdf_sha256']) {
-    out.push(`  ${k}: ~`)
-  }
-  return out.join('\n') + '\n'
-}
 
 async function download () {
   const bill = buildBill()
   const slug = (bill.bill.short_title || 'draft').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'draft'
-  const blob = new Blob([yamlOf(bill)], { type: 'text/yaml' })
+  const blob = new Blob([billToYaml(bill)], { type: 'text/yaml' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
   a.download = `draft-${slug}.yaml`

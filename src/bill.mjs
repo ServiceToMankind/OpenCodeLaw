@@ -16,6 +16,7 @@ import yaml from 'js-yaml'
 import Ajv from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 import { normalise } from './text-compare.mjs'
+import { canonicalJson, substantiveSubject, blockText, SUBSTANTIVE_FIELDS } from './scripts/bill-serialise.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OPTS = { schema: yaml.CORE_SCHEMA }
@@ -38,6 +39,8 @@ export const REQUIRED_BODIES = ['board', 'intermediate-board', 'units']
  * VOTING.
  */
 export const THRESHOLD = 2 / 3
+
+export { canonicalJson, blockText, SUBSTANTIVE_FIELDS }
 
 export function tally (approvals = []) {
   const perBody = REQUIRED_BODIES.map(body => {
@@ -472,17 +475,6 @@ export function report ({ problems, manifest, tally: t, bill }) {
  * history, approvals, enactment — is clerking that changes after drafting, and
  * including it would make a vote go stale for administrative reasons.
  */
-export const SUBSTANTIVE_FIELDS = ['short_title', 'type', 'base_version', 'objects_and_reasons', 'operations']
-
-/** RFC 8785-style canonical JSON: sorted keys, no insignificant whitespace. */
-export function canonicalJson (value) {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value ?? null)
-  if (Array.isArray(value)) return '[' + value.map(canonicalJson).join(',') + ']'
-  return '{' + Object.keys(value).sort()
-    .filter(k => value[k] !== undefined)
-    .map(k => JSON.stringify(k) + ':' + canonicalJson(value[k]))
-    .join(',') + '}'
-}
 
 /**
  * sha256 over the canonical form of what the bill actually proposes.
@@ -492,14 +484,8 @@ export function canonicalJson (value) {
  * a title would silently survive a change to the text it approved.
  */
 export function substantiveHash (bill) {
-  const subject = {
-    short_title: bill?.bill?.short_title ?? null,
-    type: bill?.bill?.type ?? null,
-    base_version: bill?.bill?.base_version ?? null,
-    objects_and_reasons: bill?.objects_and_reasons ?? null,
-    operations: bill?.operations ?? []
-  }
-  return crypto.createHash('sha256').update(canonicalJson(subject), 'utf8').digest('hex')
+  return crypto.createHash('sha256')
+    .update(canonicalJson(substantiveSubject(bill)), 'utf8').digest('hex')
 }
 
 /** The sentence a meeting reads into its minutes. */

@@ -92,12 +92,6 @@ describe('propose page', { skip: !CHROME || !fs.existsSync(path.join(DIST, 'prop
       report: document.querySelector('#check-report').textContent.replace(/\s+/g, ' ').trim()
     }))
     // The exact bytes the download button writes.
-    const text = await page.evaluate(async () => {
-      const mod = await import('/scripts/propose.js')
-      return null // module does not export; captured below instead
-    }).catch(() => null)
-    void text
-
     const downloaded = await page.evaluate(() => {
       // Re-run the page's own serialiser through a click, capturing the blob.
       return new Promise(resolve => {
@@ -110,6 +104,39 @@ describe('propose page', { skip: !CHROME || !fs.existsSync(path.join(DIST, 'prop
     await page.close()
     return { ...result, prefilled, downloaded, errors }
   }
+
+  test('selecting a target and changing nothing produces no change', async () => {
+    // Block-scalar chomping makes trailing newlines representationally
+    // unstable. If prefill or round-trip shifts one, untouched text stops
+    // comparing equal to the provision and the applier reports an edit nobody
+    // made — a phantom change on a constitution.
+    const page = await browser.newPage()
+    await page.goto(`http://localhost:${PORT}/propose/`, { waitUntil: 'networkidle0' })
+    await page.type('#p-name', 'Orla Fenn')
+    await page.type('#p-title', 'An Act that changes nothing')
+    await page.type('#p-objects', 'To test the no-change case.')
+    await page.type('.op__search', 'Annual')
+    await page.waitForSelector('.op__results li', { timeout: 4000 })
+    await page.evaluate(() => document.querySelector('.op__results li')
+      .dispatchEvent(new MouseEvent('mousedown', { bubbles: true })))
+    await new Promise(r => setTimeout(r, 600))
+
+    const downloaded = await page.evaluate(() => new Promise(resolve => {
+      const orig = URL.createObjectURL
+      URL.createObjectURL = blob => { blob.text().then(resolve); return orig.call(URL, blob) }
+      document.querySelector('#download').click()
+    }))
+    await page.close()
+
+    const parsed = yaml.load(downloaded, { schema: yaml.CORE_SCHEMA })
+    const op = parsed.operations[0]
+    const { classifyOperation, loadConstitution } = await import('../src/bill.mjs')
+    const doc = loadConstitution()
+    const node = doc.articles.find(a => a.id === op.target)
+    assert.ok(node, `${op.target} should exist in the constitution`)
+    assert.equal(classifyOperation(op, node, null), 'already-applied',
+      'an untouched provision must classify as no change, not as an edit')
+  })
 
   test('the target is prefilled with its current text, so the operation is full-text', async () => {
     const r = await drive()
