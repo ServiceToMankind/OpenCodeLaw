@@ -12,12 +12,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
 import { linkcheck } from '../src/linkcheck.mjs'
-import { normaliseBase, slugMap } from '../src/lib/paths.mjs'
+import { normaliseBase, slugMap, DEFAULT_BASE_PATH } from '../src/lib/paths.mjs'
 import { toPlainText } from '../src/lib/markdown.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = path.join(ROOT, 'dist')
-const BASE = normaliseBase(process.env.BASE_PATH ?? '/OpenCodeLaw/')
+const BASE = normaliseBase(DEFAULT_BASE_PATH)
 
 const doc = yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
 const slugs = slugMap(doc.articles)
@@ -173,9 +173,29 @@ test('the reconciliation banner is generated from reconciliation_state, not hard
   }
 })
 
-test('the custom domain is not published by default', () => {
-  assert.ok(!exists('CNAME'),
-    'CNAME must be excluded from the artifact until the new site has been reviewed')
+test('the custom domain ships with the artifact', () => {
+  // Inverted at cutover. constitution.stmorg.in now points at this build, and
+  // an Actions deploy whose artifact has no CNAME can drop the domain setting.
+  // Opt out with INCLUDE_CNAME=false, never by omission.
+  assert.ok(exists('CNAME'), 'CNAME must ship now that the custom domain is live')
+  assert.equal(read('CNAME').trim(), 'constitution.stmorg.in')
+})
+
+test('the built site is compiled for the base path it is served from', () => {
+  // The cutover breakage: the artifact was compiled for /OpenCodeLaw/ while the
+  // apex domain serves from /, so every asset and link 404'd.
+  const html = read('index.html')
+  const refs = [...html.matchAll(/\b(?:href|src)="(\/[^"]*)"/g)].map(m => m[1])
+  const cname = exists('CNAME') ? read('CNAME').trim() : null
+  if (cname) {
+    assert.equal(BASE, '/',
+      `CNAME is set to ${cname} (an apex domain, served from /), but the build used base path ${BASE}`)
+    for (const r of refs) {
+      assert.ok(!/^\/OpenCodeLaw\//.test(r), `${r} still carries the project-Pages prefix`)
+    }
+  }
+  const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)[1]
+  if (cname) assert.ok(canonical.includes(cname), `canonical ${canonical} does not point at ${cname}`)
 })
 
 test('no runtime CDN reference survives into the output', () => {
@@ -190,5 +210,44 @@ test('every Act PDF named in the register is reachable in the build', () => {
   const reg = yaml.load(fs.readFileSync(path.join(ROOT, 'acts/register.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
   for (const act of reg.acts) {
     assert.ok(exists(act.pdf), `${act.id}: ${act.pdf} missing from dist/`)
+  }
+})
+
+test('section headings sit one level below their article on every page type', () => {
+  // The document outline is how screen-reader users navigate a long legal text.
+  // Lighthouse will not catch a flattened outline: its sequential-headings audit
+  // only flags a skipped level, and h3 -> h3 is not a skip.
+  const pages = [
+    ['index.html', 3],
+    [`articles/${slugs.get('art-6')}/index.html`, 2]
+  ]
+  for (const [rel, articleLevel] of pages) {
+    const html = read(rel)
+    const art = doc.articles.find(a => a.sections?.length)
+    const start = html.indexOf(`id="${art.id}"`)
+    assert.ok(start > -1)
+    const segment = html.slice(start, start + 8000)
+
+    const artH = segment.match(new RegExp(`<h([1-6])[^>]*id="h-${art.id}"`))
+    assert.equal(Number(artH[1]), articleLevel, `${rel}: article heading level`)
+
+    for (const s of art.sections) {
+      const m = segment.match(new RegExp(`<h([1-6])[^>]*id="h-${s.id}"`))
+      assert.ok(m, `${rel}: ${s.id} heading missing`)
+      assert.equal(Number(m[1]), articleLevel + 1,
+        `${rel}: ${s.id} is <h${m[1]}> under an <h${articleLevel}> article — the outline says they are siblings`)
+    }
+  }
+})
+
+test('heading levels never skip on any page type', () => {
+  for (const rel of ['index.html', `articles/${[...slugs.values()][0]}/index.html`, 'amendments/index.html', 'archive/index.html']) {
+    const html = read(rel).replace(/<script[\s\S]*?<\/script>/g, '')
+    const levels = [...html.matchAll(/<h([1-6])\b/g)].map(m => Number(m[1]))
+    let prev = levels[0]
+    for (const l of levels.slice(1)) {
+      assert.ok(l <= prev + 1, `${rel}: jumped from h${prev} to h${l}`)
+      prev = l
+    }
   }
 })

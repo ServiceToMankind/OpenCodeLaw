@@ -18,7 +18,7 @@
   "scripts": {
     "validate": "node src/validate.mjs",
     "build": "node src/build.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test",
     "dev": "node src/build.mjs --watch --serve",
     "spec": "node src/gen-spec.mjs",
     "provenance": "node src/provenance.mjs",

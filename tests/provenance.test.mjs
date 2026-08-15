@@ -8,6 +8,11 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadActs } from '../src/acts-parse.mjs'
 import { verdictFor } from '../src/provenance.mjs'
+import { similarity } from '../src/text-compare.mjs'
+import yaml from 'js-yaml'
+import fs from 'node:fs'
+
+const live = () => yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const acts = loadActs(ROOT)
@@ -110,4 +115,41 @@ test('Act 2 sets 2/3rd in operative text and 3/4th only in the Statement of Obje
   const art16 = act2.provisions.find(p => p.target === 'art-16')
   assert.ok(/2\/3rd/.test(art16.text), 'the extracted art-16 provision carries the operative figure')
   assert.ok(!/3\/4th/.test(art16.text), 'the extracted provision must not carry the explanatory figure')
+})
+
+test('no extracted segment swallows the next operative item', () => {
+  // The real slice-boundary failure mode: a segment running past its own end
+  // and absorbing the heading — or the leading number — of the next item. A
+  // single stray token drags a 100% match down to ~98% and reads in
+  // PROVENANCE.md as unexplained drift.
+  //
+  // Guarding on "ends with a bare number" would misfire: Act 2's Article 15
+  // legitimately ends "...terminated based on article 7 and 18".
+  const HEADING = /^\s*\d+\s*\.\s*(Amendment\s+(to|of)|Insertion\s+of\s+new)\s/mi
+  for (const act of acts) {
+    for (const p of act.provisions) {
+      assert.ok(!HEADING.test(p.text),
+        `${act.file} ${p.target}: segment contains a following operative heading`)
+      // Nor a dangling "N." on its own line, which is that heading half-eaten.
+      const lines = p.text.split('\n').map(l => l.trim()).filter(Boolean)
+      const last = lines[lines.length - 1] ?? ''
+      assert.ok(!/^\d+\s*\.?$/.test(last),
+        `${act.file} ${p.target}: segment ends with a dangling item marker "${last}"`)
+    }
+  }
+})
+
+test('clause text compares like-for-like against the constitution', () => {
+  // An Act states a clause heading inline ("(2) Establishment ...") where the
+  // constitution keeps it in `title`. Comparing the clause against `content`
+  // alone drops one token in seventy-four and reports 98.6% for text that is
+  // word-for-word identical. Provenance must compare title+content.
+  const art11 = live().articles.find(a => a.number === 11)
+  const s2 = art11.sections.find(s => s.number === 2)
+  const p = acts[0].provisions.find(x => x.target === 'art-11')
+  const marks = [...p.text.matchAll(/^[ \t]*\((\d+)\)/gm)]
+  const clause2 = p.text.slice(marks[1].index).trim()
+
+  assert.equal(Math.round(similarity(clause2, `${s2.title}\n${s2.content}`) * 1000) / 1000, 1,
+    'Act 1 clause (2) is word-for-word art-11-s-2 once the title is included')
 })

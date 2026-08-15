@@ -7,11 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      include_cname:
+      skip_cname:
         description: >-
-          Publish the CNAME file, pointing constitution.stmorg.in at this build.
-          Leave false until the new site has been reviewed — the custom domain
-          still serves the old site.
+          Omit the CNAME file. Only for a deliberate rollback to the
+          servicetomankind.github.io URL — constitution.stmorg.in points here now
+          and a deploy without CNAME can drop the domain setting.
         type: boolean
         default: false
         required: false
@@ -24,10 +24,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Project Pages serves under /<repo>/. Change these two together to move to
-  # the apex domain; every internal link and asset is derived from them.
-  BASE_PATH: /OpenCodeLaw/
-  SITE_ORIGIN: https://servicetomankind.github.io
+  # The custom domain serves from the root, so the base path is "/". Every
+  # internal link and asset derives from these two; changing one without the
+  # other ships a site whose links point at a directory that is not there.
+  BASE_PATH: /
+  SITE_ORIGIN: https://constitution.stmorg.in
 
 jobs:
   # A schema violation, a failing test or a dead internal link must block
@@ -74,20 +75,31 @@ jobs:
 
       - name: Build static site
         run: npm run build
-        env:
-          INCLUDE_CNAME: ${{ github.event.inputs.include_cname || 'false' }}
 
       - name: Check links
         run: npm run linkcheck
 
-      - name: Fail if the custom domain was published unintentionally
-        if: ${{ github.event.inputs.include_cname != 'true' }}
+      # The validate matrix already tested both runtimes, but it builds its own
+      # copy. Running the suite here means the exact artifact that ships was
+      # tested against the exact Node it was produced on.
+      - name: Test the artifact build
+        run: npm test
+
+      # constitution.stmorg.in is live. An Actions deploy whose artifact has no
+      # CNAME can drop the custom domain setting, so its absence is now the
+      # failure — the opposite of the pre-cutover rule.
+      - name: Guard the custom domain
         run: |
-          if [ -f dist/CNAME ]; then
-            echo "::error::dist/CNAME present but include_cname was not requested."
+          if [ ! -f dist/CNAME ]; then
+            echo "::error::dist/CNAME missing — a deploy without it can drop the custom domain."
             exit 1
           fi
-          echo "CNAME correctly excluded; the custom domain is untouched."
+          echo "CNAME present: $(cat dist/CNAME)"
+          if grep -rqE 'href="/OpenCodeLaw/|src="/OpenCodeLaw/' dist; then
+            echo "::error::Built pages still carry the /OpenCodeLaw/ prefix but the site serves from /."
+            exit 1
+          fi
+          echo "No stale project-Pages prefix in the output."
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'

@@ -28,18 +28,27 @@ function copyButton (id, label) {
     aria-label="Copy link to ${escapeHtml(label)}"><span aria-hidden="true">🔗</span></button>`
 }
 
-export function renderSection (section, { url, actIndex }) {
+/**
+ * A section's heading must sit one level below its article's, or the document
+ * outline says the two are siblings. Screen-reader users navigate this tree by
+ * heading; a scanner reading "6 STM Roles" then "1 Board Member" at identical
+ * weight cannot tell which contains which. Lighthouse does not catch it —
+ * its sequential-headings audit only flags skipped levels, and h3 -> h3 is not
+ * a skip.
+ */
+export function renderSection (section, { url, actIndex, headingLevel = 3 }) {
+  const H = `h${Math.min(headingLevel, 6)}`
   const status = section.status ?? 'active'
   const body = status === 'active'
     ? renderMarkdown(section.content)
     : `<p class="no-text" role="note">[${escapeHtml(section.note ?? 'No text')}]</p>`
   return `
       <article class="provision provision--section" id="${escapeHtml(section.id)}" aria-labelledby="h-${escapeHtml(section.id)}">
-        <h3 class="provision__heading" id="h-${escapeHtml(section.id)}">
+        <${H} class="provision__heading" id="h-${escapeHtml(section.id)}">
           <span class="provision__num" aria-hidden="true">${section.number}</span>
           <span class="provision__title">${escapeHtml(section.title)}</span>
           ${copyButton(section.id, section.title)}
-        </h3>
+        </${H}>
         ${amendedByChips(section.amended_by, { url, actIndex })}
         <div class="provision__body">${body}</div>
       </article>`
@@ -67,7 +76,9 @@ export function renderArticle (article, opts) {
     ? `<div class="provision__body">${renderMarkdown(article.content)}</div>`
     : ((article.sections ?? []).length ? '' : `<div class="provision__body">${renderMarkdown(null)}</div>`)
 
-  const sections = (article.sections ?? []).map(s => renderSection(s, opts)).join('')
+  const sections = (article.sections ?? [])
+    .map(s => renderSection(s, { ...opts, headingLevel: headingLevel + 1 }))
+    .join('')
 
   return `
     <article class="provision provision--article" id="${escapeHtml(article.id)}" aria-labelledby="h-${escapeHtml(article.id)}">

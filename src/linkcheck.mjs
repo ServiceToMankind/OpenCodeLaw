@@ -12,11 +12,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { normaliseBase } from './lib/paths.mjs'
+import { normaliseBase, DEFAULT_BASE_PATH } from './lib/paths.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = path.join(ROOT, 'dist')
-const BASE = normaliseBase(process.env.BASE_PATH ?? '/OpenCodeLaw/')
+const BASE = normaliseBase(DEFAULT_BASE_PATH)
 
 const EXTERNAL = /^(https?:|mailto:|tel:|data:|#|javascript:)/i
 

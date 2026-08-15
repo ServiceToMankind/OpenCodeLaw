@@ -7,6 +7,14 @@
  * exactly one place and asserted by tests.
  */
 
+/**
+ * Deployment defaults, defined once. build.mjs, linkcheck.mjs and the tests all
+ * read these, so the base path they assume cannot drift apart — a mismatch
+ * ships a site whose every link points at a directory that is not there.
+ */
+export const DEFAULT_BASE_PATH = process.env.BASE_PATH ?? '/'
+export const DEFAULT_SITE_ORIGIN = (process.env.SITE_ORIGIN ?? 'https://constitution.stmorg.in').replace(/\/+$/, '')
+
 /** Trailing slash, leading slash, no doubles. `/OpenCodeLaw/` or `/`. */
 export function normaliseBase (base) {
   if (!base || base === '/') return '/'

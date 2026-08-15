@@ -11,7 +11,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
-import { makeUrl, makeAbsolute, slugMap, escapeHtml, summarise } from './lib/paths.mjs'
+import { makeUrl, makeAbsolute, slugMap, escapeHtml, summarise, DEFAULT_BASE_PATH, DEFAULT_SITE_ORIGIN } from './lib/paths.mjs'
 import { toPlainText, renderMarkdown } from './lib/markdown.mjs'
 import { layout } from './templates/layout.mjs'
 import { renderArticle, renderPreamble } from './templates/provision.mjs'
@@ -21,9 +21,11 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const OUT = () => path.join(ROOT, process.env.OUT_DIR ?? 'dist')
 
 // Configurable so switching to the apex domain later is a one-line change.
-export const BASE_PATH = process.env.BASE_PATH ?? '/OpenCodeLaw/'
-export const SITE_ORIGIN = (process.env.SITE_ORIGIN ?? 'https://servicetomankind.github.io').replace(/\/+$/, '')
-const INCLUDE_CNAME = process.env.INCLUDE_CNAME === 'true'
+export const BASE_PATH = DEFAULT_BASE_PATH
+export const SITE_ORIGIN = DEFAULT_SITE_ORIGIN
+// The custom domain is live. An artifact without CNAME can drop the domain
+// setting on deploy, so this now defaults ON and must be opted OUT of.
+const INCLUDE_CNAME = process.env.INCLUDE_CNAME !== 'false'
 
 // Engine and content are separate. Point these at your own files and the
 // engine needs no modification; versions/ and the act register are optional.
