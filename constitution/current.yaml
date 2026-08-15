@@ -108,39 +108,41 @@ articles:
       - id: art-6-s-1
         number: 1
         title: Board Member
-        title_source: editorial
+        title_source: enacted
         content: |
-          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+          Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime.
       - id: art-6-s-2
         number: 2
         title: Intermediate Board Member
-        title_source: editorial
+        title_source: enacted
         content: |
-          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+          Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime under the board.
       - id: art-6-s-3
         number: 3
-        title: College Unit Board Member
-        title_source: editorial
+        title: Unit Board Member
+        title_source: enacted
         content: |
-          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+          Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM in their respective unit within their academic life.
       - id: art-6-s-4
         number: 4
         title: Coordinator
-        title_source: editorial
+        title_source: enacted
         content: |
-          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+          Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in the STM in their respective unit within their academic life.
       - id: art-6-s-5
         number: 5
         title: Volunteer
-        title_source: editorial
+        title_source: enacted
         content: |
-          Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+          Any person who is willing to serve society and abide by the rules and regulations of the NGO to do service.
       - id: art-6-s-6
         number: 6
         title: Donor
         title_source: editorial
         content: |
           Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
+    amended_by:
+      - act-1-2024
   - id: art-7
     number: 7
     title: Membership
@@ -149,7 +151,7 @@ articles:
       1. A person who has been recruited into the organization on follow of process as per Organization rules and regulations and is duly appointed by STM as such for any of the college units or works for the NGO in certain form shall be called as an STM ‘Member’..
       2. A person who has registered online in the STM website and admitted in the NGO through a confirmation email and according to its regulations continues to be a member of the NGO.
       3. An applicant can only be a member if appointed through the recruitment process by the competent authority as may be defined by society from time to time via the Board.
-      4. Any person who donates atleast INR 30 (Rupees Thirty Only) shall be a ‘Donor Member’ of STM, however, a Donor Member is not an official STM ‘Member’ and does not work for the organization.
+      4. Any person who donates at least INR 30 (Rupees Thirty Only) shall be called ''STM DONOR''.
       5. Eligibility of membership
           * (a)The following shall be eligible for membership in the society:-
             1. The applicant will strive to work for the achievement of the objectives of the society.
@@ -165,14 +167,10 @@ articles:
                   (a) for misconduct \
                   (b) for insubordination \
                   (c) due to non-performance 
-              6. If found inactive or nonperforming, the member would be termed as inactive
-              member in writing, the member is put under a performance plan by giving
-              due notice of 3 months’ time from the date of declaration in writing to
-              perform their duties at a satisfactory level, failing which the membership of
-              an individual shall be terminated..
-          * (b)The authority to terminate or revoke the status of a member shall be vested with the Board for all members. 
-          Intermediate board can terminate or revoke the membership of a member for college units. 
-          Head of the college units can terminate or revoke the membership of a member within the college unit.
+              6. If a member is found inactive or nonperforming, the member would be termed as inactive member in writing. The member will be under a performance plan with a notice of 2 months from the date of declaration to improve their performance to a satisfactory level. Failure to do so will result in termination.
+          * (b)The Board member has authority to terminate or revoke the status of any member. The Intermediate board can terminate or revoke the membership of any member of units and the Unit Head can terminate or revoke the membership of a member within a unit with written approval from the Internal Compliance coordinator in writing for any reason stated in the suspension or termination article.
+    amended_by:
+      - act-1-2024
   - id: art-8
     number: 8
     title: Internship
