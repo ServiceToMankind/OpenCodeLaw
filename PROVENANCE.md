@@ -8,9 +8,9 @@ the text the Act prescribes, and a verdict. Regenerate with `npm run provenance`
 
 | Verdict | Meaning | Count |
 |---|---|---|
-| 🟢 ALREADY-APPLIED | Current text matches the Act's prescribed text | 5 |
-| 🟡 NOT-APPLIED | Current text is the pre-Act text, or the insertion has not been made | 19 |
-| 🔴 DIVERGENT | Matches neither — edited outside the amendment process | 0 |
+| 🟢 ALREADY-APPLIED | Current text matches the Act's prescribed text | 21 |
+| 🟡 NOT-APPLIED | Current text is the pre-Act text, or the insertion has not been made | 0 |
+| 🔴 DIVERGENT | Matches neither — edited outside the amendment process | 3 |
 
 ## Method
 
@@ -30,44 +30,53 @@ a provision is not reported as changed merely for being formatted differently.
 Match threshold 0.94. Pre-Act baseline is `constitution/versions/v1.0.0.yaml`,
 the last version that demonstrably predates all three Acts.
 
+## 🔴 DIVERGENT — stop here
+
+3 provision(s) match neither the Act nor the pre-Act text. These are not
+classified further and must not be resolved without a decision from the board.
+
+- **art-6 clause (2)** (Act 1 of 2024) — reads as the Act 93.3%, the Act's words are 93.3% present, 73.4% unchanged since v1.
+- **art-6 clause (4)** (Act 1 of 2024) — reads as the Act 93.8%, the Act's words are 93.8% present, 73.4% unchanged since v1.
+- **art-6 clause (5)** (Act 1 of 2024) — reads as the Act 90.9%, the Act's words are 90.9% present, 73.4% unchanged since v1.
+
 ## Summary
 
 | | Act | Provision | Op | Scope | Current title | Act title | Reads as Act | Act words present | Unchanged since v1 | Verdict |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 🟡 | Act 1 of 2024 | `art-6` (1) | substitute | clause | STM Roles | STM Roles | 74.2% | 74.2% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 1 of 2024 | `art-6` (2) | substitute | clause | STM Roles | STM Roles | 69.4% | 69.4% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 1 of 2024 | `art-6` (3) | substitute | clause | STM Roles | STM Roles | 67.5% | 67.5% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 1 of 2024 | `art-6` (4) | substitute | clause | STM Roles | STM Roles | 68.4% | 68.4% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 1 of 2024 | `art-6` (5) | substitute | clause | STM Roles | STM Roles | 76.9% | 76.9% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 1 of 2024 | `art-7` (4) | substitute | clause | Membership | Membership | 75.0% | 75.0% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 1 of 2024 | `art-7` (6) | substitute | clause | Membership | Membership | 44.4% | 44.4% | 100.0% | **NOT-APPLIED** |
+| 🟢 | Act 1 of 2024 | `art-6` (1) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
+| 🔴 | Act 1 of 2024 | `art-6` (2) | substitute | clause | STM Roles | STM Roles | 93.3% | 93.3% | 73.4% | **DIVERGENT** |
+| 🟢 | Act 1 of 2024 | `art-6` (3) | substitute | clause | STM Roles | STM Roles | 100.0% | 100.0% | 73.4% | **ALREADY-APPLIED** |
+| 🔴 | Act 1 of 2024 | `art-6` (4) | substitute | clause | STM Roles | STM Roles | 93.8% | 93.8% | 73.4% | **DIVERGENT** |
+| 🔴 | Act 1 of 2024 | `art-6` (5) | substitute | clause | STM Roles | STM Roles | 90.9% | 90.9% | 73.4% | **DIVERGENT** |
+| 🟢 | Act 1 of 2024 | `art-7` (4) | substitute | clause | Membership | Membership | 100.0% | 100.0% | 76.2% | **ALREADY-APPLIED** |
+| 🟢 | Act 1 of 2024 | `art-7` (6) | substitute | clause | Membership | Membership | 97.4% | 97.4% | 76.2% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-9` | substitute | article | Board Members | Board Members | 100.0% | 100.0% | 28.3% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-10` | substitute | article | Intermediate Board Members | Intermediate Board Members | 100.0% | 100.0% | 32.7% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-11` | substitute | article | Units | Units | 99.4% | 99.4% | 26.8% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-12` | substitute | article | Alumini | Alumni | 100.0% | 100.0% | 47.1% | **ALREADY-APPLIED** |
 | 🟢 | Act 1 of 2024 | `art-18` | insert | article | Suspension/Termination | Suspension/Termination | 100.0% | 100.0% | 0.0% | **ALREADY-APPLIED** |
-| 🟡 | Act 2 of 2024 | `preamble` | substitute | article | PREAMBLE | Preamble | 30.0% | 39.5% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-3` | substitute | article | Aims and Objectives | Aim and Objectives | 35.0% | 33.3% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-4` | substitute | article | Mission Statement | Mission statement | 11.1% | 16.7% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-5` | substitute | article | Vision Statement | Vision Statement | 55.6% | 80.0% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-8` | substitute | article | Internship | Internship | 84.4% | 84.4% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-16` (3) | substitute | clause | Ammendments | Amendments | 54.8% | 54.8% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-17` (1) | substitute | clause | Dissolution | Dissolution | 63.0% | 63.0% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-14` | substitute | article | Sabbatical Leave | Leaves | 12.7% | 16.7% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-20` | insert | article | — | Meetings and Activities | 0.0% | 0.0% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 2 of 2024 | `art-15` | substitute | article | Resignation | Exit Process | 9.8% | 16.2% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 3 of 2024 | `art-13` | substitute | article | Anual Reports | Annual Report | 70.4% | 70.4% | 100.0% | **NOT-APPLIED** |
-| 🟡 | Act 3 of 2024 | `art-21` | insert | article | — | Financial Management | 0.0% | 0.0% | 100.0% | **NOT-APPLIED** |
+| 🟢 | Act 2 of 2024 | `preamble` | substitute | article | Preamble | Preamble | 100.0% | 100.0% | 30.0% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-3` | substitute | article | Aim and Objectives | Aim and Objectives | 100.0% | 100.0% | 35.0% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-4` | substitute | article | Mission statement | Mission statement | 100.0% | 100.0% | 11.1% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-5` | substitute | article | Vision Statement | Vision Statement | 100.0% | 100.0% | 55.6% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-8` | substitute | article | Internship | Internship | 100.0% | 100.0% | 84.4% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-16` (3) | substitute | clause | Amendments | Amendments | 100.0% | 100.0% | 77.0% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-17` (1) | substitute | clause | Dissolution | Dissolution | 100.0% | 100.0% | 70.5% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-14` | substitute | article | Leaves | Leaves | 100.0% | 100.0% | 12.7% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-20` | insert | article | Meetings and Activities | Meetings and Activities | 100.0% | 100.0% | 0.0% | **ALREADY-APPLIED** |
+| 🟢 | Act 2 of 2024 | `art-15` | substitute | article | Exit Process | Exit Process | 100.0% | 100.0% | 9.8% | **ALREADY-APPLIED** |
+| 🟢 | Act 3 of 2024 | `art-13` | substitute | article | Annual Report | Annual Report | 100.0% | 100.0% | 70.4% | **ALREADY-APPLIED** |
+| 🟢 | Act 3 of 2024 | `art-21` | insert | article | Financial Management | Financial Management | 100.0% | 100.0% | 0.0% | **ALREADY-APPLIED** |
 
 ## Provision by provision
 
 ### Act 1 of 2024 — *Membership Act, 2024*
 
-#### 🟡 art-6 clause (1) — NOT-APPLIED
+#### 🟢 art-6 clause (1) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **74.2%** · Act's words present 74.2% · unchanged since v1 100.0%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -76,19 +85,19 @@ The membership of the NGO shall be open to all the students of the college who a
 serve the society and who are willing to abide by the rules and regulations of the NGO.
 
 Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime.
 
 Intermediate Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime under the board.
 
-College Unit Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+Unit Board Member
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM in their respective unit within their academic life.
 
 Coordinator
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in the STM in their respective unit within their academic life.
 
 Volunteer
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to do service.
 
 Donor
 Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
@@ -105,11 +114,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🟡 art-6 clause (2) — NOT-APPLIED
+#### 🔴 art-6 clause (2) — DIVERGENT
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **69.4%** · Act's words present 69.4% · unchanged since v1 100.0%
+Reads as the Act **93.3%** · Act's words present 93.3% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -118,19 +127,19 @@ The membership of the NGO shall be open to all the students of the college who a
 serve the society and who are willing to abide by the rules and regulations of the NGO.
 
 Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime.
 
 Intermediate Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime under the board.
 
-College Unit Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+Unit Board Member
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM in their respective unit within their academic life.
 
 Coordinator
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in the STM in their respective unit within their academic life.
 
 Volunteer
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to do service.
 
 Donor
 Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
@@ -147,11 +156,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🟡 art-6 clause (3) — NOT-APPLIED
+#### 🟢 art-6 clause (3) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **67.5%** · Act's words present 67.5% · unchanged since v1 100.0%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -160,19 +169,19 @@ The membership of the NGO shall be open to all the students of the college who a
 serve the society and who are willing to abide by the rules and regulations of the NGO.
 
 Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime.
 
 Intermediate Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime under the board.
 
-College Unit Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+Unit Board Member
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM in their respective unit within their academic life.
 
 Coordinator
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in the STM in their respective unit within their academic life.
 
 Volunteer
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to do service.
 
 Donor
 Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
@@ -190,11 +199,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🟡 art-6 clause (4) — NOT-APPLIED
+#### 🔴 art-6 clause (4) — DIVERGENT
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **68.4%** · Act's words present 68.4% · unchanged since v1 100.0%
+Reads as the Act **93.8%** · Act's words present 93.8% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -203,19 +212,19 @@ The membership of the NGO shall be open to all the students of the college who a
 serve the society and who are willing to abide by the rules and regulations of the NGO.
 
 Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime.
 
 Intermediate Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime under the board.
 
-College Unit Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+Unit Board Member
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM in their respective unit within their academic life.
 
 Coordinator
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in the STM in their respective unit within their academic life.
 
 Volunteer
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to do service.
 
 Donor
 Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
@@ -233,11 +242,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🟡 art-6 clause (5) — NOT-APPLIED
+#### 🔴 art-6 clause (5) — DIVERGENT
 
 `substitute` · clause scope · source `act-1-2024` line 18
 
-Reads as the Act **76.9%** · Act's words present 76.9% · unchanged since v1 100.0%
+Reads as the Act **90.9%** · Act's words present 90.9% · unchanged since v1 73.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -246,19 +255,19 @@ The membership of the NGO shall be open to all the students of the college who a
 serve the society and who are willing to abide by the rules and regulations of the NGO.
 
 Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime.
 
 Intermediate Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM for the lifetime and manage every thing in the STM under the board.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM for lifetime under the board.
 
-College Unit Board Member
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve the STM in thier respective college unit within thier academic life.
+Unit Board Member
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in STM in their respective unit within their academic life.
 
 Coordinator
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to serve and work for the STM after the successfull interview.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to work in the STM in their respective unit within their academic life.
 
 Volunteer
-Any person who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO to do service on thier will.
+Any person who is willing to serve society and abide by the rules and regulations of the NGO to do service.
 
 Donor
 Any person who agrees to donate a certain amount of money to the NGO is eligible to become a donor.
@@ -275,11 +284,11 @@ Any person who agrees to donate a certain amount of money to the NGO is eligible
 
 </details>
 
-#### 🟡 art-7 clause (4) — NOT-APPLIED
+#### 🟢 art-7 clause (4) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 35
 
-Reads as the Act **75.0%** · Act's words present 75.0% · unchanged since v1 100.0%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 76.2%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -287,7 +296,7 @@ Reads as the Act **75.0%** · Act's words present 75.0% · unchanged since v1 10
 1. A person who has been recruited into the organization on follow of process as per Organization rules and regulations and is duly appointed by STM as such for any of the college units or works for the NGO in certain form shall be called as an STM ‘Member’..
 2. A person who has registered online in the STM website and admitted in the NGO through a confirmation email and according to its regulations continues to be a member of the NGO.
 3. An applicant can only be a member if appointed through the recruitment process by the competent authority as may be defined by society from time to time via the Board.
-4. Any person who donates atleast INR 30 (Rupees Thirty Only) shall be a ‘Donor Member’ of STM, however, a Donor Member is not an official STM ‘Member’ and does not work for the organization.
+4. Any person who donates at least INR 30 (Rupees Thirty Only) shall be called ''STM DONOR''.
 5. Eligibility of membership
     * (a)The following shall be eligible for membership in the society:-
       1. The applicant will strive to work for the achievement of the objectives of the society.
@@ -303,14 +312,8 @@ Reads as the Act **75.0%** · Act's words present 75.0% · unchanged since v1 10
             (a) for misconduct \
             (b) for insubordination \
             (c) due to non-performance 
-        6. If found inactive or nonperforming, the member would be termed as inactive
-        member in writing, the member is put under a performance plan by giving
-        due notice of 3 months’ time from the date of declaration in writing to
-        perform their duties at a satisfactory level, failing which the membership of
-        an individual shall be terminated..
-    * (b)The authority to terminate or revoke the status of a member shall be vested with the Board for all members. 
-    Intermediate board can terminate or revoke the membership of a member for college units. 
-    Head of the college units can terminate or revoke the membership of a member within the college unit.
+        6. If a member is found inactive or nonperforming, the member would be termed as inactive member in writing. The member will be under a performance plan with a notice of 2 months from the date of declaration to improve their performance to a satisfactory level. Failure to do so will result in termination.
+    * (b)The Board member has authority to terminate or revoke the status of any member. The Intermediate board can terminate or revoke the membership of any member of units and the Unit Head can terminate or revoke the membership of a member within a unit with written approval from the Internal Compliance coordinator in writing for any reason stated in the suspension or termination article.
 ```
 
 </details>
@@ -324,11 +327,11 @@ Reads as the Act **75.0%** · Act's words present 75.0% · unchanged since v1 10
 
 </details>
 
-#### 🟡 art-7 clause (6) — NOT-APPLIED
+#### 🟢 art-7 clause (6) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-1-2024` line 35
 
-Reads as the Act **44.4%** · Act's words present 44.4% · unchanged since v1 100.0%
+Reads as the Act **97.4%** · Act's words present 97.4% · unchanged since v1 76.2%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
@@ -336,7 +339,7 @@ Reads as the Act **44.4%** · Act's words present 44.4% · unchanged since v1 10
 1. A person who has been recruited into the organization on follow of process as per Organization rules and regulations and is duly appointed by STM as such for any of the college units or works for the NGO in certain form shall be called as an STM ‘Member’..
 2. A person who has registered online in the STM website and admitted in the NGO through a confirmation email and according to its regulations continues to be a member of the NGO.
 3. An applicant can only be a member if appointed through the recruitment process by the competent authority as may be defined by society from time to time via the Board.
-4. Any person who donates atleast INR 30 (Rupees Thirty Only) shall be a ‘Donor Member’ of STM, however, a Donor Member is not an official STM ‘Member’ and does not work for the organization.
+4. Any person who donates at least INR 30 (Rupees Thirty Only) shall be called ''STM DONOR''.
 5. Eligibility of membership
     * (a)The following shall be eligible for membership in the society:-
       1. The applicant will strive to work for the achievement of the objectives of the society.
@@ -352,14 +355,8 @@ Reads as the Act **44.4%** · Act's words present 44.4% · unchanged since v1 10
             (a) for misconduct \
             (b) for insubordination \
             (c) due to non-performance 
-        6. If found inactive or nonperforming, the member would be termed as inactive
-        member in writing, the member is put under a performance plan by giving
-        due notice of 3 months’ time from the date of declaration in writing to
-        perform their duties at a satisfactory level, failing which the membership of
-        an individual shall be terminated..
-    * (b)The authority to terminate or revoke the status of a member shall be vested with the Board for all members. 
-    Intermediate board can terminate or revoke the membership of a member for college units. 
-    Head of the college units can terminate or revoke the membership of a member within the college unit.
+        6. If a member is found inactive or nonperforming, the member would be termed as inactive member in writing. The member will be under a performance plan with a notice of 2 months from the date of declaration to improve their performance to a satisfactory level. Failure to do so will result in termination.
+    * (b)The Board member has authority to terminate or revoke the status of any member. The Intermediate board can terminate or revoke the membership of any member of units and the Unit Head can terminate or revoke the membership of a member within a unit with written approval from the Internal Compliance coordinator in writing for any reason stated in the suspension or termination article.
 ```
 
 </details>
@@ -662,19 +659,19 @@ the Internal Compliance Coordinator.
 
 ### Act 2 of 2024
 
-#### 🟡 preamble — NOT-APPLIED
+#### 🟢 preamble — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 17
 
-Reads as the Act **30.0%** · Act's words present 39.5% · unchanged since v1 100.0%
-
-> Title: current `PREAMBLE` → enacted `Preamble`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 30.0%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-Service to Mankind is a Non-Governmental Organization (NGO) registered under Telangana Societies Registration Act., 2001 that was started to create a platform for students who are
-intent on doing their bit towards the betterment of society. Service to Mankind is a platform for the students to serve the society and to inculcate a sense of social responsibility in them.
+SERVICE TO MANKIND is a non-governmental organization registered under the
+       Telangana Society Registration Act, 2001, representing a student-run organization for
+       individuals motivated to fulfill their obligation towards societal betterment and
+       cultivate socially responsible individuals.
 ```
 
 </details>
@@ -690,20 +687,17 @@ SERVICE TO MANKIND is a non-governmental organization registered under the
 
 </details>
 
-#### 🟡 art-3 — NOT-APPLIED
+#### 🟢 art-3 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 24
 
-Reads as the Act **35.0%** · Act's words present 33.3% · unchanged since v1 100.0%
-
-> Title: current `Aims and Objectives` → enacted `Aim and Objectives`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 35.0%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-The NGO has been established to create a platform for the students who are intent on doing
-their bit towards the betterment of society with the objective of helping the underprivileged
-and the destitute in any and every way possible.
+To create a platform for students who have a motive to fulfill their obligation towards
+       societal betterment by helping the underprivileged in every possible way.
 ```
 
 </details>
@@ -717,19 +711,17 @@ To create a platform for students who have a motive to fulfill their obligation 
 
 </details>
 
-#### 🟡 art-4 — NOT-APPLIED
+#### 🟢 art-4 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 30
 
-Reads as the Act **11.1%** · Act's words present 16.7% · unchanged since v1 100.0%
-
-> Title: current `Mission Statement` → enacted `Mission statement`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 11.1%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-The mission of the NGO is to provide a platform for the students to serve the society and
-to inculcate a sense of social responsibility in them.
+To nurture socially responsible personalities who enlighten the lives of the
+       underprivileged.
 ```
 
 </details>
@@ -743,17 +735,17 @@ To nurture socially responsible personalities who enlighten the lives of the
 
 </details>
 
-#### 🟡 art-5 — NOT-APPLIED
+#### 🟢 art-5 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 36
 
-Reads as the Act **55.6%** · Act's words present 80.0% · unchanged since v1 100.0%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 55.6%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-The vision of the NGO is to create a society where everyone has access to basic amenities
-and to create a society where everyone is treated equally.
+To create a society where everyone has access to basic amenities and is treated
+       equally.
 ```
 
 </details>
@@ -767,34 +759,40 @@ To create a society where everyone has access to basic amenities and is treated
 
 </details>
 
-#### 🟡 art-8 — NOT-APPLIED
+#### 🟢 art-8 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 47
 
-Reads as the Act **84.4%** · Act's words present 84.4% · unchanged since v1 100.0%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 84.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-Internship is a program where the students of the college are given an opportunity to work for the NGO and to learn the working of the NGO as a coordinator in respective collage unit.
+Internship is a program where the students of the college are given an opportunity to
+       work for the NGO and to learn the working of the NGO as a coordinator in the
+       respective unit.
 
 Stipend
-There is no stipend for the internship program. But the interns will be provided with the certificate of internship in thier respective college units.
+There is no stipend for the internship program. But the coordinators will be provided
+with the certificate of internship in their respective units.
 
 Duration
-The duration of the internship program is 3 academic years.
+The duration of the internship program is two years.
 
 Eligibility
-Any student who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO is eligible to become an intern according to the article 7 of the constitution.
+Any student who is willing to serve the society and abide by the rules and regulations of
+the NGO is eligible to become an coordinator, according to the article 7.
 
 Selection Process
 The selection process for the internship program is as follows:
-1. The student should fill the application form for the internship program.
-2. The student should attend the interview conducted by the college board.
-3. The student should be selected by the board.
+         1. The student should fill out the application form for the internship program.
+         2. The student will engage in recruitment rounds conducted by the unit board.
+         3. The student should be selected by the unit board.
 
 Roles and Responsibilities
-All the interns should abide by the rules and regulations of the NGO. The interns should work for the NGO in thier respective departments and should work for the betterment of the society.
+All the coordinators should abide by the rules and regulations of the NGO. The
+coordinator should work for the NGO in their respective departments for the betterment
+of the society.
 ```
 
 </details>
@@ -827,20 +825,18 @@ Internship is a program where the students of the college are given an opportuni
 
 </details>
 
-#### 🟡 art-16 clause (3) — NOT-APPLIED
+#### 🟢 art-16 clause (3) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-2-2024` line 72
 
-Reads as the Act **54.8%** · Act's words present 54.8% · unchanged since v1 100.0%
-
-> Title: current `Ammendments` → enacted `Amendments`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 77.0%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
 1. Any changes to the constitution of the NGO should be done by the board of the NGO.
 2. The ammenments should be done according to the by-laws of the NGO.
-3. All the proposed ammendments should be approved by the board of the NGO, intermediate board of the NGO and all college units of the NGO.
+3. All proposed amendments must be approved by a 2/3rd present and voting of the board of the NGO, the intermediate board of the NGO and units of the NGO collectively.
 ```
 
 </details>
@@ -854,17 +850,16 @@ the NGO, the intermediate board of the NGO and units of the NGO collectively.
 
 </details>
 
-#### 🟡 art-17 clause (1) — NOT-APPLIED
+#### 🟢 art-17 clause (1) — ALREADY-APPLIED
 
 `substitute` · clause scope · source `act-2-2024` line 83
 
-Reads as the Act **63.0%** · Act's words present 63.0% · unchanged since v1 100.0%
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 70.5%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-(a). In an event that the NGO fails to function totally and needs to be dissolved, the whole
-board of the NGO shall be dissolved and a new board shall be elected by the General Body. Else, the whole NGO shall be dissolved. \
+(a). In an event that the NGO fails to function totally and needs to be dissolved, the whole board of the NGO shall be dissolved. Else, the whole NGO shall be dissolved. The funds of the NGO will be transferred to the same objectives of the NGO.
 (b). College Units of the NGO can only be dissolved by the Board of the NGO
 ```
 
@@ -880,27 +875,19 @@ the NGO will be transferred to the same objectives of the NGO.
 
 </details>
 
-#### 🟡 art-14 — NOT-APPLIED
+#### 🟢 art-14 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 90
 
-Reads as the Act **12.7%** · Act's words present 16.7% · unchanged since v1 100.0%
-
-> Title: current `Sabbatical Leave` → enacted `Leaves`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 12.7%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-Sabbatical leave is a leave given to the members of the NGO who are working for the NGO for a long time and who are willing to take a break from the NGO for a certain period of time.
-
-Eligibility
-Any member who is working for the NGO for a long time and who is willing to take a break from the NGO for a certain period of time is eligible for the sabbatical leave.
-
-Application
-The member should fill the application form for the sabbatical leave and should submit the application to the board.
-
-Duration
-The duration of the sabbatical leave will be varied from 6 months to 1 year. According to the application of the member.
+Sabbatical Leave
+1. Board and IBM members can apply for leave for 3 months to 1 year . The
+    request letter must be sent to the board 48 hours prior to the leave day.
+2. If the leaves are proven to be false or invalid, a warning letter will be issued.
 ```
 
 </details>
@@ -916,18 +903,19 @@ The duration of the sabbatical leave will be varied from 6 months to 1 year. Acc
 
 </details>
 
-#### 🟡 art-20 — NOT-APPLIED
+#### 🟢 art-20 — ALREADY-APPLIED
 
 `insert` · article scope · source `act-2-2024` line 97
 
-Reads as the Act **0.0%** · Act's words present 0.0% · unchanged since v1 100.0%
-
-> Title: current `—` → enacted `Meetings and Activities`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 0.0%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-(no text)
+1.   The board and IBM should hold a meeting with the unit periodically.
+   2.   The unit board should meet every month.
+   3.   The unit board should meet the coordinators periodically.
+   4.   If any member did not attend the meeting, appropriate action shall be taken.
 ```
 
 </details>
@@ -943,27 +931,21 @@ Reads as the Act **0.0%** · Act's words present 0.0% · unchanged since v1 100.
 
 </details>
 
-#### 🟡 art-15 — NOT-APPLIED
+#### 🟢 art-15 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-2-2024` line 105
 
-Reads as the Act **9.8%** · Act's words present 16.2% · unchanged since v1 100.0%
-
-> Title: current `Resignation` → enacted `Exit Process`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 9.8%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-Resignation is a process where the member of the NGO can leave the NGO if they are not willing to work for the NGO.
+Voluntary
+(a) Any Member can opt out of working for an Organization by submitting the
+resignation letter to the Unit Head.
 
-Eligibility
-Any member who is not willing to work for the NGO is eligible for the resignation.
-
-Application
-The member should fill the application form for the resignation and should submit the application to the board.
-
-Duration
-The duration of the resignation will be varied from 1 month to 3 months. According to the application of the member.
+Involuntary
+(a) Member can be terminated based on article 7 and 18
 ```
 
 </details>
@@ -982,21 +964,25 @@ The duration of the resignation will be varied from 1 month to 3 months. Accordi
 
 ### Act 3 of 2024 — *Finance Act, 2024*
 
-#### 🟡 art-13 — NOT-APPLIED
+#### 🟢 art-13 — ALREADY-APPLIED
 
 `substitute` · article scope · source `act-3-2024` line 18
 
-Reads as the Act **70.4%** · Act's words present 70.4% · unchanged since v1 100.0%
-
-> Title: current `Anual Reports` → enacted `Annual Report`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 70.4%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-1. All divisions and units must maintain the task reports of all the events taken up during the year, and must submit the reports to the Finance Controller Coordinator of STM at least 2 weeks prior to the AGM
-2. A detailed annual report of all the events conducted throughout the NGO shall be consolidated and maintained by the Finance Controller Coordinator of STM
-3. The Annual Report of the NGO must be compulsorily prepared by the Finance Controller of STM by the AGM in the prescribed format mentioned in the Documentation policy
-4. All the Annual Reports from the inception of the NGO must be maintained in the STM management portal
+1. All units must maintain task reports of all the events taken up during the financial
+        year and must submit the reports to the IBM-Finance Coordinator at least 2 weeks
+        prior to the Annual General Meeting.
+        2. An annual report of all the activities conducted throughout the NGO shall be
+        consolidated and maintained by the IBM-Finance Coordinator.
+        3. The Annual Report of the NGO must be compulsorily prepared by the
+        IBM-Finance Coordinator in the prescribed format mentioned in the Documentation
+        guidelines.
+        4. All the annual reports from the inception of the NGO must be maintained in the
+        STM operations portal and on the NGO official website.
 ```
 
 </details>
@@ -1018,18 +1004,27 @@ Reads as the Act **70.4%** · Act's words present 70.4% · unchanged since v1 10
 
 </details>
 
-#### 🟡 art-21 — NOT-APPLIED
+#### 🟢 art-21 — ALREADY-APPLIED
 
 `insert` · article scope · source `act-3-2024` line 32
 
-Reads as the Act **0.0%** · Act's words present 0.0% · unchanged since v1 100.0%
-
-> Title: current `—` → enacted `Financial Management`
+Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 0.0%
 
 <details><summary>Current text — <code>constitution/current.yaml</code></summary>
 
 ```
-(no text)
+1. The bank account of the NGO shall be maintained by the members of the board.
+     2. The NGO has the right to take money from the general public in the form of
+        donations.
+     3. The NGO is permitted to conduct events/ parties in order to generate funds.
+     4. The Treasurer and IBM-Finance coordinator has only the right to approve the funds
+        for the activities.
+
+ 5. Every month IBM-Finance coordinator has to verify the activity reports and balance
+    sheet and inform the Treasurer.
+ 6. Every Quarter of the year, the internal compliance coordinator will conduct an
+    audit. Unit Finance coordinator is responsible for sending all reports and balance
+    sheets to the Internal compliance coordinator for every three months.
 ```
 
 </details>
@@ -1058,27 +1053,27 @@ Reads as the Act **0.0%** · Act's words present 0.0% · unchanged since v1 100.
 Applying an amendment already in force would duplicate or revert a provision, so every
 🟡 NOT-APPLIED row must be confirmed before Phase 3 applies anything.
 
-- [ ] 🟡 `art-6(1)` — Act 1 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-6(2)` — Act 1 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-6(3)` — Act 1 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-6(4)` — Act 1 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-6(5)` — Act 1 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-7(4)` — Act 1 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-7(6)` — Act 1 of 2024 — NOT-APPLIED
+- [ ] 🟢 `art-6(1)` — Act 1 of 2024 — ALREADY-APPLIED
+- [ ] 🔴 `art-6(2)` — Act 1 of 2024 — DIVERGENT
+- [ ] 🟢 `art-6(3)` — Act 1 of 2024 — ALREADY-APPLIED
+- [ ] 🔴 `art-6(4)` — Act 1 of 2024 — DIVERGENT
+- [ ] 🔴 `art-6(5)` — Act 1 of 2024 — DIVERGENT
+- [ ] 🟢 `art-7(4)` — Act 1 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-7(6)` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-9` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-10` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-11` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-12` — Act 1 of 2024 — ALREADY-APPLIED
 - [ ] 🟢 `art-18` — Act 1 of 2024 — ALREADY-APPLIED
-- [ ] 🟡 `preamble` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-3` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-4` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-5` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-8` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-16(3)` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-17(1)` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-14` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-20` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-15` — Act 2 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-13` — Act 3 of 2024 — NOT-APPLIED
-- [ ] 🟡 `art-21` — Act 3 of 2024 — NOT-APPLIED
+- [ ] 🟢 `preamble` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-3` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-4` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-5` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-8` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-16(3)` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-17(1)` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-14` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-20` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-15` — Act 2 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-13` — Act 3 of 2024 — ALREADY-APPLIED
+- [ ] 🟢 `art-21` — Act 3 of 2024 — ALREADY-APPLIED

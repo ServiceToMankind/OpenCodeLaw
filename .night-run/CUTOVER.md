@@ -117,6 +117,22 @@ certificate does not cover the hostname once the proxy is back on, Full (strict)
 [cf-strict]: https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/
 [cf-526]: https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-526/
 
+### 1b. Six section anchors changed meaning
+
+Applying Act 2 restructured Articles 14 and 15. Anyone holding a bookmark to a *section* of either
+will land on different text than before:
+
+| Anchor | meant | now means |
+|---|---|---|
+| `art-14-s-1` | Eligibility | Sabbatical Leave |
+| `art-15-s-1` | Eligibility | Voluntary |
+| `art-15-s-2` | Application | Involuntary |
+| `art-14-s-2`, `art-14-s-3`, `art-15-s-3` | Application / Duration | no longer exist |
+
+Article-level anchors (`art-14`, `art-15`) are unaffected. `/archive/2.0.0/` still serves the old
+structure, so a stale citation remains readable as it stood. No redirect is possible or appropriate:
+the Act changed what the provision says, and silently forwarding would hide that.
+
 ### 2. Caching
 
 Pages serves `cache-control: max-age=600`. After a deploy, expect up to ten minutes of stale HTML at

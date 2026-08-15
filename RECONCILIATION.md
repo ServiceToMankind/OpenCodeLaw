@@ -14,6 +14,30 @@ Short names used below: **A1** = first-constitution-amendment-act-2024.txt, **A2
 **A3** = third….
 
 
+## Citation stability — anchors that changed meaning
+
+Applying Act 2 restructured Articles 14 and 15. **Article-level ids are stable — `art-14` and
+`art-15` still point at the same articles.** But five section ids changed what they denote, which is
+the first time an anchor has moved rather than merely existed.
+
+| Anchor | v2.0.0 | 3.0.0 |
+|---|---|---|
+| `art-14-s-1` | Eligibility (under Sabbatical Leave) | **Sabbatical Leave** (under Leaves) |
+| `art-14-s-2` | Application | removed |
+| `art-14-s-3` | Duration | removed |
+| `art-15-s-1` | Eligibility (under Resignation) | **Voluntary** (under Exit Process) |
+| `art-15-s-2` | Application | **Involuntary** |
+| `art-15-s-3` | Duration | removed |
+
+This is correct: the Act restructured those articles, and a section id names a position within an
+article, not an immutable provision. It is recorded because a citation to `art-15-s-1` made before
+2026-08-15 meant *Eligibility* and now means *Voluntary*.
+
+`constitution/versions/v2.0.0.yaml` preserves the old structure, and `/archive/2.0.0/` still
+resolves every one of the old anchors — so a stale citation can still be read as it stood.
+
+---
+
 ## Standing conventions
 
 Rules that bind every entry in this file and every entry in `acts/register.yaml`.
