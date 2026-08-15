@@ -20,6 +20,15 @@ opencodelaw — a YAML-driven renderer for organizational constitutions
   opencodelaw validate [file]   Validate the corpus, or one file against the schema
   opencodelaw build             Render the static site into dist/
   opencodelaw spec              Regenerate schema/SPEC.md from the JSON Schema
+
+  Amending the constitution — see process/AMENDMENT-PROCESS.md
+  opencodelaw bill new [--type amendment|corrigendum|revision] [--name <slug>]
+  opencodelaw bill validate <file>    schema, targets, threshold, and the before/after diff
+  opencodelaw bill render <file>      the instrument in house style (text and HTML)
+  opencodelaw bill submit <file>      ICC: assign a bill number, status -> submitted
+  opencodelaw act enact <file> --signed-pdf <path> [--signed-by <name>]
+  opencodelaw act apply <file> [--dry-run]
+
   opencodelaw --version
 
 Environment:
@@ -78,6 +87,12 @@ switch (command) {
     const { build, BASE_PATH } = await import('./build.mjs')
     const { written, og } = build()
     console.log(`built ${written.length} pages under ${BASE_PATH} (${og.made} OG images)`)
+    break
+  }
+  case 'bill':
+  case 'act': {
+    const { runBillCommand } = await import('./bill-commands.mjs')
+    await runBillCommand(command, rest)
     break
   }
   case 'spec':

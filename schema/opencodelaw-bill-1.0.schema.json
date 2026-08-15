@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://constitution.stmorg.in/schema/opencodelaw-bill-1.0.schema.json",
+  "title": "OpenCodeLaw Bill 1.0",
+  "description": "A proposed amendment, machine-applicable from the moment it is drafted. This file is the source of truth; the signed PDF is a rendering of it. The 2024 Acts were authored as prose and applied to the YAML by hand, which produced a half-applied constitution, an unrecorded application, a splice that made re-running an Act unsafe, and fourteen reconciliation questions. Inverting that is the point of this schema.",
+  "type": "object",
+  "required": ["opencodelaw_bill", "bill", "status", "operations"],
+  "additionalProperties": false,
+  "properties": {
+    "opencodelaw_bill": { "const": "1.0" },
+    "bill": { "$ref": "#/$defs/billMeta" },
+    "status": { "$ref": "#/$defs/status" },
+    "history": {
+      "type": "array",
+      "description": "Every status transition, dated, with who did it and what evidences it. Append-only in practice.",
+      "items": { "$ref": "#/$defs/historyEntry" }
+    },
+    "objects_and_reasons": {
+      "type": "string",
+      "description": "Explanatory only. Convention C1: a Statement of Objects and Reasons is never operative and never a source of authority. It is structurally impossible for it to be one here — operations carry their own text — and the validator additionally asserts that no operation refers to it."
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/operation" }
+    },
+    "approvals": {
+      "type": "array",
+      "description": "Article 16(3) requires approval by the board, the intermediate board and the units of the NGO collectively. All three are required for enactment; none may be inferred.",
+      "items": { "$ref": "#/$defs/approval" }
+    },
+    "enactment": { "$ref": "#/$defs/enactment" }
+  },
+
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?$"
+    },
+
+    "status": {
+      "enum": ["draft", "submitted", "under-review", "returned", "scheduled", "approved", "rejected", "enacted", "applied", "withdrawn", "lapsed"],
+      "description": "draft → submitted → under-review → (returned ⇄ under-review) → scheduled → approved | rejected → enacted → applied. `withdrawn` is the author's, any time before approval. `lapsed` is the board's and is set by hand — no timeout is invented, because the constitution states none."
+    },
+
+    "billMeta": {
+      "type": "object",
+      "required": ["short_title", "year", "type", "moved_by", "base_version", "version_bump"],
+      "additionalProperties": false,
+      "properties": {
+        "short_title": { "type": "string", "minLength": 1, "pattern": "\\S" },
+        "also_known_as": {
+          "type": "string",
+          "description": "The \"Membership Act, 2024\" style familiar name, if the bill declares one."
+        },
+        "year": { "type": "integer", "minimum": 2024 },
+        "number": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Assigned by the ICC at submission, per year. Null while the bill is a draft: an unnumbered draft is not yet before anyone."
+        },
+        "type": {
+          "enum": ["amendment", "corrigendum", "revision"],
+          "description": "`amendment` is the ordinary case. `corrigendum` corrects a drafting error already on record, and the validator constrains it to those. `revision` is a full re-adoption and is the only type that may renumber."
+        },
+        "moved_by": {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "description": "Recorded at drafting, which is what permanently fixes the problem the 2024 Acts left: three instruments whose mover had to be reconstructed afterwards and never was (Q8).",
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "role": { "type": "string" },
+            "contact": { "type": "string" }
+          }
+        },
+        "drafted": { "type": ["string", "null"], "format": "date" },
+        "base_version": {
+          "$ref": "#/$defs/semver",
+          "description": "The constitution version this bill was drafted against. If the constitution has moved past it, validation fails with a rebase instruction — so an approval meeting always sees what it is actually voting on."
+        },
+        "version_bump": {
+          "enum": ["minor", "major"],
+          "description": "An applied Act bumps the minor version. Major is reserved for a `revision`. There is no patch release of provision text: an editorial edit without an instrument is exactly what this system exists to prevent."
+        }
+      }
+    },
+
+    "historyEntry": {
+      "type": "object",
+      "required": ["date", "to", "actor"],
+      "additionalProperties": false,
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "from": { "$ref": "#/$defs/status" },
+        "to": { "$ref": "#/$defs/status" },
+        "actor": { "type": "string", "minLength": 1 },
+        "evidence": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      }
+    },
+
+    "operation": {
+      "type": "object",
+      "required": ["id", "operation", "target", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^op-[1-9]\\d*$" },
+        "operation": {
+          "enum": ["substitute", "insert", "omit", "retitle", "reserve"],
+          "description": "`renumber` is deliberately absent. Anchor stability is a public API and an ordinary amendment never moves a number; renumbering is lawful only inside a `revision` bill with a major bump and an explicit anchor map. The validator rejects it by name with that explanation."
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^(preamble|art-[1-9]\\d*(-s-[1-9]\\d*)?)$",
+          "description": "Must resolve against base_version — except for `insert`, where it must not already exist."
+        },
+        "scope": { "enum": ["article", "clause"] },
+        "title": {
+          "type": "string",
+          "description": "If stated, this becomes the provision's heading and is recorded as title_source: enacted. Omit to leave the existing heading, which stays editorial."
+        },
+        "text": {
+          "type": "string",
+          "description": "The COMPLETE resulting text of the target provision — never a diff, never a splice, never \"insert after the words…\". This is what makes application idempotent: the applier compares the target's current text against this, so re-running an applied Act is a no-op by construction rather than by luck."
+        },
+        "sections": {
+          "type": "array",
+          "description": "Full replacement subdivisions, where the operation restructures a provision. Omit to leave the target's sections untouched.",
+          "items": {
+            "type": "object",
+            "required": ["number", "title", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "number": { "type": "integer", "minimum": 1 },
+              "title": { "type": "string", "minLength": 1 },
+              "text": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "note": {
+          "type": "string",
+          "description": "Drafting note. Explanatory, never operative."
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "Anything that leaves text behind must carry that text in full. `omit` and `reserve` must not.",
+          "if": { "properties": { "operation": { "enum": ["substitute", "insert"] } }, "required": ["operation"] },
+          "then": { "anyOf": [{ "required": ["text"] }, { "required": ["sections"] }] }
+        },
+        {
+          "if": { "properties": { "operation": { "const": "retitle" } }, "required": ["operation"] },
+          "then": { "required": ["title"] }
+        },
+        {
+          "if": { "properties": { "operation": { "enum": ["omit", "reserve"] } }, "required": ["operation"] },
+          "then": { "required": ["note"], "properties": { "text": false, "sections": false } }
+        }
+      ]
+    },
+
+    "approval": {
+      "type": "object",
+      "required": ["body"],
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "enum": ["board", "intermediate-board", "units"],
+          "description": "The three bodies Article 16(3) names. All three are required."
+        },
+        "date": { "type": ["string", "null"], "format": "date" },
+        "present": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Members present. Quorum and notice are by-laws matters under 16(2); this schema records what happened and does not invent rules the constitution does not state."
+        },
+        "for": { "type": ["integer", "null"], "minimum": 0 },
+        "against": { "type": ["integer", "null"], "minimum": 0 },
+        "abstain": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Excluded from the denominator: the threshold is of those present AND VOTING."
+        },
+        "evidence": {
+          "type": ["string", "null"],
+          "description": "Minutes reference. Required before enactment — an approval with no evidence is an assertion, which is the gap Q13 recorded against the 2024 Acts."
+        },
+        "note": { "type": "string" }
+      }
+    },
+
+    "enactment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "act_number": { "type": ["integer", "null"], "minimum": 1 },
+        "act_year": { "type": ["integer", "null"], "minimum": 2024 },
+        "assent_date": { "type": ["string", "null"], "format": "date" },
+        "assented_by": { "type": ["string", "null"] },
+        "signed_by": { "type": ["string", "null"] },
+        "signed_pdf": {
+          "type": ["string", "null"],
+          "description": "Repository-relative path to the signed scan. Required before a bill may be applied."
+        },
+        "signed_pdf_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^([a-f0-9]{64})?$",
+          "description": "Checksum of the signed instrument, so the archived PDF can be proved to be the one that was enacted."
+        },
+        "rendered_from": {
+          "type": ["string", "null"],
+          "description": "Bill file the instrument was rendered from — the audit link between the printed Act and the patch it came from."
+        }
+      }
+    }
+  }
+}

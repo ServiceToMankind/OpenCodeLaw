@@ -445,6 +445,78 @@
         "id": {
           "$ref": "#/$defs/actId"
         },
+        "origin": {
+          "enum": [
+            "bill",
+            "external-pdf"
+          ],
+          "description": "How the Act entered the record. `external-pdf` means it was authored as prose and transcribed \u2014 the three 2024 Acts, whose history is not rewritten into the new format. `bill` means it was born from a bill file, which is the only path available for new Acts."
+        },
+        "bill_file": {
+          "type": "string",
+          "description": "Repository-relative path to the bill this Act was rendered from. Required for origin: bill."
+        },
+        "signed_pdf_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Checksum of the signed instrument, so the archived PDF can be proved to be the one enacted."
+        },
+        "approvals": {
+          "type": "array",
+          "description": "Per-body tallies under Article 16(3). Recorded for Acts born from bills; the 2024 Acts predate the pipeline and carry only the procedure block.",
+          "items": {
+            "type": "object",
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "body": {
+                "enum": [
+                  "board",
+                  "intermediate-board",
+                  "units"
+                ]
+              },
+              "date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "present": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "for": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "against": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "abstain": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "evidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
         "number": {
           "type": "integer",
           "minimum": 1
@@ -662,7 +734,27 @@
             ]
           }
         }
-      }
+      },
+      "allOf": [
+        {
+          "$comment": "An Act born from a bill must say which bill; that link is the audit trail between the printed instrument and the patch it came from.",
+          "if": {
+            "properties": {
+              "origin": {
+                "const": "bill"
+              }
+            },
+            "required": [
+              "origin"
+            ]
+          },
+          "then": {
+            "required": [
+              "bill_file"
+            ]
+          }
+        }
+      ]
     },
     "reconciliationState": {
       "type": "object",

@@ -120,6 +120,32 @@ the workflow with `include_cname: true`. The CNAME is excluded by default and CI
 fails if it appears without being asked for, so a build cannot silently repoint a
 live domain.
 
+## Amending the constitution
+
+Amendments are not edits. A change to provision text requires an instrument, and this repository
+carries the pipeline that produces one.
+
+**The bill is the source of truth; the signed PDF is a rendering of it.** An amendment is drafted as
+YAML, validated, rendered into the house style of the existing Acts, printed, signed and archived —
+and then applied mechanically, because the instrument and the patch are the same object. The three
+Acts of 2024 were authored the other way round, as prose applied to the text by hand, which is what
+produced a half-applied constitution and fourteen reconciliation questions.
+
+```bash
+npx opencodelaw bill new --name my-amendment
+npx opencodelaw bill validate bills/2026/my-amendment.yaml   # prints the before/after diff
+npx opencodelaw bill render   bills/2026/my-amendment.yaml   # the instrument, for signature
+```
+
+Approval is governed by **Article 16(3)**: two thirds of those present and voting in the board, the
+intermediate board and the units. All three bodies are required and the pipeline will not enact on
+fewer.
+
+| | |
+|---|---|
+| [process/PROPOSING.md](process/PROPOSING.md) | How to write a bill. Start here. |
+| [process/AMENDMENT-PROCESS.md](process/AMENDMENT-PROCESS.md) | Roles, lifecycle, thresholds, versioning. |
+
 ## Honest limitations
 
 - **Reconciliation is a human process.** The tools compare texts, classify provisions
