@@ -117,6 +117,41 @@ function buildSearchIndex (doc, slugs) {
   return rows
 }
 
+/**
+ * URLs the previous Apache host served that this one does not.
+ *
+ * Its .htaccess rewrote `/x.html` to the extensionless `/x`, so the canonical
+ * old archive URLs had no extension. Static hosting cannot rewrite, so each
+ * old shape gets a real page that redirects. Inbound links to a constitution
+ * live in minutes, emails and other people's documents; letting them 404 is
+ * how a citation dies.
+ */
+const LEGACY_REDIRECTS = {
+  'archives/v1/index.html': 'archive/1.0.0/',
+  'archives/v2/index.html': 'archive/2.0.0/',
+  'archives/v1.html': 'archive/1.0.0/',
+  'archives/v2.html': 'archive/2.0.0/',
+  'archives/index.html': 'archive/'
+}
+
+function redirectStub (to, absTo) {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Moved — this page has a new address</title>
+    <link rel="canonical" href="${absTo}">
+    <meta http-equiv="refresh" content="0; url=${to}">
+    <meta name="robots" content="noindex, follow">
+  </head>
+  <body>
+    <p>This page has moved to <a href="${to}">${absTo}</a>.</p>
+    <script>location.replace(${JSON.stringify(to)})</script>
+  </body>
+</html>
+`
+}
+
 /** Old `#article5` / `#article5-section2` links must keep resolving. */
 function legacyAnchorMap (doc) {
   const map = {}
@@ -316,6 +351,10 @@ export function build () {
   // ---- data, assets, static files ----
   write('search-index.json', JSON.stringify(buildSearchIndex(doc, slugs)))
   write('legacy-anchors.json', JSON.stringify(legacyAnchorMap(doc)))
+  for (const [from, to] of Object.entries(LEGACY_REDIRECTS)) {
+    written.push(write(from, redirectStub(url(to), abs(to))))
+  }
+
   write('.nojekyll', '')
   write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${abs('sitemap.xml')}\n`)
   write('sitemap.xml', sitemap(doc, slugs, versions))

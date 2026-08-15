@@ -251,3 +251,24 @@ test('heading levels never skip on any page type', () => {
     }
   }
 })
+
+test('legacy Apache URLs redirect instead of 404ing', () => {
+  // The previous host rewrote /x.html to the extensionless /x, so both shapes
+  // exist in the wild. Static hosting cannot rewrite; each gets a real page.
+  const cases = [
+    ['archives/v1/index.html', '1.0.0'],
+    ['archives/v2/index.html', '2.0.0'],
+    ['archives/v1.html', '1.0.0'],
+    ['archives/v2.html', '2.0.0']
+  ]
+  for (const [rel, version] of cases) {
+    assert.ok(exists(rel), `${rel} missing — an old inbound link would 404`)
+    const html = read(rel)
+    const target = `archive/${version}/`
+    assert.ok(html.includes(`url=${BASE}${target}`), `${rel} does not meta-refresh to ${target}`)
+    assert.match(html, /<link rel="canonical" href="https?:\/\/[^"]+"/, `${rel} needs a canonical`)
+    assert.ok(html.includes('noindex'), `${rel} should not be indexed in its own right`)
+    // And the destination must actually exist in this build.
+    assert.ok(exists(`${target}index.html`), `${rel} redirects to ${target}, which is not built`)
+  }
+})
