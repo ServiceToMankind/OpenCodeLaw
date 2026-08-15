@@ -60,6 +60,33 @@ const copyDir = (from, to) => {
 
 // ---------------------------------------------------------------------------
 
+/**
+ * The headline under the title states the ADOPTED position, never the working
+ * version label.
+ *
+ * A version number on a governing document is an assertion about what is in
+ * force. This text is published at 3.0.0-alpha.1, a build label for a version
+ * the board has not adopted, and an "effective from" date taken from Acts the
+ * banner immediately below says are unapplied. Publishing either as the
+ * document's status claims something nobody enacted.
+ */
+function legalStatusLead (info, actIndex) {
+  if (info.legal_status !== 'not_adopted') {
+    return `<p class="page-lead">Version ${escapeHtml(info.version)} · effective ${escapeHtml(info.effective_from)}` +
+      `${info.registration ? ` · ${escapeHtml(info.registration)}` : ''}</p>`
+  }
+  const applied = Object.values(actIndex)
+    .filter(a => a.application_status === 'applied' || a.application_status === 'partially-applied')
+    .map(a => `Act ${a.number} of ${a.year}`)
+  return `<p class="page-lead page-lead--status">
+    Last adopted version <strong>${escapeHtml(info.adopted_version)}</strong>.
+    This page shows that text as at ${escapeHtml(info.text_as_of)}${applied.length
+      ? `, together with the provisions of ${applied.map(escapeHtml).join(' and ')} recorded as applied`
+      : ''}.
+    <strong>No later version has been adopted.</strong>
+  </p>`
+}
+
 function organizationLd (info) {
   return {
     '@context': 'https://schema.org', '@type': 'Organization',
@@ -74,9 +101,10 @@ function legislationLd (info, doc) {
   return {
     '@context': 'https://schema.org', '@type': 'Legislation',
     name: `Constitution of ${info.organization}`,
-    legislationIdentifier: info.version,
+    // The identifier and date describe what was ADOPTED, not the build label.
+    legislationIdentifier: info.legal_status === 'not_adopted' ? info.adopted_version : info.version,
     legislationType: 'Constitution',
-    legislationDate: info.effective_from,
+    legislationDate: info.legal_status === 'not_adopted' ? info.text_as_of : info.effective_from,
     ...(info.jurisdiction ? { legislationJurisdiction: info.jurisdiction } : {}),
     inLanguage: 'en',
     url: abs(''),
@@ -182,7 +210,7 @@ export function build () {
   // ---- index: the whole constitution, every provision inline ----
   const indexMain = `
     <h1 class="page-title">Constitution of ${escapeHtml(info.organization)}</h1>
-    <p class="page-lead">Version ${escapeHtml(info.version)} · effective ${escapeHtml(info.effective_from)}${info.registration ? ` · ${escapeHtml(info.registration)}` : ''}</p>
+    ${legalStatusLead(info, actIndex)}
     ${renderPreamble(doc.preamble, { url, actIndex })}
     <h2 class="section-title" id="articles">Articles</h2>
     ${doc.articles.map(a => renderArticle(a, { url, actIndex, headingLevel: 3 })).join('')}`
@@ -229,7 +257,7 @@ export function build () {
           articleSection: 'Constitution',
           description: summarise(text),
           url: canonical,
-          datePublished: info.effective_from,
+          datePublished: info.text_as_of ?? info.effective_from,
           isPartOf: { '@type': 'Legislation', name: `Constitution of ${info.organization}`, url: abs('') },
           publisher: { '@type': 'Organization', name: info.organization }
         },
@@ -471,22 +499,42 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
       .map(s => ({ id: s.id, label: `Article ${a.number}, clause ${s.number}`, title: s.title }))
   ])
 
+  const enacted = doc.articles.flatMap(a => [
+    ...(a.title_source === 'enacted' ? [{ id: a.id, label: `Article ${a.number}`, title: a.title }] : []),
+    ...(a.sections ?? []).filter(s => s.title_source === 'enacted')
+      .map(s => ({ id: s.id, label: `Article ${a.number}, clause ${s.number}`, title: s.title }))
+  ])
+  const totalHeadings = doc.articles.reduce((n, a) => n + 1 + (a.sections?.length ?? 0), 0)
+
   const editorialSection = `
-    <h2 class="act__sub" id="editorial-headings">Headings not enacted by any instrument</h2>
-    <p>Some headings in this constitution appear in an instrument and carry legal force. Others were
-    supplied by an editor and do not. Act 1 of 2024 titles Article 11's clause (2)
-    <strong>Establishment</strong>; it gives clause (1) no title at all, and the heading above it was
-    written by an editor. Editorial headings are marked
-    <span class="title-mark"><span aria-hidden="true">§</span><span class="visually-hidden">(editorial heading, not enacted)</span></span>
-    throughout the text.</p>
-    <p>A heading counts as enacted only where an instrument <em>already applied</em> to that provision
-    states it as a heading. Nothing is credited to an Act that has not been applied.</p>
-    <p><strong>${editorial.length}</strong> of ${doc.articles.reduce((n, a) => n + 1 + (a.sections?.length ?? 0), 0)}
-    headings are editorial. They are listed here so the board can ratify or replace them, rather than
-    have them quietly rewritten.</p>
+    <h2 class="act__sub" id="editorial-headings">Which headings carry legal force</h2>
+    <p><strong>Headings in this constitution are editorial aids unless marked
+    <span class="title-mark"><span aria-hidden="true">§</span><span class="visually-hidden">enacted heading</span></span>.</strong>
+    A marked heading is one an amending instrument states as a heading, in an Act already applied to
+    that provision. ${enacted.length} of ${totalHeadings} headings are marked.</p>
+    <p>Most headings anywhere in a legal document are navigational, not enacted, so this is the
+    ordinary case rather than a defect. It matters where the two are easy to confuse: Act 1 of 2024
+    titles Article 11's clause (2) <strong>Establishment</strong>, but gives clause (1) no title at
+    all — the lowercase <code>units</code> above it was written by an editor.</p>
+    <p>Nothing is credited to an Act that has not been applied. Editorial headings are listed below
+    so the board can ratify or replace them, rather than have them quietly rewritten.</p>
+    <h3 class="act__sub">Enacted headings (${enacted.length})</h3>
+    <ul class="act__provisions">
+      ${enacted.map(e => `<li><a href="${url('')}#${escapeHtml(e.id)}">${escapeHtml(e.label)}</a> — <code>${escapeHtml(e.title)}</code></li>`).join('')}
+    </ul>
+    <h3 class="act__sub">Editorial headings (${editorial.length})</h3>
     <ul class="act__provisions">
       ${editorial.map(e => `<li><a href="${url('')}#${escapeHtml(e.id)}">${escapeHtml(e.label)}</a> — <code>${escapeHtml(e.title)}</code></li>`).join('')}
     </ul>`
+
+  const buildLabel = `
+    <h2 class="act__sub" id="publication-label">Publication label</h2>
+    <p>This site is built from a working label, <code>${escapeHtml(doc.info.version)}</code>. It is
+    build metadata and <strong>not a statement of what is in force</strong>. The last version the
+    board adopted is <strong>${escapeHtml(doc.info.adopted_version ?? doc.info.version)}</strong>;
+    the text shown across the site is that version as at
+    ${escapeHtml(doc.info.text_as_of ?? '—')}, plus the provisions recorded as applied above.
+    No later version has been adopted.</p>`
 
   return `
     <h1 class="page-title">Amendment register</h1>
@@ -496,17 +544,18 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
       <ul class="banner__list">${held}</ul>
     </aside>` : ''}
     ${rows}
-    ${editorialSection}`
+    ${editorialSection}
+    ${doc.info.legal_status === 'not_adopted' ? buildLabel : ''}`
 }
 
 function sitemap (doc, slugs, versions) {
   const urls = [
-    { loc: abs(''), lastmod: doc.info.effective_from, priority: '1.0' },
-    { loc: abs('amendments/'), lastmod: doc.info.effective_from, priority: '0.8' },
-    { loc: abs('archive/'), lastmod: doc.info.effective_from, priority: '0.5' },
+    { loc: abs(''), lastmod: doc.info.text_as_of ?? doc.info.effective_from, priority: '1.0' },
+    { loc: abs('amendments/'), lastmod: doc.info.text_as_of ?? doc.info.effective_from, priority: '0.8' },
+    { loc: abs('archive/'), lastmod: doc.info.text_as_of ?? doc.info.effective_from, priority: '0.5' },
     ...doc.articles.map(a => ({
       loc: abs(`articles/${slugs.get(a.id)}/`),
-      lastmod: doc.info.effective_from,
+      lastmod: doc.info.text_as_of ?? doc.info.effective_from,
       priority: '0.9'
     })),
     ...versions.map(f => ({

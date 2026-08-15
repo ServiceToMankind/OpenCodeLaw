@@ -245,6 +245,36 @@ function checkPlaceholderUrls (rep, file, doc) {
 // Corpus-level checks: statuses, versions, archive integrity
 // ---------------------------------------------------------------------------
 
+/**
+ * A version number on a governing document asserts what is in force. When the
+ * board has adopted nothing at that version, the document must not also carry
+ * an `effective_from`: the two together read as "this text took effect on this
+ * date", which is the claim `legal_status: not_adopted` exists to disclaim.
+ */
+function checkLegalStatus (rep, docs) {
+  for (const { file, doc, archived } of docs) {
+    const info = doc?.info ?? {}
+    if (archived) continue
+    if (!info.legal_status) {
+      rep.error(file, 'legal-status-missing',
+        'the live document must declare legal_status (adopted | not_adopted). A version number ' +
+        'published without it reads as an assertion about what is in force.', 'info')
+      continue
+    }
+    if (info.legal_status === 'not_adopted') {
+      if (info.effective_from) {
+        rep.error(file, 'unadopted-effective-date',
+          'legal_status is "not_adopted" but info.effective_from is set. An unadopted text has no ' +
+          'effective date; state what the text reflects in text_as_of instead.', 'info.effective_from')
+      }
+      if (info.adopted_version && info.adopted_version === info.version) {
+        rep.error(file, 'unadopted-version-collision',
+          `adopted_version "${info.adopted_version}" equals the working version; if the board adopted it, legal_status should be "adopted"`, 'info.adopted_version')
+      }
+    }
+  }
+}
+
 function checkVersionIdentity (rep, docs) {
   for (const { file, doc, archived, expectedVersion } of docs) {
     const info = doc?.info ?? {}
@@ -477,6 +507,7 @@ export function validate () {
   }
 
   checkVersionIdentity(rep, docs)
+  checkLegalStatus(rep, docs)
 
   let register = null
   if (fs.existsSync(path.join(ROOT, REGISTER_FILE))) {

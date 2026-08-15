@@ -14,10 +14,14 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
+import { normaliseBase, DEFAULT_BASE_PATH } from '../src/lib/paths.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = path.join(ROOT, 'dist')
-const BASE = '/OpenCodeLaw'
+// Read the same default the build and link checker use. Hardcoding it here is
+// how this harness kept serving /OpenCodeLaw/ after the site moved to the apex
+// domain, and every asset 404'd inside the tests while the real site was fine.
+const BASE = normaliseBase(DEFAULT_BASE_PATH).replace(/\/$/, '')
 const PORT = 8137
 
 function findChrome () {

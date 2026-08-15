@@ -283,37 +283,85 @@ test('every live heading declares whether it carries legal force', () => {
   }
 })
 
-test('editorial headings are marked in the rendered text, enacted ones are not', () => {
-  const html = read('index.html')
-  const sample = (id, expected) => {
-    const i = html.indexOf(`id="${id}"`)
-    assert.ok(i > -1, `${id} not rendered`)
-    const head = html.slice(i, i + 600)
-    const marked = head.slice(0, head.indexOf('</h')).includes('title-mark')
-    assert.equal(marked, expected, `${id}: expected ${expected ? 'an editorial mark' : 'no mark'}`)
-  }
-  // Act 1 gives clause (1) of Article 11 no title; `units` was typed by an editor.
-  sample('art-11-s-1', true)
-  // Act 1 titles clause (2) `Establishment`.
-  sample('art-11-s-2', false)
-  // Article 10's three sections are enacted headings inside Act 1.
-  sample('art-10-s-1', false)
+test('the amendments page lists both enacted and editorial headings for the board', () => {
+  const html = read('amendments/index.html')
+  assert.ok(html.includes('Which headings carry legal force'), 'no explanation of the marker')
 
-  // A title credited to an Act that has NOT been applied would be a false claim
-  // of legal force. Act 2 retitles Article 14, but Act 2 is not applied.
+  const pick = kind => doc.articles.flatMap(a => [
+    ...(a.title_source === kind ? [a.id] : []),
+    ...(a.sections ?? []).filter(s => s.title_source === kind).map(s => s.id)
+  ])
+  for (const id of [...pick('editorial'), ...pick('enacted')]) {
+    assert.ok(html.includes(`#${id}`), `${id} is not listed for the board`)
+  }
+
+  // A heading credited to an Act that has not been applied would be a false
+  // claim of legal force. Act 2 retitles Article 14, but Act 2 is not applied.
   const art14 = doc.articles.find(a => a.number === 14)
-  assert.equal(art14.title_source, 'editorial',
-    'a heading must not be credited to an unapplied Act')
+  assert.equal(art14.title_source, 'editorial', 'a heading must not be credited to an unapplied Act')
 })
 
-test('the amendments page explains the editorial marker and lists every instance', () => {
-  const html = read('amendments/index.html')
-  assert.ok(html.includes('Headings not enacted by any instrument'), 'no explanation of the marker')
-  const editorial = doc.articles.flatMap(a => [
-    ...(a.title_source === 'editorial' ? [a.id] : []),
-    ...(a.sections ?? []).filter(s => s.title_source === 'editorial').map(s => s.id)
-  ])
-  for (const id of editorial) {
-    assert.ok(html.includes(`#${id}`), `editorial heading ${id} is not listed for ratification`)
+test('the contact link works without JavaScript', () => {
+  // Cloudflare's Email Address Obfuscation rewrites mailto: links at the edge
+  // into /cdn-cgi/l/email-protection#<hex>, which only resolves once its script
+  // has run. On a site whose premise is that it works with JavaScript disabled,
+  // that silently breaks the one outbound link a reader is most likely to need.
+  //
+  // This asserts the BUILD is clean. The rewrite happens at the edge, so it
+  // cannot be fixed here — see .night-run/CUTOVER.md for the two routes, both
+  // of which are Cloudflare-side.
+  for (const rel of ['index.html', 'amendments/index.html', 'archive/index.html', '404.html']) {
+    const html = read(rel)
+    assert.ok(!/cdn-cgi\/l\/email-protection/.test(html),
+      `${rel} contains a Cloudflare email-obfuscation link in the build output`)
   }
+  const html = read('index.html')
+  const noScript = html.replace(/<script[\s\S]*?<\/script>/g, '')
+  const mailto = noScript.match(/href="mailto:([^"]+)"/)
+  assert.ok(mailto, 'the footer contact must be a real mailto: in the served HTML')
+  assert.ok(mailto[1].includes('@'), `mailto target looks wrong: ${mailto[1]}`)
+})
+
+test('the headline states the adopted position, not the working version label', () => {
+  // A version number on a governing document asserts what is in force. The
+  // board has adopted nothing at 3.0.0-alpha.1, and the effective date it
+  // previously carried contradicted the banner immediately below it.
+  const html = read('index.html')
+  const lead = html.match(/<p class="page-lead[^"]*">([\s\S]*?)<\/p>/)[1].replace(/<[^>]+>/g, ' ')
+
+  if (doc.info.legal_status === 'not_adopted') {
+    assert.ok(!lead.includes(doc.info.version),
+      `the headline publishes the working label "${doc.info.version}" as the document's status`)
+    assert.ok(lead.includes(doc.info.adopted_version), 'the headline must name the adopted version')
+    assert.ok(/no later version has been adopted/i.test(lead), 'the headline must disclaim adoption')
+    assert.ok(!doc.info.effective_from,
+      'an unadopted text must not carry an effective date')
+
+    // The working label stays visible, but as build metadata where it belongs.
+    const amendments = read('amendments/index.html')
+    assert.ok(amendments.includes(doc.info.version),
+      'the working label should still be discoverable on the amendments page')
+    assert.ok(/not a statement of what is in force/i.test(amendments),
+      'the amendments page must say the label is not a legal claim')
+  }
+})
+
+test('enacted headings are marked; editorial headings are the unmarked default', () => {
+  const html = read('index.html')
+  const marks = (html.match(/class="title-mark"/g) ?? []).length
+  const enacted = doc.articles.reduce((n, a) =>
+    n + (a.title_source === 'enacted' ? 1 : 0) +
+    (a.sections ?? []).filter(s => s.title_source === 'enacted').length, 0)
+
+  assert.equal(marks, enacted, `expected ${enacted} marks (the enacted headings), found ${marks}`)
+  assert.ok(enacted < 20, 'sanity: the marked set should be the exception, not the rule')
+
+  // The words "not enacted" must not sit inside a heading, where they read as a
+  // claim about the provision rather than about its heading.
+  const headings = [...html.matchAll(/<h[2-6][^>]*class="provision__heading"[^>]*>([\s\S]*?)<\/h[2-6]>/g)]
+  for (const h of headings) {
+    assert.ok(!/not enacted/i.test(h[1]), 'a heading contains the phrase "not enacted"')
+  }
+  assert.ok(/editorial aids unless marked/i.test(read('amendments/index.html')),
+    'the default must be stated once on the amendments page')
 })

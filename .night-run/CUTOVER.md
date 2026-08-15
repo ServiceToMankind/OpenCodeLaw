@@ -35,6 +35,31 @@ Fixed by rebuilding at `BASE_PATH=/`. Three guards now make it unrepeatable:
 
 ## Still outstanding
 
+### 0. Cloudflare rewrites the contact link, breaking the no-JS guarantee
+
+**Confirmed live.** The build ships `href="mailto:pranay@stmorg.in"`; the served page carries
+`/cdn-cgi/l/email-protection#<hex>`, which only resolves once Cloudflare's script has run. On a site
+whose premise is that it works with JavaScript disabled, the one outbound link a reader is most
+likely to need is the only thing that requires it.
+
+This is Cloudflare's **Email Address Obfuscation** (Scrape Shield). It is applied at the edge and
+**cannot be fixed in the build** — `npm test` asserts the build output is clean, which it is.
+
+Two routes, both Pranay's to choose:
+
+1. **Turn it off.** Cloudflare dashboard → the zone → **Scrape Shield** → disable *Email Address
+   Obfuscation*. Narrower option: leave it on globally and add a Configuration Rule disabling it for
+   `constitution.stmorg.in`.
+2. **Stop publishing a raw address.** Replace `info.contact.email` with `info.contact.url` pointing
+   at a contact page. Nothing to obfuscate, and the address stops being scraped — which is what the
+   feature is for.
+
+Verify after either:
+
+```bash
+curl -sS "https://constitution.stmorg.in/?cb=$(date +%s)" | grep -c "cdn-cgi/l/email-protection"   # 0
+```
+
 ### 1. HTTPS is not enforced by GitHub
 
 `gh api repos/ServiceToMankind/OpenCodeLaw/pages` reports `https_enforced: false`, and the Pages
@@ -42,17 +67,40 @@ Fixed by rebuilding at `BASE_PATH=/`. Three guards now make it unrepeatable:
 by GitHub. The served HTML contains `/cdn-cgi/l/email-protection`, which is Cloudflare rewriting the
 `mailto:` in the footer, so the domain is proxied (orange cloud).
 
-Consequences worth a decision:
+**What the documentation actually says** — checked rather than recalled, because the usual advice
+here is folklore:
 
-- GitHub cannot provision its own certificate while Cloudflare proxies the domain, so
-  **Enforce HTTPS will stay unavailable** until the record is set to DNS-only long enough for
-  GitHub to issue a certificate.
-- If Cloudflare's SSL mode is **Flexible**, the Cloudflare→GitHub leg is plaintext. It should be
-  **Full (strict)**. Worth checking in the Cloudflare dashboard.
-- Cloudflare's email obfuscation is rewriting page content. Harmless here, but it means the bytes
-  served are not exactly the bytes built.
+- GitHub's own pages on [securing a Pages site with HTTPS][gh-https] and
+  [troubleshooting custom domains][gh-tsh] **do not mention CDNs, proxies or Cloudflare at all.**
+  They say certificate provisioning depends on the DNS records resolving to GitHub's infrastructure,
+  that stray `A`/`AAAA`/`ALIAS`/`ANAME`/`CNAME` records "may prevent the HTTPS certificate from
+  generating", and that the fix for a stuck certificate is to remove and re-add the custom domain.
+  So the DNS-only step is **inference from those requirements, not documented GitHub guidance.**
+- Cloudflare's side is clearer. Its community guidance is that using GitHub Pages with Cloudflare
+  requires disabling the HTTP proxy, and that under **Full (strict)** Cloudflare blocks the HTTP
+  validation GitHub uses to issue a certificate — see [the Cloudflare community thread][cf-gh] and
+  [Full (strict) mode][cf-strict].
 
-**Not changed — this is DNS and a third-party dashboard, outside anything authorised.**
+**Therefore the sequence, stated as a proposal to verify and not as fact:** set the record to
+DNS-only (grey cloud), wait for GitHub to issue the certificate and for *Enforce HTTPS* to become
+available, then re-enable the proxy if it is wanted. **Confirm before running it** — if GitHub's
+certificate does not cover the hostname once the proxy is back on, Full (strict) returns
+[error 526][cf-526].
+
+- **SSL mode.** If Cloudflare is set to **Flexible**, the Cloudflare→GitHub leg is plaintext while
+  the padlock still shows for visitors. It should be **Full (strict)**, which
+  [requires a valid publicly-trusted certificate on the origin][cf-strict] — which GitHub provides
+  once provisioning has succeeded. Check this first: it is the item with a real security consequence,
+  and it is independent of whether *Enforce HTTPS* is ever turned on.
+- **Bytes served are not bytes built.** See item 0.
+
+**Nothing changed. This is DNS and a third-party dashboard, outside anything authorised here.**
+
+[gh-https]: https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https
+[gh-tsh]: https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages
+[cf-gh]: https://community.cloudflare.com/t/github-pages-require-disabling-cfs-http-proxy/147401
+[cf-strict]: https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/
+[cf-526]: https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-526/
 
 ### 2. Caching
 
@@ -66,6 +114,7 @@ enabled for HTML, purge after deploys or the window is longer.
 curl -sS "https://constitution.stmorg.in/?cb=$(date +%s)" | grep -c "/OpenCodeLaw/"   # must be 0
 curl -sS -o /dev/null -w "%{http_code}\n" https://constitution.stmorg.in/styles/tokens.css
 curl -sS "https://constitution.stmorg.in/?cb=$(date +%s)" | grep -oE '<link rel="canonical"[^>]*>'
+curl -sS "https://constitution.stmorg.in/?cb=$(date +%s)" | grep -c "cdn-cgi/l/email-protection"  # must be 0
 gh api repos/ServiceToMankind/OpenCodeLaw/pages --jq '{cname, https_enforced}'
 ```
 

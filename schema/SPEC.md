@@ -57,12 +57,19 @@ Records text that entered the constitution outside the amendment process. Its pu
 | `registration` | `string` | no | Registration identifier under the governing statute. |
 | `version` | [semver](#semver) | **yes** |  |
 | `status` | `current` \| `superseded` | **yes** | Exactly one document in the corpus may be `current`. |
-| `effective_from` | `string` (date) | **yes** |  |
+| `legal_status` | [legalStatus](#legalstatus) | no |  |
+| `adopted_version` | [semver](#semver) | no | The last version the board actually adopted. Required when legal_status is not_adopted. |
+| `text_as_of` | `string` (date) | no | The date the displayed text reflects, which is not the same as the date any instrument took effect. Required when legal_status is not_adopted. |
+| `effective_from` | `string` (date) | no |  |
 | `superseded_by` | [semver](#semver) | no | Version that replaced this one. Required in practice for archived pages, which must name their successor in a visible banner. |
 | `logo` | object | no |  <br><small>no extra keys</small> |
 | `contact` | object | no |  <br><small>no extra keys</small> |
 | `termsOfService` | `string` (uri) | no |  |
 | `license` | `string` | no |  |
+
+**Conditional rules**
+
+- When `legal_status` is `not_adopted`: `adopted_version`, `text_as_of` becomes required. Otherwise `effective_from` is required.
 
 ### preamble
 
@@ -163,6 +170,12 @@ Declares that this document does not yet reflect every instrument that amends it
 Whether this heading carries legal force. `enacted` means the title appears as a heading in an instrument already applied to this provision. `editorial` means an editor supplied it — Act 1 titles Article 11's clause (2) `Establishment` but gives clause (1) no title at all, and the lowercase `units` above it is editorial. Optional in the schema so frozen archives stay valid unedited; validate.mjs requires it on the current document.
 
 Type: `enacted` \| `editorial`
+
+### legalStatus
+
+Whether the board has adopted the text as published at `version`. `not_adopted` means the version string is a working publication label and NOT an assertion about what is in force; the document must then declare `adopted_version` and `text_as_of`, and the renderer must lead with the adopted position rather than the label. Optional in the schema so frozen archives stay valid unedited; validate.mjs requires it on the current document.
+
+Type: `adopted` \| `not_adopted`
 
 ## Validation beyond the schema
 

@@ -178,7 +178,9 @@ export function layout ({
         ${info.contact?.email ? ` · <a href="mailto:${escapeHtml(info.contact.email)}">Contact</a>` : ''}
       </p>
       <p class="site-footer__meta">
-        Version ${escapeHtml(info.version)} · effective ${escapeHtml(info.effective_from)}
+        ${info.legal_status === 'not_adopted'
+          ? `Last adopted version ${escapeHtml(info.adopted_version)} · text as at ${escapeHtml(info.text_as_of)} · not yet adopted`
+          : `Version ${escapeHtml(info.version)} · effective ${escapeHtml(info.effective_from)}`}
         ${info.license ? ` · ${escapeHtml(info.license)}` : ''}
       </p>
     </footer>

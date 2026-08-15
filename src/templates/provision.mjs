@@ -24,15 +24,18 @@ function amendedByChips (ids, { url, actIndex }) {
 }
 
 /**
- * Marks a heading an editor supplied rather than one an instrument enacted.
- * Rendering both at identical weight is how Article 11's lowercase `units`
- * has sat above an enacted clause looking official.
+ * Marks the heading that an instrument enacted — the exception, not the rule.
+ *
+ * 8 of 40 headings are enacted; 32 are editorial aids. Marking the editorial
+ * ones marked the normal case, and put the words "not enacted" next to the
+ * provision, where they read as a claim about the provision rather than its
+ * heading. The default is stated once on the amendments page instead.
  */
-function editorialMark (titleSource) {
-  if (titleSource !== 'editorial') return ''
-  return ` <span class="title-mark" title="Editorial heading — not enacted by any instrument">` +
+function enactedMark (titleSource) {
+  if (titleSource !== 'enacted') return ''
+  return `<span class="title-mark" title="Enacted heading — stated by an amending instrument">` +
     `<span aria-hidden="true">§</span>` +
-    `<span class="visually-hidden">(editorial heading, not enacted)</span></span>`
+    `<span class="visually-hidden">enacted heading</span></span>`
 }
 
 function copyButton (id, label) {
@@ -58,7 +61,7 @@ export function renderSection (section, { url, actIndex, headingLevel = 3 }) {
       <article class="provision provision--section" id="${escapeHtml(section.id)}" aria-labelledby="h-${escapeHtml(section.id)}">
         <${H} class="provision__heading" id="h-${escapeHtml(section.id)}">
           <span class="provision__num" aria-hidden="true">${section.number}</span>
-          <span class="provision__title">${escapeHtml(section.title)}${editorialMark(section.title_source)}</span>
+          <span class="provision__title">${escapeHtml(section.title)}${enactedMark(section.title_source)}</span>
           ${copyButton(section.id, section.title)}
         </${H}>
         ${amendedByChips(section.amended_by, { url, actIndex })}
@@ -96,7 +99,7 @@ export function renderArticle (article, opts) {
     <article class="provision provision--article" id="${escapeHtml(article.id)}" aria-labelledby="h-${escapeHtml(article.id)}">
       <${H} class="provision__heading" id="h-${escapeHtml(article.id)}">
         <span class="provision__num" aria-hidden="true">${article.number}</span>
-        <span class="provision__title">${escapeHtml(article.title)}${editorialMark(article.title_source)}</span>
+        <span class="provision__title">${escapeHtml(article.title)}${enactedMark(article.title_source)}</span>
         ${copyButton(article.id, article.title)}
       </${H}>
       ${amendedByChips(article.amended_by, { url, actIndex })}
