@@ -541,3 +541,42 @@ test('a resolution sheet renders only once a bill is scheduled', async () => {
   assert.match(flat, /present and voting/i)
   assert.match(flat, /individual members' votes are not published/i)
 })
+
+// --- the gate --------------------------------------------------------------
+
+test('two open bills on one provision are a conflict the ICC must sequence', async () => {
+  const { findConflicts, TERMINAL } = await import('../src/bill-gate.mjs')
+  const mk = (n, status, target) => ({
+    rel: `bills/2026/b${n}.yaml`,
+    bill: { bill: { number: n, year: 2026, short_title: `Bill ${n}` }, status, operations: [{ target }] }
+  })
+
+  const conflicts = findConflicts([
+    mk(1, 'submitted', 'art-13'),
+    mk(2, 'scheduled', 'art-13'),
+    mk(3, 'applied', 'art-13')   // terminal: cannot conflict with anything
+  ])
+  assert.equal(conflicts.length, 1, 'one conflicted provision')
+  assert.equal(conflicts[0].target, 'art-13')
+  assert.equal(conflicts[0].bills.length, 2, 'the applied bill must not be counted')
+  for (const n of ['Bill 1 of 2026', 'Bill 2 of 2026']) {
+    assert.ok(conflicts[0].message.includes(n), `${n} must be named`)
+  }
+  assert.match(conflicts[0].message, /rebase voids them/,
+    'the message must say the second bill re-collects its approvals')
+
+  // Different provisions never conflict.
+  assert.deepEqual(findConflicts([mk(1, 'submitted', 'art-13'), mk(2, 'submitted', 'art-14')]), [])
+  // Terminal states are terminal.
+  for (const s of ['applied', 'rejected', 'withdrawn', 'lapsed']) assert.ok(TERMINAL.has(s))
+})
+
+test('the gate reports validator warnings, not only errors', async () => {
+  // A warning only in local CLI output is a warning nobody sees. The gate has
+  // to surface them, so it has to count them.
+  const { runGate } = await import('../src/bill-gate.mjs')
+  const r = runGate({ baseRef: 'HEAD', annotations: false })
+  assert.equal(typeof r.warnings, 'number')
+  assert.equal(typeof r.errors, 'number')
+  assert.match(r.text, /Bill gate —/)
+})

@@ -1,0 +1,90 @@
+name: Bill gate
+
+# The technical department's gate. ICC returns the approved artifact, the tech
+# department opens a pull request, and this runs on it.
+#
+# Merging a bill file never amends the constitution. The constitution changes
+# only through `act apply`, with its manifest and its tripwire.
+
+on:
+  pull_request:
+    paths:
+      - 'bills/**'
+      - 'constitution/current.yaml'
+      - 'acts/register.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  gate:
+    name: Check bills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The gate diffs against the base, so it needs the history to do it.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # Schema, target resolution, staleness, evidence files and their
+      # checksums, and the threshold for any recorded approvals — plus the
+      # cross-bill checks no single-bill run can see.
+      #
+      # Warnings surface as annotations, not only in this log: a warning nobody
+      # sees is a warning that does not exist.
+      - name: Run the bill gate
+        id: gate
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+        run: npm run bill-gate
+
+      # What the approving bodies read, so the tech department reviews the same
+      # thing rather than a YAML diff.
+      - name: Upload the gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bill-gate-report
+          path: bill-gate-report.md
+          if-no-files-found: ignore
+
+      - name: Render the instruments this pull request touches
+        if: always()
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          set -e
+          mkdir -p rendered
+          for f in $(git diff --name-only "$BASE_REF"...HEAD -- 'bills/**/*.yaml' 'bills/**/*.yml' || true); do
+            [ -f "$f" ] || continue
+            echo "rendering $f"
+            node src/cli.mjs bill render "$f" || true
+            node src/cli.mjs bill ballot "$f" || true
+          done
+          find bills -name '*-ballot.html' -o -name '*.html' -o -name '*.txt' 2>/dev/null \
+            | while read -r r; do cp "$r" rendered/ 2>/dev/null || true; done
+          ls -la rendered || true
+
+      - name: Upload the rendered instruments
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-instruments
+          path: rendered/
+          if-no-files-found: ignore
+
+      # The whole corpus still has to hold together.
+      - name: Validate the corpus
+        run: npm run validate
+
+      - name: Test
+        run: npm test
