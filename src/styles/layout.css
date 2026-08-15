@@ -1425,3 +1425,22 @@ body.is-focus-mode .provision:focus-within { opacity: 1; }
 body.is-modal-open {
   overflow: hidden;
 }
+
+/* An editorial heading — supplied by an editor, not enacted by any instrument.
+   Deliberately quiet: it must be noticeable on inspection without competing
+   with the provision text, and it must never look like an error. */
+.title-mark {
+  display: inline-block;
+  margin-left: 0.35em;
+  padding: 0 0.3em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 4px);
+  color: var(--muted);
+  background: var(--surface);
+  font-family: var(--font-num);
+  font-size: 0.62em;
+  font-weight: 600;
+  line-height: 1.6;
+  vertical-align: 0.28em;
+  cursor: help;
+}

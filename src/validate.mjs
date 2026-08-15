@@ -210,6 +210,22 @@ function checkNumbering (rep, file, doc) {
   }
 }
 
+/**
+ * Every heading in the live document must declare whether it carries legal
+ * force. A reader cannot tell an enacted heading from one an editor typed,
+ * and rendering both at the same weight is how `units` sat above an enacted
+ * clause for two years looking official.
+ */
+function checkTitleSource (rep, file, doc) {
+  for (const p of provisionsOf(doc)) {
+    if (p.kind === 'preamble' || (p.status ?? 'active') !== 'active') continue
+    if (!p.node?.title_source) {
+      rep.error(file, 'title-source-missing',
+        `${p.id} "${p.node?.title}" does not declare title_source (enacted | editorial)`, p.where)
+    }
+  }
+}
+
 function checkPlaceholderUrls (rep, file, doc) {
   const walk = (node, trail) => {
     if (typeof node === 'string') {
@@ -455,6 +471,9 @@ export function validate () {
     checkIdentity(rep, d.file, d.doc)
     checkNumbering(rep, d.file, d.doc)
     checkPlaceholderUrls(rep, d.file, d.doc)
+    // Required on the live document only. Archived versions are append-never,
+    // edit-never, so the rule cannot be applied retroactively to them.
+    if (!d.archived) checkTitleSource(rep, d.file, d.doc)
   }
 
   checkVersionIdentity(rep, docs)

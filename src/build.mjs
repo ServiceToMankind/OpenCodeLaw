@@ -465,6 +465,29 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
   const held = (state?.held ?? []).map(h =>
     `<li><strong>${h.provisions.map(escapeHtml).join(', ')}</strong> — awaiting ${escapeHtml(Array.isArray(h.blocked_by) ? h.blocked_by.join(', ') : h.blocked_by)}${h.note ? `<span class="banner__note">${escapeHtml(h.note)}</span>` : ''}</li>`).join('')
 
+  const editorial = doc.articles.flatMap(a => [
+    ...(a.title_source === 'editorial' ? [{ id: a.id, label: `Article ${a.number}`, title: a.title }] : []),
+    ...(a.sections ?? []).filter(s => s.title_source === 'editorial')
+      .map(s => ({ id: s.id, label: `Article ${a.number}, clause ${s.number}`, title: s.title }))
+  ])
+
+  const editorialSection = `
+    <h2 class="act__sub" id="editorial-headings">Headings not enacted by any instrument</h2>
+    <p>Some headings in this constitution appear in an instrument and carry legal force. Others were
+    supplied by an editor and do not. Act 1 of 2024 titles Article 11's clause (2)
+    <strong>Establishment</strong>; it gives clause (1) no title at all, and the heading above it was
+    written by an editor. Editorial headings are marked
+    <span class="title-mark"><span aria-hidden="true">§</span><span class="visually-hidden">(editorial heading, not enacted)</span></span>
+    throughout the text.</p>
+    <p>A heading counts as enacted only where an instrument <em>already applied</em> to that provision
+    states it as a heading. Nothing is credited to an Act that has not been applied.</p>
+    <p><strong>${editorial.length}</strong> of ${doc.articles.reduce((n, a) => n + 1 + (a.sections?.length ?? 0), 0)}
+    headings are editorial. They are listed here so the board can ratify or replace them, rather than
+    have them quietly rewritten.</p>
+    <ul class="act__provisions">
+      ${editorial.map(e => `<li><a href="${url('')}#${escapeHtml(e.id)}">${escapeHtml(e.label)}</a> — <code>${escapeHtml(e.title)}</code></li>`).join('')}
+    </ul>`
+
   return `
     <h1 class="page-title">Amendment register</h1>
     <p class="page-lead">Every instrument amending this constitution, with the provisions it touches and the signed Act as published.</p>
@@ -472,7 +495,8 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
       <h2 class="banner__title" id="held-heading">Not yet reconciled</h2>
       <ul class="banner__list">${held}</ul>
     </aside>` : ''}
-    ${rows}`
+    ${rows}
+    ${editorialSection}`
 }
 
 function sitemap (doc, slugs, versions) {

@@ -23,6 +23,18 @@ function amendedByChips (ids, { url, actIndex }) {
   return chips ? `<p class="chips">${chips}</p>` : ''
 }
 
+/**
+ * Marks a heading an editor supplied rather than one an instrument enacted.
+ * Rendering both at identical weight is how Article 11's lowercase `units`
+ * has sat above an enacted clause looking official.
+ */
+function editorialMark (titleSource) {
+  if (titleSource !== 'editorial') return ''
+  return ` <span class="title-mark" title="Editorial heading — not enacted by any instrument">` +
+    `<span aria-hidden="true">§</span>` +
+    `<span class="visually-hidden">(editorial heading, not enacted)</span></span>`
+}
+
 function copyButton (id, label) {
   return `<button type="button" class="copy" data-copy="${escapeHtml(id)}"
     aria-label="Copy link to ${escapeHtml(label)}"><span aria-hidden="true">🔗</span></button>`
@@ -46,7 +58,7 @@ export function renderSection (section, { url, actIndex, headingLevel = 3 }) {
       <article class="provision provision--section" id="${escapeHtml(section.id)}" aria-labelledby="h-${escapeHtml(section.id)}">
         <${H} class="provision__heading" id="h-${escapeHtml(section.id)}">
           <span class="provision__num" aria-hidden="true">${section.number}</span>
-          <span class="provision__title">${escapeHtml(section.title)}</span>
+          <span class="provision__title">${escapeHtml(section.title)}${editorialMark(section.title_source)}</span>
           ${copyButton(section.id, section.title)}
         </${H}>
         ${amendedByChips(section.amended_by, { url, actIndex })}
@@ -84,7 +96,7 @@ export function renderArticle (article, opts) {
     <article class="provision provision--article" id="${escapeHtml(article.id)}" aria-labelledby="h-${escapeHtml(article.id)}">
       <${H} class="provision__heading" id="h-${escapeHtml(article.id)}">
         <span class="provision__num" aria-hidden="true">${article.number}</span>
-        <span class="provision__title">${escapeHtml(article.title)}</span>
+        <span class="provision__title">${escapeHtml(article.title)}${editorialMark(article.title_source)}</span>
         ${copyButton(article.id, article.title)}
       </${H}>
       ${amendedByChips(article.amended_by, { url, actIndex })}

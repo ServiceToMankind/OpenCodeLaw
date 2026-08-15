@@ -272,3 +272,48 @@ test('legacy Apache URLs redirect instead of 404ing', () => {
     assert.ok(exists(`${target}index.html`), `${rel} redirects to ${target}, which is not built`)
   }
 })
+
+test('every live heading declares whether it carries legal force', () => {
+  for (const a of doc.articles) {
+    if ((a.status ?? 'active') !== 'active') continue
+    assert.ok(['enacted', 'editorial'].includes(a.title_source), `${a.id} missing title_source`)
+    for (const s of a.sections ?? []) {
+      assert.ok(['enacted', 'editorial'].includes(s.title_source), `${s.id} missing title_source`)
+    }
+  }
+})
+
+test('editorial headings are marked in the rendered text, enacted ones are not', () => {
+  const html = read('index.html')
+  const sample = (id, expected) => {
+    const i = html.indexOf(`id="${id}"`)
+    assert.ok(i > -1, `${id} not rendered`)
+    const head = html.slice(i, i + 600)
+    const marked = head.slice(0, head.indexOf('</h')).includes('title-mark')
+    assert.equal(marked, expected, `${id}: expected ${expected ? 'an editorial mark' : 'no mark'}`)
+  }
+  // Act 1 gives clause (1) of Article 11 no title; `units` was typed by an editor.
+  sample('art-11-s-1', true)
+  // Act 1 titles clause (2) `Establishment`.
+  sample('art-11-s-2', false)
+  // Article 10's three sections are enacted headings inside Act 1.
+  sample('art-10-s-1', false)
+
+  // A title credited to an Act that has NOT been applied would be a false claim
+  // of legal force. Act 2 retitles Article 14, but Act 2 is not applied.
+  const art14 = doc.articles.find(a => a.number === 14)
+  assert.equal(art14.title_source, 'editorial',
+    'a heading must not be credited to an unapplied Act')
+})
+
+test('the amendments page explains the editorial marker and lists every instance', () => {
+  const html = read('amendments/index.html')
+  assert.ok(html.includes('Headings not enacted by any instrument'), 'no explanation of the marker')
+  const editorial = doc.articles.flatMap(a => [
+    ...(a.title_source === 'editorial' ? [a.id] : []),
+    ...(a.sections ?? []).filter(s => s.title_source === 'editorial').map(s => s.id)
+  ])
+  for (const id of editorial) {
+    assert.ok(html.includes(`#${id}`), `editorial heading ${id} is not listed for ratification`)
+  }
+})

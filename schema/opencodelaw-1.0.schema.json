@@ -225,6 +225,9 @@
         "title": {
           "$ref": "#/$defs/nonEmptyText"
         },
+        "title_source": {
+          "$ref": "#/$defs/titleSource"
+        },
         "content": {
           "$ref": "#/$defs/nonEmptyText"
         },
@@ -315,6 +318,9 @@
         },
         "title": {
           "$ref": "#/$defs/nonEmptyText"
+        },
+        "title_source": {
+          "$ref": "#/$defs/titleSource"
         },
         "content": {
           "$ref": "#/$defs/nonEmptyText"
@@ -667,6 +673,13 @@
           }
         }
       }
+    },
+    "titleSource": {
+      "enum": [
+        "enacted",
+        "editorial"
+      ],
+      "description": "Whether this heading carries legal force. `enacted` means the title appears as a heading in an instrument already applied to this provision. `editorial` means an editor supplied it \u2014 Act 1 titles Article 11's clause (2) `Establishment` but gives clause (1) no title at all, and the lowercase `units` above it is editorial. Optional in the schema so frozen archives stay valid unedited; validate.mjs requires it on the current document."
     }
   }
 }

@@ -1,7 +1,7 @@
 # Reconciliation
 
 **Status:** open. No constitutional text has been changed.
-**Answered:** Q3, Q5, Q6, Q8, Q9, Q11, Q14 — recorded below and carried into Phase 3.
+**Answered:** Q3, Q5, Q6, Q8, Q9, Q11 (signed off), Q14 — recorded below and carried into Phase 3.
 **Open:** Q1, Q2 (blocking — holds Articles 6 and 7), Q4, Q7, Q10, Q12, Q13.
 **Branch:** `rebuild/v3` · **Raised:** 2026-08-14 · **Sign-off required from:** Pranay
 
@@ -217,7 +217,22 @@ enacting instruments? Recording it preserves the v1 adoption date, which exists 
 
 ### Q11 — Article 11 `Units` has no article body
 
-> **ANSWERED — Determined by the Act. Act 1 sets Article 11's text out at article level under the heading `11. Units`; whoever applied it placed that text in a subsection named `units` and left the article body empty. A transcription error, not an editorial choice. `current.yaml` restores the text to article level per Act 1. `versions/v2.0.0.yaml` keeps the empty body and gains a `publication_defect` note — an archive that silently fixes what was published is not an archive.**
+> **SIGNED OFF — section-only is correct.**
+>
+> The earlier answer assumed Act 1 supplies article-level text for Article 11 that someone
+> misfiled into a subsection. It does not. Act 1 runs `11. Units` straight into `(1)(a)`, exactly
+> as it does for Article 10, and supplies no article-level body at all. Its clause (1) is a 100.0%
+> match to `art-11-s-1` and its clause (2) a 100.0% match to `art-11-s-2` once the section title is
+> included in the comparison — together the whole of the enacted text.
+>
+> **The resolution comes from Act 1's operative structure, not from an editorial preference.**
+> Removing the empty `content` key makes Article 11 the shape the instrument enacts: an article
+> consisting of two clauses. No provision text was added, removed or altered.
+> `versions/v2.0.0.yaml` keeps its empty body, as published.
+>
+> One consequence is recorded separately: Act 1 gives clause (1) no title. The lowercase `units`
+> above it is an editorial heading, now marked as such in the rendered text and listed on the
+> amendments page for ratification. See the note on `title_source` below.
 
 `art-11.content` is an empty string. This is the defect that published a blank provision for two
 years, and the new validator now rejects it as a hard error — the build cannot ship until this is
@@ -417,6 +432,33 @@ question.
 
 ---
 
+## Heading provenance — `title_source`
+
+Every heading in the live document now declares whether it carries legal force:
+
+- **`enacted`** — the heading appears, as a heading, in an instrument **already applied** to that
+  provision. 8 of 40.
+- **`editorial`** — supplied by an editor. 32 of 40.
+
+Two deliberate narrowings, both of which change the answer:
+
+1. **A heading is never credited to an unapplied Act.** Act 2 retitles Article 14 to `Leaves`, but
+   Act 2 has not been applied, so `Sabbatical Leave` remains editorial. Crediting it would claim
+   legal force for a heading that is not in effect.
+2. **The heading must appear as a heading, not anywhere in the prose.** A substring test marks
+   Article 11's `units` as enacted, because Act 1's clause (1) opens "The units of the NGO…", and
+   marks Article 15's `Resignation` as enacted off the phrase "the resignation letter". Both are
+   false.
+
+Nothing was renamed. `units`, `Alumini`, `Anual Reports` and `Ammendments` all stand exactly as
+they are, now visibly marked as editorial and listed on the amendments page.
+
+**Note on `Ammendments`:** Act 2's operative text spells Article 16 as **`Amendments`**. That typo
+therefore corrects itself when Act 2 is applied, by the instrument rather than by an editor. It
+should not be fixed by hand in the meantime.
+
+---
+
 ## Sign-off
 
 No text may be applied until every **blocking** question above is answered.
@@ -426,7 +468,7 @@ No text may be applied until every **blocking** question above is answered.
 - [x] Q6 Full-substitution convention — **read the body, not the heading**
 - [x] Q8 Act author vs signatory — **split the field**, Revanth preserved as unverified
 - [x] Q9 Assent date — **2024-05-03 assent, 2024-05-02 recorded as passed_date**
-- [x] Q11 Article 11 empty body — **restore in current, keep the defect in the archive**
+- [x] Q11 Article 11 empty body — **signed off: section-only, per Act 1's operative structure**
 
 Open:
 

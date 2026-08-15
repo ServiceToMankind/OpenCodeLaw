@@ -382,7 +382,7 @@ Reads as the Act **44.4%** · Act's words present 44.4% · unchanged since v1 10
 
 #### 🟢 art-9 — ALREADY-APPLIED
 
-`substitute` · article scope · source `act-1-2024` line 56
+`substitute` · article scope · source `act-1-2024` line 55
 
 Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 28.3%
 
@@ -431,7 +431,7 @@ Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 
 
 #### 🟢 art-10 — ALREADY-APPLIED
 
-`substitute` · article scope · source `act-1-2024` line 77
+`substitute` · article scope · source `act-1-2024` line 76
 
 Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 32.7%
 
@@ -529,7 +529,7 @@ The IBM are as follows:
 
 #### 🟢 art-11 — ALREADY-APPLIED
 
-`substitute` · article scope · source `act-1-2024` line 123
+`substitute` · article scope · source `act-1-2024` line 121
 
 Reads as the Act **99.4%** · Act's words present 99.4% · unchanged since v1 26.8%
 
@@ -594,7 +594,7 @@ To establish a unit in a college, the following conditions should be satisfied:
 
 #### 🟢 art-12 — ALREADY-APPLIED
 
-`substitute` · article scope · source `act-1-2024` line 156
+`substitute` · article scope · source `act-1-2024` line 153
 
 Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 47.1%
 
@@ -618,7 +618,7 @@ Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 
 
 #### 🟢 art-18 — ALREADY-APPLIED
 
-`insert` · article scope · source `act-1-2024` line 161
+`insert` · article scope · source `act-1-2024` line 158
 
 Reads as the Act **100.0%** · Act's words present 100.0% · unchanged since v1 0.0%
 
@@ -769,7 +769,7 @@ To create a society where everyone has access to basic amenities and is treated
 
 #### 🟡 art-8 — NOT-APPLIED
 
-`substitute` · article scope · source `act-2-2024` line 48
+`substitute` · article scope · source `act-2-2024` line 47
 
 Reads as the Act **84.4%** · Act's words present 84.4% · unchanged since v1 100.0%
 
@@ -829,7 +829,7 @@ Internship is a program where the students of the college are given an opportuni
 
 #### 🟡 art-16 clause (3) — NOT-APPLIED
 
-`substitute` · clause scope · source `act-2-2024` line 73
+`substitute` · clause scope · source `act-2-2024` line 72
 
 Reads as the Act **54.8%** · Act's words present 54.8% · unchanged since v1 100.0%
 
@@ -856,7 +856,7 @@ the NGO, the intermediate board of the NGO and units of the NGO collectively.
 
 #### 🟡 art-17 clause (1) — NOT-APPLIED
 
-`substitute` · clause scope · source `act-2-2024` line 85
+`substitute` · clause scope · source `act-2-2024` line 83
 
 Reads as the Act **63.0%** · Act's words present 63.0% · unchanged since v1 100.0%
 
@@ -882,7 +882,7 @@ the NGO will be transferred to the same objectives of the NGO.
 
 #### 🟡 art-14 — NOT-APPLIED
 
-`substitute` · article scope · source `act-2-2024` line 92
+`substitute` · article scope · source `act-2-2024` line 90
 
 Reads as the Act **12.7%** · Act's words present 16.7% · unchanged since v1 100.0%
 
@@ -918,7 +918,7 @@ The duration of the sabbatical leave will be varied from 6 months to 1 year. Acc
 
 #### 🟡 art-20 — NOT-APPLIED
 
-`insert` · article scope · source `act-2-2024` line 99
+`insert` · article scope · source `act-2-2024` line 97
 
 Reads as the Act **0.0%** · Act's words present 0.0% · unchanged since v1 100.0%
 
@@ -945,7 +945,7 @@ Reads as the Act **0.0%** · Act's words present 0.0% · unchanged since v1 100.
 
 #### 🟡 art-15 — NOT-APPLIED
 
-`substitute` · article scope · source `act-2-2024` line 107
+`substitute` · article scope · source `act-2-2024` line 105
 
 Reads as the Act **9.8%** · Act's words present 16.2% · unchanged since v1 100.0%
 

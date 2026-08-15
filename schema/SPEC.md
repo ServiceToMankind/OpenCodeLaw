@@ -88,6 +88,7 @@ Type: `active` \| `omitted` \| `reserved`
 | `id` | `string` | **yes** | Permanent citation identifier and public URL anchor. Treat as a public API: never regenerate, never derive from array position. <br><small>pattern `^art-[1-9]\d*$`</small> |
 | `number` | `integer` | **yes** | The number the Acts cite. Explicit, never derived from index. Article 21 is `number: 21` even when it is the 20th element of the list. <br><small>min 1</small> |
 | `title` | [nonEmptyText](#nonemptytext) | **yes** |  |
+| `title_source` | [titleSource](#titlesource) | no |  |
 | `content` | [nonEmptyText](#nonemptytext) | no |  |
 | `status` | [provisionStatus](#provisionstatus) | no |  |
 | `note` | `string` | no | Required for `reserved`/`omitted`: why this number carries no text. <br><small>min length 1</small> |
@@ -106,6 +107,7 @@ Type: `active` \| `omitted` \| `reserved`
 | `id` | `string` | **yes** | Permanent citation identifier, e.g. art-6-s-1. Must agree with the parent article's number and this section's number; validate.mjs enforces the relationship. <br><small>pattern `^art-[1-9]\d*-s-[1-9]\d*$`</small> |
 | `number` | `integer` | **yes** |  <br><small>min 1</small> |
 | `title` | [nonEmptyText](#nonemptytext) | **yes** |  |
+| `title_source` | [titleSource](#titlesource) | no |  |
 | `content` | [nonEmptyText](#nonemptytext) | no |  |
 | `status` | [provisionStatus](#provisionstatus) | no |  |
 | `note` | `string` | no |  <br><small>min length 1</small> |
@@ -155,6 +157,12 @@ Declares that this document does not yet reflect every instrument that amends it
 | `complete` | `boolean` | **yes** |  |
 | `applied` | array of `string` | no | Instruments reflected in this text, annotated where only partly so. |
 | `held` | array of object | no | What is not yet applied and why. Naming the blocker is the point: an unreconciled state that does not say what it is waiting for is indistinguishable from an oversight. |
+
+### titleSource
+
+Whether this heading carries legal force. `enacted` means the title appears as a heading in an instrument already applied to this provision. `editorial` means an editor supplied it — Act 1 titles Article 11's clause (2) `Establishment` but gives clause (1) no title at all, and the lowercase `units` above it is editorial. Optional in the schema so frozen archives stay valid unedited; validate.mjs requires it on the current document.
+
+Type: `enacted` \| `editorial`
 
 ## Validation beyond the schema
 
