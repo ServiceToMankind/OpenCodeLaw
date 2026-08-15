@@ -67,6 +67,21 @@ curl -sS "https://constitution.stmorg.in/?cb=$(date +%s)" | grep -c "cdn-cgi/l/e
 by GitHub. The served HTML contains `/cdn-cgi/l/email-protection`, which is Cloudflare rewriting the
 `mailto:` in the footer, so the domain is proxied (orange cloud).
 
+**Direct evidence that no GitHub certificate exists for this hostname.** Fetching GitHub's Pages
+origin with the right Host header fails TLS verification:
+
+```
+$ curl --resolve constitution.stmorg.in:443:185.199.108.153 https://constitution.stmorg.in/
+curl: (60) SSL: no alternative certificate subject name matches target host name
+      'constitution.stmorg.in'
+```
+
+Visitors are unaffected — Cloudflare terminates TLS with its own certificate — but it confirms the
+GitHub-side certificate has never been issued, which is what `https_enforced: false` reflects. It
+also means **Cloudflare's SSL mode cannot currently be Full (strict)** against this origin without
+returning [error 526][cf-526]: strict mode validates the origin certificate, and there is not a
+valid one for this hostname. Whatever the mode is today, it is not that. Check it.
+
 **What the documentation actually says** — checked rather than recalled, because the usual advice
 here is folklore:
 
