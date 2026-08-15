@@ -215,6 +215,9 @@
         "title": {
           "$ref": "#/$defs/nonEmptyText"
         },
+        "title_source": {
+          "$ref": "#/$defs/titleSource"
+        },
         "content": {
           "$ref": "#/$defs/nonEmptyText"
         },

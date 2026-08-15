@@ -204,6 +204,15 @@ export function applyAct (actId, { dryRun = false } = {}) {
       applied.push(`${target} already applied`)
     } else if (p.scope === 'clause') {
       applyClauseEdits(target, node, p.text)
+      // A clause-scope Act still restates the article heading above its
+      // clauses, and that heading is enacted text: Act 2 heads Article 16
+      // "16. Amendments", which is how the misspelling is corrected by the
+      // instrument rather than by an editor.
+      if (p.enacted_title && p.enacted_title !== node.title) {
+        applied.push(`${target} retitled ${JSON.stringify(node.title)} -> ${JSON.stringify(p.enacted_title)}`)
+        node.title = p.enacted_title
+      }
+      if (p.enacted_title) node.title_source = 'enacted'
       applied.push(`${target} clauses ${p.clauses}`)
     } else {
       applyArticleScope(target, doc, p.text, p.enacted_title)

@@ -77,6 +77,7 @@ Records text that entered the constitution outside the amendment process. Its pu
 |---|---|---|---|
 | `id` | `"preamble"` | **yes** |  |
 | `title` | [nonEmptyText](#nonemptytext) | **yes** |  |
+| `title_source` | [titleSource](#titlesource) | no |  |
 | `content` | [nonEmptyText](#nonemptytext) | **yes** |  |
 | `adopted` | `string` | no |  |
 | `amended_by` | array of [actId](#actid) | no |  |

@@ -38,11 +38,16 @@ reconciliation_state:
       note: Neither Act has been applied. Act 2 amends the preamble and Articles 3, 4, 5, 8, 14, 15, 16(3), 17(1) and inserts Article 20. Act 3 amends Article 13 and inserts Article 21.
 preamble:
   id: preamble
-  title: PREAMBLE
+  title: Preamble
   content: |
-    Service to Mankind is a Non-Governmental Organization (NGO) registered under Telangana Societies Registration Act., 2001 that was started to create a platform for students who are
-    intent on doing their bit towards the betterment of society. Service to Mankind is a platform for the students to serve the society and to inculcate a sense of social responsibility in them.
+    SERVICE TO MANKIND is a non-governmental organization registered under the
+           Telangana Society Registration Act, 2001, representing a student-run organization for
+           individuals motivated to fulfill their obligation towards societal betterment and
+           cultivate socially responsible individuals.
   adopted: "2023-10-08T20:20:00+05:30"
+  title_source: enacted
+  amended_by:
+    - act-2-2024
 articles:
   - id: art-1
     number: 1
@@ -77,26 +82,31 @@ articles:
       16. "STM" means the Service to Mankind.
   - id: art-3
     number: 3
-    title: Aims and Objectives
-    title_source: editorial
+    title: Aim and Objectives
+    title_source: enacted
     content: |
-      The NGO has been established to create a platform for the students who are intent on doing
-      their bit towards the betterment of society with the objective of helping the underprivileged
-      and the destitute in any and every way possible.
+      To create a platform for students who have a motive to fulfill their obligation towards
+             societal betterment by helping the underprivileged in every possible way.
+    amended_by:
+      - act-2-2024
   - id: art-4
     number: 4
-    title: Mission Statement
-    title_source: editorial
+    title: Mission statement
+    title_source: enacted
     content: |
-      The mission of the NGO is to provide a platform for the students to serve the society and
-      to inculcate a sense of social responsibility in them.
+      To nurture socially responsible personalities who enlighten the lives of the
+             underprivileged.
+    amended_by:
+      - act-2-2024
   - id: art-5
     number: 5
     title: Vision Statement
-    title_source: editorial
+    title_source: enacted
     content: |
-      The vision of the NGO is to create a society where everyone has access to basic amenities
-      and to create a society where everyone is treated equally.
+      To create a society where everyone has access to basic amenities and is treated
+             equally.
+    amended_by:
+      - act-2-2024
   - id: art-6
     number: 6
     title: STM Roles
@@ -174,43 +184,51 @@ articles:
   - id: art-8
     number: 8
     title: Internship
-    title_source: editorial
+    title_source: enacted
     content: |
-      Internship is a program where the students of the college are given an opportunity to work for the NGO and to learn the working of the NGO as a coordinator in respective collage unit.
+      Internship is a program where the students of the college are given an opportunity to
+             work for the NGO and to learn the working of the NGO as a coordinator in the
+             respective unit.
     sections:
       - id: art-8-s-1
         number: 1
         title: Stipend
-        title_source: editorial
+        title_source: enacted
         content: |
-          There is no stipend for the internship program. But the interns will be provided with the certificate of internship in thier respective college units.
+          There is no stipend for the internship program. But the coordinators will be provided
+          with the certificate of internship in their respective units.
       - id: art-8-s-2
         number: 2
         title: Duration
-        title_source: editorial
+        title_source: enacted
         content: |
-          The duration of the internship program is 3 academic years.
+          The duration of the internship program is two years.
       - id: art-8-s-3
         number: 3
         title: Eligibility
-        title_source: editorial
+        title_source: enacted
         content: |
-          Any student who is willing to serve the society and who is willing to abide by the rules and regulations of the NGO is eligible to become an intern according to the article 7 of the constitution.
+          Any student who is willing to serve the society and abide by the rules and regulations of
+          the NGO is eligible to become an coordinator, according to the article 7.
       - id: art-8-s-4
         number: 4
         title: Selection Process
-        title_source: editorial
+        title_source: enacted
         content: |
           The selection process for the internship program is as follows:
-          1. The student should fill the application form for the internship program.
-          2. The student should attend the interview conducted by the college board.
-          3. The student should be selected by the board.
+                   1. The student should fill out the application form for the internship program.
+                   2. The student will engage in recruitment rounds conducted by the unit board.
+                   3. The student should be selected by the unit board.
       - id: art-8-s-5
         number: 5
         title: Roles and Responsibilities
-        title_source: editorial
+        title_source: enacted
         content: |
-          All the interns should abide by the rules and regulations of the NGO. The interns should work for the NGO in thier respective departments and should work for the betterment of the society.
+          All the coordinators should abide by the rules and regulations of the NGO. The
+          coordinator should work for the NGO in their respective departments for the betterment
+          of the society.
+    amended_by:
+      - act-2-2024
   - id: art-9
     number: 9
     title: Board Members
@@ -348,70 +366,58 @@ articles:
       4. All the Annual Reports from the inception of the NGO must be maintained in the STM management portal
   - id: art-14
     number: 14
-    title: Sabbatical Leave
-    title_source: editorial
-    content: |
-      Sabbatical leave is a leave given to the members of the NGO who are working for the NGO for a long time and who are willing to take a break from the NGO for a certain period of time.
+    title: Leaves
+    title_source: enacted
     sections:
       - id: art-14-s-1
         number: 1
-        title: Eligibility
-        title_source: editorial
+        title: Sabbatical Leave
+        title_source: enacted
         content: |
-          Any member who is working for the NGO for a long time and who is willing to take a break from the NGO for a certain period of time is eligible for the sabbatical leave.
-      - id: art-14-s-2
-        number: 2
-        title: Application
-        title_source: editorial
-        content: |
-          The member should fill the application form for the sabbatical leave and should submit the application to the board.
-      - id: art-14-s-3
-        number: 3
-        title: Duration
-        title_source: editorial
-        content: |
-          The duration of the sabbatical leave will be varied from 6 months to 1 year. According to the application of the member.
+          1. Board and IBM members can apply for leave for 3 months to 1 year . The
+              request letter must be sent to the board 48 hours prior to the leave day.
+          2. If the leaves are proven to be false or invalid, a warning letter will be issued.
+    amended_by:
+      - act-2-2024
   - id: art-15
     number: 15
-    title: Resignation
-    title_source: editorial
-    content: |
-      Resignation is a process where the member of the NGO can leave the NGO if they are not willing to work for the NGO.
+    title: Exit Process
+    title_source: enacted
     sections:
       - id: art-15-s-1
         number: 1
-        title: Eligibility
-        title_source: editorial
+        title: Voluntary
+        title_source: enacted
         content: |
-          Any member who is not willing to work for the NGO is eligible for the resignation.
+          (a) Any Member can opt out of working for an Organization by submitting the
+          resignation letter to the Unit Head.
       - id: art-15-s-2
         number: 2
-        title: Application
-        title_source: editorial
+        title: Involuntary
+        title_source: enacted
         content: |
-          The member should fill the application form for the resignation and should submit the application to the board.
-      - id: art-15-s-3
-        number: 3
-        title: Duration
-        title_source: editorial
-        content: |
-          The duration of the resignation will be varied from 1 month to 3 months. According to the application of the member.
+          (a) Member can be terminated based on article 7 and 18
+    amended_by:
+      - act-2-2024
   - id: art-16
     number: 16
-    title: Ammendments
-    title_source: editorial
+    title: Amendments
+    title_source: enacted
     content: |
       1. Any changes to the constitution of the NGO should be done by the board of the NGO.
       2. The ammenments should be done according to the by-laws of the NGO.
-      3. All the proposed ammendments should be approved by the board of the NGO, intermediate board of the NGO and all college units of the NGO.
+      3. All proposed amendments must be approved by a 2/3rd present and voting of the board of the NGO, the intermediate board of the NGO and units of the NGO collectively.
+    amended_by:
+      - act-2-2024
   - id: art-17
     number: 17
     title: Dissolution
     title_source: editorial
     content: |
-      (a). In an event that the NGO fails to function totally and needs to be dissolved, the whole
-      board of the NGO shall be dissolved and a new board shall be elected by the General Body. Else, the whole NGO shall be dissolved. \
+      (a). In an event that the NGO fails to function totally and needs to be dissolved, the whole board of the NGO shall be dissolved. Else, the whole NGO shall be dissolved. The funds of the NGO will be transferred to the same objectives of the NGO.
       (b). College Units of the NGO can only be dissolved by the Board of the NGO
+    amended_by:
+      - act-2-2024
   - id: art-18
     number: 18
     title: Suspension/Termination
@@ -430,3 +436,20 @@ articles:
       the Internal Compliance Coordinator.
     amended_by:
       - act-1-2024
+  - id: art-19
+    number: 19
+    title: Reserved
+    title_source: editorial
+    status: reserved
+    note: No instrument has occupied this number. Acts 1, 2 and 3 of 2024 insert Articles 18, 20 and 21 and none mentions 19; a whitespace-normalised search over all three finds no occurrence of it in any form. Left unallocated rather than closed by renumbering, which would break every citation after it. See RECONCILIATION.md Q1.
+  - id: art-20
+    number: 20
+    title: Meetings and Activities
+    title_source: enacted
+    content: |
+      1.   The board and IBM should hold a meeting with the unit periodically.
+         2.   The unit board should meet every month.
+         3.   The unit board should meet the coordinators periodically.
+         4.   If any member did not attend the meeting, appropriate action shall be taken.
+    amended_by:
+      - act-2-2024
