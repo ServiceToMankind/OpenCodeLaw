@@ -175,7 +175,7 @@
       },
       "allOf": [
         {
-          "$comment": "An unadopted document must say what WAS adopted and what the text reflects; a version number alone would read as a claim about what is in force.",
+          "$comment": "An unadopted document must say what WAS adopted and what the text reflects. An adopted one must state the date it took effect.",
           "if": {
             "properties": {
               "legal_status": {

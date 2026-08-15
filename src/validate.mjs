@@ -261,6 +261,17 @@ function checkLegalStatus (rep, docs) {
         'published without it reads as an assertion about what is in force.', 'info')
       continue
     }
+    if (info.legal_status === 'adopted') {
+      if (!info.effective_from) {
+        rep.error(file, 'adopted-without-date',
+          'legal_status is "adopted" but info.effective_from is missing. An adopted text takes ' +
+          'effect on a date; state it.', 'info')
+      }
+      if (info.adopted_version && info.adopted_version !== info.version) {
+        rep.error(file, 'adopted-version-mismatch',
+          `legal_status is "adopted" but adopted_version "${info.adopted_version}" differs from version "${info.version}"`, 'info.adopted_version')
+      }
+    }
     if (info.legal_status === 'not_adopted') {
       if (info.effective_from) {
         rep.error(file, 'unadopted-effective-date',

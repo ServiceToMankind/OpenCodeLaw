@@ -24,18 +24,26 @@ function amendedByChips (ids, { url, actIndex }) {
 }
 
 /**
- * Marks the heading that an instrument enacted — the exception, not the rule.
+ * Marks whichever kind of heading is the exception, and says so once elsewhere.
  *
- * 8 of 40 headings are enacted; 32 are editorial aids. Marking the editorial
- * ones marked the normal case, and put the words "not enacted" next to the
- * provision, where they read as a claim about the provision rather than its
- * heading. The default is stated once on the amendments page instead.
+ * Marking the common case is noise, and putting "not enacted" beside a
+ * provision reads as a claim about the provision rather than its heading. Which
+ * kind is rare is not fixed: before the Acts were applied 8 of 40 headings were
+ * enacted, and after them 32 of 40 are. So the direction follows the data
+ * rather than a constant, and the amendments page states the matching default.
  */
-function enactedMark (titleSource) {
-  if (titleSource !== 'enacted') return ''
-  return `<span class="title-mark" title="Enacted heading — stated by an amending instrument">` +
+function headingMark (titleSource, markKind) {
+  if (!markKind || titleSource !== markKind) return ''
+  // The label names the heading, never its legal effect. "not enacted" beside a
+  // provision reads as a claim about the provision itself; the tooltip and the
+  // amendments page carry the fuller meaning.
+  const label = markKind === 'enacted' ? 'enacted heading' : 'editorial heading'
+  const title = markKind === 'enacted'
+    ? 'Enacted heading — stated by an amending instrument'
+    : 'Editorial heading — not stated by any instrument'
+  return `<span class="title-mark" title="${title}">` +
     `<span aria-hidden="true">§</span>` +
-    `<span class="visually-hidden">enacted heading</span></span>`
+    `<span class="visually-hidden">${label}</span></span>`
 }
 
 function copyButton (id, label) {
@@ -51,7 +59,8 @@ function copyButton (id, label) {
  * its sequential-headings audit only flags skipped levels, and h3 -> h3 is not
  * a skip.
  */
-export function renderSection (section, { url, actIndex, headingLevel = 3 }) {
+export function renderSection (section, opts) {
+  const { url, actIndex, headingLevel = 3 } = opts
   const H = `h${Math.min(headingLevel, 6)}`
   const status = section.status ?? 'active'
   const body = status === 'active'
@@ -61,7 +70,7 @@ export function renderSection (section, { url, actIndex, headingLevel = 3 }) {
       <article class="provision provision--section" id="${escapeHtml(section.id)}" aria-labelledby="h-${escapeHtml(section.id)}">
         <${H} class="provision__heading" id="h-${escapeHtml(section.id)}">
           <span class="provision__num" aria-hidden="true">${section.number}</span>
-          <span class="provision__title">${escapeHtml(section.title)}${enactedMark(section.title_source)}</span>
+          <span class="provision__title">${escapeHtml(section.title)}${headingMark(section.title_source, opts.markKind)}</span>
           ${copyButton(section.id, section.title)}
         </${H}>
         ${amendedByChips(section.amended_by, { url, actIndex })}
@@ -99,7 +108,7 @@ export function renderArticle (article, opts) {
     <article class="provision provision--article" id="${escapeHtml(article.id)}" aria-labelledby="h-${escapeHtml(article.id)}">
       <${H} class="provision__heading" id="h-${escapeHtml(article.id)}">
         <span class="provision__num" aria-hidden="true">${article.number}</span>
-        <span class="provision__title">${escapeHtml(article.title)}${enactedMark(article.title_source)}</span>
+        <span class="provision__title">${escapeHtml(article.title)}${headingMark(article.title_source, opts.markKind)}</span>
         ${copyButton(article.id, article.title)}
       </${H}>
       ${amendedByChips(article.amended_by, { url, actIndex })}

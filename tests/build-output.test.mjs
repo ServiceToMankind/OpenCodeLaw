@@ -161,15 +161,25 @@ test('archived pages carry a canonical to the current version and a superseded b
   }
 })
 
-test('the reconciliation banner is generated from reconciliation_state, not hardcoded', () => {
+test('the reconciliation banner appears only while reconciliation_state says so', () => {
   const html = read('index.html')
   const state = doc.reconciliation_state
-  assert.ok(state, 'fixture expects a reconciliation_state block')
-  assert.ok(html.includes('mid-reconciliation'), 'banner missing')
-  // Every held blocker named in the YAML must appear in the rendered banner.
-  for (const held of state.held) {
-    const why = Array.isArray(held.blocked_by) ? held.blocked_by : [held.blocked_by]
-    for (const w of why) assert.ok(html.includes(w), `banner does not mention blocker "${w}"`)
+
+  if (!state || state.complete) {
+    // All three Acts are applied. Leaving the banner up would be its own kind
+    // of dishonesty, and its absence must follow the data, not a template edit.
+    assert.ok(!html.includes('mid-reconciliation'),
+      'the banner still renders but reconciliation_state is gone')
+    const amendments = read('amendments/index.html')
+    assert.ok(amendments.includes('Standing notes for a future Act'))
+    assert.ok(/Article 19 is reserved/.test(amendments), 'Article 19 must still be accounted for')
+    assert.ok(/Donor/.test(amendments), 'the Article 6(6) tension must still be recorded')
+  } else {
+    assert.ok(html.includes('mid-reconciliation'), 'banner missing')
+    for (const held of state.held) {
+      const why = Array.isArray(held.blocked_by) ? held.blocked_by : [held.blocked_by]
+      for (const w of why) assert.ok(html.includes(w), `banner does not mention blocker "${w}"`)
+    }
   }
 })
 
@@ -297,8 +307,12 @@ test('the amendments page lists both enacted and editorial headings for the boar
 
   // A heading credited to an Act that has not been applied would be a false
   // claim of legal force. Act 2 retitles Article 14, but Act 2 is not applied.
-  const art14 = doc.articles.find(a => a.number === 14)
-  assert.equal(art14.title_source, 'editorial', 'a heading must not be credited to an unapplied Act')
+  for (const a of doc.articles) {
+    if (a.title_source === 'enacted') {
+      assert.ok((a.amended_by ?? []).length > 0,
+        `${a.id} claims an enacted heading but no Act is recorded as amending it`)
+    }
+  }
 })
 
 test('the contact link works without JavaScript', () => {
@@ -346,22 +360,25 @@ test('the headline states the adopted position, not the working version label', 
   }
 })
 
-test('enacted headings are marked; editorial headings are the unmarked default', () => {
+test('the marked headings are the minority, whichever kind that is', () => {
   const html = read('index.html')
   const marks = (html.match(/class="title-mark"/g) ?? []).length
-  const enacted = doc.articles.reduce((n, a) =>
-    n + (a.title_source === 'enacted' ? 1 : 0) +
-    (a.sections ?? []).filter(s => s.title_source === 'enacted').length, 0)
 
-  assert.equal(marks, enacted, `expected ${enacted} marks (the enacted headings), found ${marks}`)
-  assert.ok(enacted < 20, 'sanity: the marked set should be the exception, not the rule')
+  const nodes = [doc.preamble, ...doc.articles.flatMap(a => [a, ...(a.sections ?? [])])]
+    .filter(n => (n.status ?? 'active') === 'active')
+  const enacted = nodes.filter(n => n.title_source === 'enacted').length
+  const editorial = nodes.length - enacted
 
-  // The words "not enacted" must not sit inside a heading, where they read as a
-  // claim about the provision rather than about its heading.
-  const headings = [...html.matchAll(/<h[2-6][^>]*class="provision__heading"[^>]*>([\s\S]*?)<\/h[2-6]>/g)]
-  for (const h of headings) {
-    assert.ok(!/not enacted/i.test(h[1]), 'a heading contains the phrase "not enacted"')
+  // Applying the Acts flipped this from 8 enacted of 40 to 32 of 40, so the
+  // direction follows the data rather than a constant.
+  assert.equal(marks, Math.min(enacted, editorial),
+    `expected the minority (${Math.min(enacted, editorial)}) marked, found ${marks}`)
+
+  // "not enacted" must never sit inside a heading, where it reads as a claim
+  // about the provision rather than about its heading.
+  for (const h of html.matchAll(/<h[2-6][^>]*class="provision__heading"[^>]*>([\s\S]*?)<\/h[2-6]>/g)) {
+    assert.ok(!/not enacted/i.test(h[1]))
   }
-  assert.ok(/editorial aids unless marked/i.test(read('amendments/index.html')),
+  assert.ok(/unless marked/i.test(read('amendments/index.html')),
     'the default must be stated once on the amendments page')
 })

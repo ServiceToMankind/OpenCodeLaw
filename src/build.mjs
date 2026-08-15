@@ -205,15 +205,25 @@ export function build () {
   fs.rmSync(OUT(), { recursive: true, force: true })
   fs.mkdirSync(OUT(), { recursive: true })
 
+  // Mark the exception, whichever it is. Applying the Acts flipped this from
+  // 8 enacted of 40 to 32 of 40.
+  const headingCounts = [doc.preamble, ...doc.articles.flatMap(a => [a, ...(a.sections ?? [])])]
+    .filter(n => (n.status ?? 'active') === 'active')
+    .reduce((acc, n) => { acc[n.title_source === 'enacted' ? 'enacted' : 'editorial']++; return acc },
+      { enacted: 0, editorial: 0 })
+  const markKind = headingCounts.enacted === headingCounts.editorial
+    ? 'editorial'
+    : (headingCounts.enacted < headingCounts.editorial ? 'enacted' : 'editorial')
+
   const shell = { info, url, absolute: abs, state, actIndex, articles: doc.articles, slugs }
 
   // ---- index: the whole constitution, every provision inline ----
   const indexMain = `
     <h1 class="page-title">Constitution of ${escapeHtml(info.organization)}</h1>
     ${legalStatusLead(info, actIndex)}
-    ${renderPreamble(doc.preamble, { url, actIndex })}
+    ${renderPreamble(doc.preamble, { url, actIndex, markKind })}
     <h2 class="section-title" id="articles">Articles</h2>
-    ${doc.articles.map(a => renderArticle(a, { url, actIndex, headingLevel: 3 })).join('')}`
+    ${doc.articles.map(a => renderArticle(a, { url, actIndex, headingLevel: 3, markKind })).join('')}`
 
   written.push(write('index.html', layout({
     ...shell,
@@ -237,7 +247,7 @@ export function build () {
         <span aria-current="page">Article ${a.number}</span>
       </nav>
       <h1 class="page-title"><span class="page-title__num">Article ${a.number}</span> ${escapeHtml(a.title)}</h1>
-      ${renderArticle(a, { url, actIndex, headingLevel: 2 })}
+      ${renderArticle(a, { url, actIndex, headingLevel: 2, markKind })}
       <nav class="pager" aria-label="Article navigation">
         ${prevNext(doc.articles, a, slugs, url)}
       </nav>`
@@ -282,7 +292,7 @@ export function build () {
       { name: 'Constitution', url: abs('') },
       { name: 'Amendments', url: abs('amendments/') }
     ])],
-    main: amendmentsMain(register, state, doc, { url, slugs, actIndex })
+    main: amendmentsMain(register, state, doc, { url, slugs, actIndex, markKind })
   })))
 
   // ---- archive ----
@@ -352,9 +362,9 @@ export function build () {
         </aside>
         <h1 class="page-title">Constitution — version ${escapeHtml(v)}</h1>
         <p class="page-lead">Effective ${escapeHtml(d.info.effective_from)} · superseded</p>
-        ${renderPreamble(d.preamble, { url, actIndex })}
+        ${renderPreamble(d.preamble, { url, actIndex, markKind })}
         <h2 class="section-title" id="articles">Articles</h2>
-        ${d.articles.map(a => renderArticle(a, { url, actIndex, headingLevel: 3 })).join('')}`
+        ${d.articles.map(a => renderArticle(a, { url, actIndex, headingLevel: 3, markKind })).join('')}`
     })))
   }
 
@@ -435,7 +445,7 @@ function prevNext (articles, current, slugs, url) {
   ].join('')
 }
 
-function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
+function amendmentsMain (register, state, doc, { url, slugs, actIndex, markKind }) {
   const byId = Object.fromEntries(doc.articles.map(a => [a.id, a]))
   const acts = (register.acts ?? []).slice().sort((a, b) => a.number - b.number)
 
@@ -506,16 +516,20 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
   ])
   const totalHeadings = doc.articles.reduce((n, a) => n + 1 + (a.sections?.length ?? 0), 0)
 
+  const marked = markKind === 'enacted' ? enacted : editorial
+  const unmarkedKind = markKind === 'enacted' ? 'editorial aids' : 'stated by an instrument'
+
   const editorialSection = `
     <h2 class="act__sub" id="editorial-headings">Which headings carry legal force</h2>
-    <p><strong>Headings in this constitution are editorial aids unless marked
-    <span class="title-mark"><span aria-hidden="true">§</span><span class="visually-hidden">enacted heading</span></span>.</strong>
-    A marked heading is one an amending instrument states as a heading, in an Act already applied to
-    that provision. ${enacted.length} of ${totalHeadings} headings are marked.</p>
-    <p>Most headings anywhere in a legal document are navigational, not enacted, so this is the
-    ordinary case rather than a defect. It matters where the two are easy to confuse: Act 1 of 2024
-    titles Article 11's clause (2) <strong>Establishment</strong>, but gives clause (1) no title at
-    all — the lowercase <code>units</code> above it was written by an editor.</p>
+    <p><strong>Headings in this constitution are ${escapeHtml(unmarkedKind)} unless marked
+    <span class="title-mark"><span aria-hidden="true">§</span><span class="visually-hidden">${markKind === 'enacted' ? 'enacted heading' : 'editorial heading'}</span></span>.</strong>
+    An enacted heading is one an amending instrument states as a heading, in an Act applied to that
+    provision. ${enacted.length} of ${totalHeadings} headings are enacted and ${editorial.length} are
+    editorial; the ${marked.length} in the minority are marked, because marking the ordinary case is
+    noise.</p>
+    <p>It matters where the two are easy to confuse: Act 1 of 2024 titles Article 11's clause (2)
+    <strong>Establishment</strong>, but gives clause (1) no title at all — the lowercase
+    <code>units</code> above it was written by an editor.</p>
     <p>Nothing is credited to an Act that has not been applied. Editorial headings are listed below
     so the board can ratify or replace them, rather than have them quietly rewritten.</p>
     <h3 class="act__sub">Enacted headings (${enacted.length})</h3>
@@ -525,6 +539,26 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
     <h3 class="act__sub">Editorial headings (${editorial.length})</h3>
     <ul class="act__provisions">
       ${editorial.map(e => `<li><a href="${url('')}#${escapeHtml(e.id)}">${escapeHtml(e.label)}</a> — <code>${escapeHtml(e.title)}</code></li>`).join('')}
+    </ul>`
+
+  const reserved = doc.articles.filter(a => a.status === 'reserved')
+  const standingNotes = `
+    <h2 class="act__sub" id="standing-notes">Standing notes for a future Act</h2>
+    <p>Reconciliation is complete: all three Amendment Acts of 2024 are applied. These points are
+    recorded rather than resolved, because resolving them would mean editing the constitution
+    without an instrument.</p>
+    <ul class="act__provisions">
+      ${reserved.map(a => `<li><strong>Article ${a.number} is reserved.</strong> ${escapeHtml(a.note ?? '')}</li>`).join('')}
+      <li><strong>Article 6 clause (6), <code>Donor</code>, sits oddly with Article 7(4).</strong>
+      Act 1 substituted clauses (1)–(5) of Article 6 by name and did not reach clause (6), so
+      <code>Donor</code> stands as an STM role — while Article 7(4), as Act 1 amended it, provides
+      that a Donor Member is not an official Member and does not work for the organisation. A
+      substitution of named clauses does not reach an unnamed one, so the tension is published
+      rather than tidied away.</li>
+      <li><strong>Article 6 clauses (3) and (4) are defined in identical words.</strong> Act 1
+      defines <code>Unit Board Member</code> and <code>Coordinator</code> with the same operative
+      text, differing only by "in STM" and "in the STM". Published as enacted; a candidate for a
+      corrigendum or a Fourth Amendment Act.</li>
     </ul>`
 
   const buildLabel = `
@@ -545,6 +579,7 @@ function amendmentsMain (register, state, doc, { url, slugs, actIndex }) {
     </aside>` : ''}
     ${rows}
     ${editorialSection}
+    ${standingNotes}
     ${doc.info.legal_status === 'not_adopted' ? buildLabel : ''}`
 }
 

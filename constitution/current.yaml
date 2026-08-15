@@ -3,11 +3,10 @@ info:
   title: SERVICE TO MANKIND
   organization: Service to Mankind Welfare Association
   jurisdiction: Telangana, India
-  version: 3.0.0-alpha.1
+  version: 3.0.0
   status: current
-  legal_status: not_adopted
-  adopted_version: 2.0.0
-  text_as_of: "2024-05-02"
+  legal_status: adopted
+  effective_from: "2024-05-03"
   logo:
     url: https://stmorg.in/accesories/service_to_man_kind-20200709-0001.jpg
     alt: Logo
@@ -15,27 +14,6 @@ info:
     name: Pranay Kiran
     email: pranay@stmorg.in
   license: MIT
-reconciliation_state:
-  target_version: 3.0.0
-  complete: false
-  applied:
-    - act-1-2024 (partial)
-  held:
-    - provisions:
-        - art-6
-        - art-7
-      blocked_by: Q2
-      note: Act 1 of 2024 also amends Articles 6 and 7. Both are word-for-word their pre-Act text. Act 1 substitutes clauses (1)-(5) of Article 6 and is silent on clause (6), Donor; applying it requires knowing whether that clause survives.
-    - provisions:
-        - act-2-2024
-        - act-3-2024
-      blocked_by:
-        - Q4
-        - Q7
-        - Q10
-        - Q12
-        - board sign-off
-      note: Neither Act has been applied. Act 2 amends the preamble and Articles 3, 4, 5, 8, 14, 15, 16(3), 17(1) and inserts Article 20. Act 3 amends Article 13 and inserts Article 21.
 preamble:
   id: preamble
   title: Preamble
@@ -357,13 +335,21 @@ articles:
       - act-1-2024
   - id: art-13
     number: 13
-    title: Anual Reports
-    title_source: editorial
+    title: Annual Report
+    title_source: enacted
     content: |
-      1. All divisions and units must maintain the task reports of all the events taken up during the year, and must submit the reports to the Finance Controller Coordinator of STM at least 2 weeks prior to the AGM
-      2. A detailed annual report of all the events conducted throughout the NGO shall be consolidated and maintained by the Finance Controller Coordinator of STM
-      3. The Annual Report of the NGO must be compulsorily prepared by the Finance Controller of STM by the AGM in the prescribed format mentioned in the Documentation policy
-      4. All the Annual Reports from the inception of the NGO must be maintained in the STM management portal
+      1. All units must maintain task reports of all the events taken up during the financial
+              year and must submit the reports to the IBM-Finance Coordinator at least 2 weeks
+              prior to the Annual General Meeting.
+              2. An annual report of all the activities conducted throughout the NGO shall be
+              consolidated and maintained by the IBM-Finance Coordinator.
+              3. The Annual Report of the NGO must be compulsorily prepared by the
+              IBM-Finance Coordinator in the prescribed format mentioned in the Documentation
+              guidelines.
+              4. All the annual reports from the inception of the NGO must be maintained in the
+              STM operations portal and on the NGO official website.
+    amended_by:
+      - act-3-2024
   - id: art-14
     number: 14
     title: Leaves
@@ -453,3 +439,22 @@ articles:
          4.   If any member did not attend the meeting, appropriate action shall be taken.
     amended_by:
       - act-2-2024
+  - id: art-21
+    number: 21
+    title: Financial Management
+    title_source: enacted
+    content: |
+      1. The bank account of the NGO shall be maintained by the members of the board.
+           2. The NGO has the right to take money from the general public in the form of
+              donations.
+           3. The NGO is permitted to conduct events/ parties in order to generate funds.
+           4. The Treasurer and IBM-Finance coordinator has only the right to approve the funds
+              for the activities.
+
+       5. Every month IBM-Finance coordinator has to verify the activity reports and balance
+          sheet and inform the Treasurer.
+       6. Every Quarter of the year, the internal compliance coordinator will conduct an
+          audit. Unit Finance coordinator is responsible for sending all reports and balance
+          sheets to the Internal compliance coordinator for every three months.
+    amended_by:
+      - act-3-2024

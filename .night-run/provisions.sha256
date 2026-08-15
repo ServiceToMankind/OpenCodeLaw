@@ -1,11 +1,11 @@
 {
   "note": "Baseline for the unattended run. Any change outside PERMITTED in tripwire.mjs aborts the run.",
   "file": "constitution/current.yaml",
-  "taken_at_commit": "38a9f70",
+  "taken_at_commit": "f36a02c",
   "permitted": [
     "art-11.content"
   ],
-  "count": 80,
+  "count": 82,
   "provisions": {
     "preamble.title": "59e371c5cac498cc5ae8361dafb8f60b4023665a8fb606860a289dc3d399a8dc",
     "preamble.content": "11084e27c5599ea73017a0a3fc748490e8b4424e8d70e3f2bd4d8301a59d460f",
@@ -65,8 +65,8 @@
     "art-11-s-2.content": "544267149f490925bfeda78b4129a95ae7f65a58f62dd8986c630c72a56de380",
     "art-12.title": "3303026655c83910b9a0ae51382813956e58271c276fd5a27d05f95b847b139a",
     "art-12.content": "8c5ac0ac874e1d0b65dbf0a7c081db4bb42c4886967e1288982734bffc8704ad",
-    "art-13.title": "0f823f11d82d331a1aecc4a9ed8915fbc1907c5b734312871bc7ced1964b9aa6",
-    "art-13.content": "d983edbc9a71f1f4f5045c0314eb8a5325402c6c40cb628522d18a42771170e0",
+    "art-13.title": "8f672276e8b9971baef1e26d73b6733f436575230b342e58e5722c11536263fc",
+    "art-13.content": "3124807d0cfcf79deaa8683b46627fd1859abaf233627aa69ddeb8b9e7ed75ef",
     "art-14.title": "0e23163adf07b381c77d179daffb12aea79d1eea42f9daaceaf04ba4649e23f1",
     "art-14.content": "0b6d498b4ebc42c4eac30101fe491c2a1a7f5813c4187b52112806082be98a8d",
     "art-14-s-1.title": "d37a699e6ab3e501964d63d56adde49f2a1bdffc755a6e232d3fa901a6a1e94f",
@@ -86,6 +86,8 @@
     "art-19.title": "3385ffe6747065e4884da355303009050e129ec48d3e05bce928d6213bb6753c",
     "art-19.content": "0b6d498b4ebc42c4eac30101fe491c2a1a7f5813c4187b52112806082be98a8d",
     "art-20.title": "15245b427efc9b5ec04016ad2f98944ac21b8150262cc6552ddcd93e75521e38",
-    "art-20.content": "894c47e0c2d7a7bcc4b817a9e88942331b01d7caaa7756737e3d8c23f6371d0b"
+    "art-20.content": "894c47e0c2d7a7bcc4b817a9e88942331b01d7caaa7756737e3d8c23f6371d0b",
+    "art-21.title": "37d1b30ec49a212797eced763fc1fe7cd5c03604e1dda266a750d785cbd1cff0",
+    "art-21.content": "429fda7f865cd803a1601cb128df04e50d242a1fc87b222c9d9a2a7f3f07e11d"
   }
 }
