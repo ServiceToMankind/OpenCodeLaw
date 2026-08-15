@@ -557,6 +557,10 @@
                       "null"
                     ],
                     "description": "Link or reference to the minutes recording this approval."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Recorded as approving. Absent means not recorded, which is not the same as not approved."
                   }
                 }
               }
@@ -567,6 +571,13 @@
             "assent_date": {
               "type": "string",
               "format": "date"
+            },
+            "complete": {
+              "type": "boolean",
+              "description": "Whether every body the procedure required has been recorded as approving. Never inferred from a partial chain."
+            },
+            "note": {
+              "type": "string"
             }
           }
         },

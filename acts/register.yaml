@@ -1,14 +1,3 @@
-# Amendment register.
-#
-# Machine-readable record of every instrument amending this constitution.
-# Generated once and maintained by hand; `npm run validate` fails the build if
-# any target does not resolve, any PDF is missing, or any provision cites a
-# Statement of Objects as its authority.
-#
-# `provisions` records what has been reconciled into constitution/current.yaml.
-# Anything an Act amends that is still held is named in that file's
-# `reconciliation_state`, not omitted silently.
-
 acts:
   - id: act-1-2024
     number: 1
@@ -24,11 +13,12 @@ acts:
     pdf: acts/pdf/first-constitution-amendment-act-2024.pdf
     source_text: acts/text/first-constitution-amendment-act-2024.txt
     procedure:
-      required_by: art-16
+      required_by: art-16-s-3
       approvals:
         - body: board
+          approved: true
           date: null
-          evidence: null
+          evidence: "Stated by Pranay (project owner, contact of record), 2026-08-15: the amendments were authored long ago and approved by every member of the board."
         - body: intermediate-board
           date: null
           evidence: null
@@ -37,6 +27,8 @@ acts:
           evidence: null
       attested_by: P. Priya, Internal Compliance Coordinator
       assent_date: "2024-05-03"
+      complete: false
+      note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
     amends:
       - art-9
       - art-10
@@ -82,11 +74,12 @@ acts:
     pdf: acts/pdf/second-constitution-amendment-act-2024.pdf
     source_text: acts/text/second-constitution-amendment-act-2024.txt
     procedure:
-      required_by: art-16
+      required_by: art-16-s-3
       approvals:
         - body: board
+          approved: true
           date: null
-          evidence: null
+          evidence: "Stated by Pranay (project owner, contact of record), 2026-08-15: the amendments were authored long ago and approved by every member of the board."
         - body: intermediate-board
           date: null
           evidence: null
@@ -95,6 +88,8 @@ acts:
           evidence: null
       attested_by: P. Priya, Internal Compliance Coordinator
       assent_date: "2024-05-03"
+      complete: false
+      note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.
     drafting_discrepancy:
       - provision: art-16
         operative: All proposed amendments must be approved by a 2/3rd present and voting of the board of the NGO, the intermediate board of the NGO and units of the NGO collectively.
@@ -122,11 +117,12 @@ acts:
     pdf: acts/pdf/third-constitution-amendment-act-2024.pdf
     source_text: acts/text/third-constitution-amendment-act-2024.txt
     procedure:
-      required_by: art-16
+      required_by: art-16-s-3
       approvals:
         - body: board
+          approved: true
           date: null
-          evidence: null
+          evidence: "Stated by Pranay (project owner, contact of record), 2026-08-15: the amendments were authored long ago and approved by every member of the board."
         - body: intermediate-board
           date: null
           evidence: null
@@ -135,3 +131,5 @@ acts:
           evidence: null
       attested_by: P. Priya, Internal Compliance Coordinator
       assent_date: "2024-05-03"
+      complete: false
+      note: Article 16(3) as it stood required approval by the board, the intermediate board and all college units. Board approval is recorded as stated. Confirmation of intermediate-board and unit approval is outstanding; the chain is not complete and is not inferred.

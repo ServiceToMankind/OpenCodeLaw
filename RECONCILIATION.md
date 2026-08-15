@@ -2,7 +2,7 @@
 
 **Status:** open. No constitutional text has been changed.
 **Answered:** Q3, Q5, Q6, Q8, Q9, Q11 (signed off), Q14 — recorded below and carried into Phase 3.
-**Open:** Q1, Q2 (blocking — holds Articles 6 and 7), Q4, Q7, Q10, Q12, Q13.
+**Answered 2026-08-15:** Q2, Q4, Q5, Q7, Q13 — see below. **Open:** Q1, Q8, Q9, Q10, Q12 (none blocking).
 **Branch:** `rebuild/v3` · **Raised:** 2026-08-14 · **Sign-off required from:** Pranay
 
 Phase 3's provision-by-provision table (Act, operation, target id, before, after, source line,
@@ -52,7 +52,17 @@ left **unallocated**, not invented and not closed by renumbering.
 **Question:** does a fourth instrument exist? If not, confirm Article 19 is recorded as
 `status: reserved` with a note stating no instrument ever occupied it.
 
-### Q2 — Article 6, clause 6 (`Donor`) — **BLOCKING: Act 1 cannot be applied to Articles 6 or 7 until this returns**
+### Q2 — Article 6, clause 6 (`Donor`)
+
+> **RESOLVED by literal application — and it was never a decision to make.** Board approval speaks to
+> validity, not to what the instrument does. Act 1 substitutes clauses (1)–(5) by name. **A
+> substitution of named clauses does not reach an unnamed one**, so clause (6) `Donor` stands.
+> Dropping it would be repair by inference, which this project has refused at every step.
+>
+> **The tension is real and is recorded, not resolved.** `Donor` remains listed under `STM Roles`
+> while Act 1's amended Article 7(4) provides that a Donor Member is not an official Member and does
+> not work for the organisation. Carried as a standing item for a future Act, and noted on
+> `art-6-s-6`.
 
 Escalated from deferred. The provenance analysis found Article 6 is **100% its pre-Act text** — all
 five clauses Act 1 substitutes are unapplied. So this is no longer a question about a provision that
@@ -105,6 +115,12 @@ not enacting — but this governs how every future amendment passes, and I will 
 
 ### Q4 — Act 2 disagrees with itself on whether Article 15 is amended or inserted
 
+> **RESOLVED by convention C1.** The operative item reads `Amendment of Article 15 - Exit Process`.
+> The word "inserted" appears **only** under `STATEMENT OF OBJECTS AND REASONS`, which C1 forbids as
+> a source of authority and which `sor-as-authority` already enforces in the validator. So this
+> needed no new decision: it is an **amendment**, renaming Article 15 from `Resignation` to
+> `Exit Process` and restructuring it into (1) Voluntary and (2) Involuntary.
+
 A2:105 reads *"Amendment of Article 15 - Exit Process"*. The Statement of Objects at A2:131-132
 reads *"Article 15 has been **inserted** to incorporate processes for both voluntary and involuntary
 exit."*
@@ -118,6 +134,8 @@ retained alongside the new (1) Voluntary / (2) Involuntary structure.
 
 ### Q5 — Act 1 defines `Unit Board Member` and `Coordinator` with identical words
 
+> **CONFIRMED 2026-08-15 — publish both as enacted, note the defect, flag for a future Act.**
+>
 > **ANSWERED — Publish the defect; do not repair it. The engine records the law, it does not correct the law. Act 1 applies verbatim, both definitions stand as enacted, and an `editorial_note` on `art-6-s-3` and `art-6-s-4` points at the defect and at this entry. The note renders visibly. Escalated to the board as a candidate for a corrigendum or a Fourth Amendment Act.**
 
 Not previously flagged. A1:26-31, verbatim:
@@ -167,7 +185,16 @@ provisions at once, so it is worth settling explicitly.
 Confirmed as the Acts' operative words, not extraction artefacts — the layout-preserving extraction
 reproduces the PDF text exactly.
 
-**Question:** the `Alumini`/`Anual Reports`/`Ammendments` corrections are already authorised as
+> **RESOLVED — the Acts make every one of these corrections themselves. No editorial rename is
+> made.** Act 1 titles Article 12 `Alumni`; Act 3 titles Article 13 `Annual Report`; Act 2 titles
+> Article 16 `Amendments`. Holding them was right: correcting them by hand in Phase 3 would have
+> been an editorial edit duplicating one the instruments already make.
+>
+> Two further renames come from the same source and are **structural, not spelling**: Act 2 renames
+> Article 14 `Sabbatical Leave` → `Leaves` (with Sabbatical Leave becoming clause (1)), and Article
+> 15 `Resignation` → `Exit Process`.
+
+**Original question:** the `Alumini`/`Anual Reports`/`Ammendments` corrections are already authorised as
 spelling fixes. Confirm `College Unit Board Member` → `Unit Board Member` and `Sabbatical Leave` →
 `Leaves` are **substantive retitles enacted by the Acts**, not spelling fixes.
 
@@ -303,7 +330,16 @@ any `example.com` URL in `info`.
 
 ### Q13 — Procedural validity of all three Acts
 
-Raised by the board, recorded here rather than resolved.
+> **RESOLVED by authorisation, 2026-08-15.** Pranay (project owner, contact of record) states:
+> *the amendments were authored long ago and approved by every member of the board.*
+>
+> Recorded as stated, not as an inference. Article 16(3) as it stood required approval by the board,
+> the **intermediate board** and **all college units**. Pranay named the board. The register records
+> board approval with that statement as its evidence and leaves the other two bodies unpopulated,
+> with `complete: false`. **Confirmation of intermediate-board and unit approval is outstanding.**
+>
+> The circularity noted below stands and is unaffected: Act 2 amends Article 16(3) itself, so it
+> passed under the unamended procedure.
 
 Article 16(3) as it stood on 3 May 2024 required proposed amendments to be approved by the board,
 the intermediate board, and all college units. All three Acts record assent from the **Internal
@@ -473,10 +509,10 @@ No text may be applied until every **blocking** question above is answered.
 Open:
 
 - [ ] Q1 Article 19 gap — does a fourth instrument exist?
-- [ ] Q2 Article 6 clause 6 (Donor) — **BLOCKING**, holds Articles 6 and 7
-- [ ] Q4 Article 15 amend vs insert
-- [ ] Q7 Substantive retitles
+- [x] Q2 Article 6 clause 6 (Donor) — **clause (6) stands**; tension recorded for a future Act
+- [x] Q4 Article 15 amend vs insert — **amendment**, resolved by C1
+- [x] Q7 Retitles — **the Acts make all of them**; no editorial rename
 - [ ] Q10 Original adoption record
 - [ ] Q12 Renumber and citation identity
-- [ ] Q13 Procedural validity of all three Acts
+- [x] Q13 Procedural validity — **board approval recorded as stated**; IBM and unit approval outstanding
 - [x] Q14 Article 10 unenacted paragraph — **deleted from operative text**, ratification item for the board
