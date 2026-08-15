@@ -273,6 +273,31 @@ export function validateBill (file, { constitution } = {}) {
     }
   }
 
+  // Evidence can be shared; arithmetic cannot. One record legitimately proves a
+  // joint sitting — who presided, what was resolved — but a body's two-thirds is
+  // proven only by that body's own tally. A shared path across bodies whose
+  // meetings differ is also exactly what a copy-paste mistake looks like, so it
+  // is worth a second look without being forbidden.
+  const byPath = new Map()
+  for (const a of bill.approvals ?? []) {
+    if (!a.evidence?.path) continue
+    if (!byPath.has(a.evidence.path)) byPath.set(a.evidence.path, [])
+    byPath.get(a.evidence.path).push(a)
+  }
+  for (const [evPath, shared] of byPath) {
+    if (shared.length < 2) continue
+    const dates = new Set(shared.map(a => a.meeting?.date ?? null))
+    const modes = new Set(shared.map(a => a.meeting?.mode ?? null))
+    if (dates.size > 1 || modes.size > 1) {
+      p.warn('shared-evidence-incoherent',
+        `${shared.map(a => a.body).join(', ')} share the record ${evPath} but their meetings differ ` +
+        `(${dates.size > 1 ? `dates ${[...dates].join(', ')}` : ''}${dates.size > 1 && modes.size > 1 ? '; ' : ''}` +
+        `${modes.size > 1 ? `modes ${[...modes].join(', ')}` : ''}). One compiled record covering ` +
+        'separate meetings is legitimate archival practice — check that this is that, and not a ' +
+        'copy-paste.', 'approvals')
+    }
+  }
+
   if (stale.length) {
     p.error('approval-stale',
       `edit recorded — approvals by ${stale.map(s2 => s2.body).join(', ')} are void; move them to ` +

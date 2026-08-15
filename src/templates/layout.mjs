@@ -196,6 +196,7 @@ export function layout ({
         <a href="${url('')}">Constitution</a> ·
         <a href="${url('amendments/')}">Amendments</a> ·
         <a href="${url('bills/')}">Bills</a> ·
+        <a href="${url('propose/')}">Propose</a> ·
         <a href="${url('archive/')}">Archive</a>
         ${info.contact?.email ? ` · <a href="mailto:${escapeHtml(info.contact.email)}">Contact</a>` : ''}
       </p>

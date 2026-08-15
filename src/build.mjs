@@ -17,6 +17,8 @@ import { layout, tocSections } from './templates/layout.mjs'
 import { renderArticle, renderPreamble } from './templates/provision.mjs'
 import { generateOgImages } from './og.mjs'
 import { billsMain, billsTocItems } from './templates/bills.mjs'
+import { proposeMain, proposeTocItems } from './templates/propose.mjs'
+import { generateBillValidator } from './gen-bill-validator.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = () => path.join(ROOT, process.env.OUT_DIR ?? 'dist')
@@ -336,6 +338,22 @@ export function build () {
     main: billsMain(bills, { url, escapeHtml, actIndex })
   })))
 
+  // ---- propose: author a bill without editing YAML ----
+  written.push(write('propose/index.html', layout({
+    ...shell,
+    showToc: false,
+    toc: tocSections(proposeTocItems(), { heading: 'Propose a bill' }),
+    title: `Propose an amendment — ${info.title}`,
+    description: `Draft a bill to amend the constitution of ${info.organization}. The page produces a draft for the Internal Compliance Committee; it does not submit, number or approve anything.`,
+    canonical: abs('propose/'),
+    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Propose an amendment' },
+    jsonLd: [breadcrumbLd([
+      { name: 'Constitution', url: abs('') }, { name: 'Propose', url: abs('propose/') }
+    ])],
+    head: `<script type="module" src="${url('scripts/propose.js')}"></script>`,
+    main: proposeMain({ url, escapeHtml, info })
+  })))
+
   // ---- archive ----
   const versions = fs.existsSync(path.join(ROOT, VERSIONS_DIR))
     ? fs.readdirSync(path.join(ROOT, VERSIONS_DIR)).filter(f => f.endsWith('.yaml')).sort()
@@ -437,6 +455,31 @@ export function build () {
 
   // ---- data, assets, static files ----
   write('search-index.json', JSON.stringify(buildSearchIndex(doc, slugs)))
+
+  // What /propose/ needs to build an operation: the id a target is cited by,
+  // and the CURRENT text, so a substitute can be prefilled and edited into the
+  // complete resulting text. An author never types a target id or a partial edit.
+  write('provisions.json', JSON.stringify({
+    base_version: info.version,
+    generated_for: 'the propose page — targets are picked from this list, never typed',
+    provisions: [
+      { id: doc.preamble.id, kind: 'preamble', number: null, title: doc.preamble.title,
+        title_source: doc.preamble.title_source ?? 'editorial', text: doc.preamble.content ?? '' },
+      ...doc.articles.flatMap(a => [
+        { id: a.id, kind: 'article', number: a.number, title: a.title,
+          title_source: a.title_source ?? 'editorial', status: a.status ?? 'active',
+          text: a.content ?? '',
+          sections: (a.sections ?? []).map(x => ({ number: x.number, title: x.title, text: x.content ?? '' })) },
+        ...(a.sections ?? []).map(x => ({
+          id: x.id, kind: 'section', number: x.number, title: x.title,
+          title_source: x.title_source ?? 'editorial', article: a.id, article_number: a.number,
+          text: x.content ?? '' }))
+      ])
+    ],
+    // The next free article number, and any reserved slot an insert may occupy.
+    next_article: Math.max(...doc.articles.map(a => a.number)) + 1,
+    reserved: doc.articles.filter(a => a.status === 'reserved').map(a => a.number)
+  }))
   write('legacy-anchors.json', JSON.stringify(legacyAnchorMap(doc)))
   for (const [from, to] of Object.entries(LEGACY_REDIRECTS)) {
     written.push(write(from, redirectStub(url(to), abs(to))))
@@ -473,6 +516,11 @@ export function build () {
   copyDir('acts/pdf', 'acts/pdf')
   copyDir('src/styles', 'styles')
   copyDir('src/scripts', 'scripts')
+
+  // The propose page enforces the same schema the CLI does, compiled to a
+  // standalone module. A second hand-written check in the page would be a
+  // second implementation, free to drift.
+  write('scripts/bill-validator.mjs', generateBillValidator())
 
   // The custom domain stays on the old site until it has been reviewed.
   if (INCLUDE_CNAME && fs.existsSync(path.join(ROOT, 'CNAME'))) {

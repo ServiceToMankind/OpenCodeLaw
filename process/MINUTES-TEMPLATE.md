@@ -74,6 +74,10 @@ The three bodies may sit together, and often should — it turns a re-vote after
 meeting instead of three. One signed record may then serve all three bodies and the same file may be
 referenced by each.
 
+**In a joint sitting, attendance and votes are recorded per body, never for the room.** Three ballot
+sheets filled at one meeting, or one combined record — either way the counts stay per body. This is
+the one recording error a joint sitting invites.
+
 **The tallies must still be recorded separately per body.** Article 16(3) says "collectively", which
 bears two readings, and until the board resolves which one it means, the stricter governs: two thirds
 within each body, counted on its own. A joint sitting that records only a pooled count cannot satisfy
