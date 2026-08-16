@@ -17,6 +17,49 @@ PROPOSE_ENABLED=true npm run build     # or set it in the deploy workflow
 
 ---
 
+## RESOLVED — the pages were opened on 2026-08-16
+
+Recorded here rather than deleted, because how a gate was passed is part of the record.
+
+| | |
+|---|---|
+| **1. Receiving address** | **Overridden by Pranay.** Narrowed on inspection — see below. |
+| **2. ICC coordinator briefed** | **Done**, confirmed by Pranay. |
+| **3. Announcement to all three bodies** | **Not done.** Opened anyway, on Pranay's direction. |
+| **4. Human dry run** | **Not done.** Opened anyway, on Pranay's direction. |
+
+**On condition 1, I had it wrong and the record should say so.** I reported that the
+propose page's one instruction "ships broken". It does not, and the reason is structural:
+`/propose/` cannot produce a file without JavaScript — it is an editor — so every reader
+who can use the page at all has JavaScript, and with JavaScript Cloudflare's own decode
+script restores `mailto:pranay@stmorg.in` correctly. Verified against the live domain with
+a real browser, both ways:
+
+```
+JS ON   href=mailto:pranay@stmorg.in
+JS OFF  href=/cdn-cgi/l/email-protection#7404…      (that URL 404s)
+```
+
+Pranay's framing is the correct one: **the proposer downloads a file and mails it from
+their own client.** Nothing has to be sent from the website, so a mail-composer link is a
+convenience and never the mechanism.
+
+What remains true, and is smaller than condition 1 claimed:
+
+- For a reader **without** JavaScript, the contact address is unreadable on every page
+  that carries it — the footer "Contact" link, and the `<noscript>` note on `/propose/`
+  which tells such a reader to write to the ICC. Cloudflare replaces the address text as
+  well as the href, so it cannot be read, let alone clicked. That is a real gap for a site
+  whose premise is that no-JS works, and it is **not** a blocker on a JavaScript-only page.
+- The verification command below is also wrong as written: run against `/propose/` while
+  the page was dark, it measured the 404 page's own footer link and returned 1 for a
+  reason having nothing to do with the propose page.
+
+Both are follow-ups, not conditions. Disabling Email Address Obfuscation for this zone
+still fixes them in one setting.
+
+---
+
 ## 1. The receiving address works without JavaScript
 
 **This is the one that is currently failing.**
@@ -42,7 +85,12 @@ curl -sS "https://constitution.stmorg.in/propose/?cb=$(date +%s)" \
   | grep -c "cdn-cgi/l/email-protection"     # must be 0
 ```
 
-- [ ] Done, and verified by the command above.
+- [x] **Overridden** by Pranay, 2026-08-16, on the ground that the proposer mails the ICC
+      from their own client and nothing is sent from the website. See the resolution above
+      for what this does and does not leave broken.
+
+Note the command is only meaningful once the page is LIVE — run against a dark
+`/propose/` it measures the 404 page's footer instead.
 
 Background: `.night-run/CUTOVER.md`, item 0.
 
@@ -65,7 +113,7 @@ Not a document — a conversation. It covers:
 - **Who runs `bill validate`** — the ICC, or the technical department. Decide it; do not leave it
   ambiguous.
 
-- [ ] Briefed. Who: ______________________  Date: __________
+- [x] Briefed. Confirmed by Pranay, 2026-08-16.
 
 ## 3. One announcement, to all three bodies
 
@@ -77,7 +125,9 @@ exists when they are summoned to vote under it.
 It needs to say only: amendments are now proposed as bills, all three bodies vote on every one, and
 here is where to read about it — link `process/PROPOSING.md` and `process/AMENDMENT-PROCESS.md`.
 
-- [ ] Sent. Date: __________
+- [ ] **Not sent.** The pages were opened before this. Article 16(3) convenes all three
+      bodies for any bill, and none of them should first hear that this process exists
+      when they are summoned to vote under it. Still outstanding.
 
 ## 4. One human dry run
 
@@ -97,7 +147,8 @@ first real bill is not the first time a human touches the tools.
 
 Do it against `examples/starter/fixture-constitution.yaml`, never `constitution/current.yaml`.
 
-- [ ] Done. Who: ______________________  Date: __________
+- [ ] **Not done.** The pages were opened before this. The first real bill will therefore
+      be the first time a human touches the tools. Still outstanding.
 
 ---
 

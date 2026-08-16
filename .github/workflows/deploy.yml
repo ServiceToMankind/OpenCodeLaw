@@ -29,9 +29,10 @@ env:
   # other ships a site whose links point at a directory that is not there.
   BASE_PATH: /
   SITE_ORIGIN: https://constitution.stmorg.in
-  # /bills/ is record and always ships. /propose/ is action and ships when the
-  # desk behind it is staffed — see process/ADOPTION.md for the four conditions.
-  PROPOSE_ENABLED: 'false'
+  # /bills/ is record and always ships. /propose/ and /icc/ are action, and open
+  # together — see process/ADOPTION.md, which records how each of its four
+  # conditions was resolved and by whom.
+  PROPOSE_ENABLED: 'true'
 
 jobs:
   # A schema violation, a failing test or a dead internal link must block
