@@ -10,7 +10,9 @@
 # what your bill would change, before and after. Read that diff — it is what
 # the approval meetings will read.
 #
-# Author's guide: process/PROPOSING.md
+# Prefer not to write YAML? The propose page does all of this for you:
+#   https://constitution.stmorg.in/propose/
+# Writing it by hand: process/AUTHORING-BY-HAND.md
 # The rules this follows: process/AMENDMENT-PROCESS.md
 # ---------------------------------------------------------------------------
 
@@ -75,6 +77,21 @@ operations:
     text: |
       The complete new text of Article 3, written out in full, exactly as it
       should read once this Act is applied.
+    # If the provision has clauses, EVERY one must be ACCOUNTED FOR here —
+    # restated with its text, or carried as a tombstone with `status: omitted`.
+    # Leaving one out is refused: silence used to mean deletion, and a deleted
+    # clause takes its number and every citation to it with it. Nothing is ever
+    # deleted, at any depth. Changing only one clause? Target the clause
+    # instead: `target: art-3-s-2`, `scope: clause`.
+    # sections:
+    #   - number: 1
+    #     title: Admission
+    #     text: |
+    #       The complete text of clause (1).
+    #   - number: 2
+    #     title: Duties
+    #     status: omitted
+    #     note: Why clause (2) is being ended.
 
   # A second example — delete to remove it.
   # - id: op-2

@@ -1,0 +1,167 @@
+# ---------------------------------------------------------------------------
+# The FIXTURE constitution at version 2.1.0, archived.
+#
+# Identical to examples/starter/fixture-constitution.yaml except for the two
+# lines that say it is superseded. It exists so a fixture build can publish
+# archive/2.1.0/constitution.json — the snapshot /propose/ needs to tell a
+# stale edit that still fits from one whose target was rewritten underneath
+# it. Without it, both look the same and every carried-over edit is a
+# conflict.
+# ---------------------------------------------------------------------------
+
+opencodelaw: "1.0"
+
+info:
+  title: MARROW VALE LAMPLIGHTERS
+  organization: The Marrow Vale Lamplighters' Guild, Incorporated
+  jurisdiction: Marrow Vale, Province of Thule
+  registration: GUILD/0042/1897
+
+  version: 2.1.0
+  status: superseded
+  superseded_by: 2.2.0
+  legal_status: adopted
+  effective_from: 2025-09-01
+
+  contact:
+    name: The Keeper of the Roll
+    email: keeper@marrowvalelamplighters.org
+    url: https://marrowvalelamplighters.org
+  license: CC-BY-4.0
+
+preamble:
+  id: preamble
+  title: Preamble
+  title_source: editorial
+  content: |
+    We, the lamplighters of Marrow Vale, having kept the lamps of this town
+    alight through fog and frost since the founding, adopt these articles for
+    the ordering of the Guild.
+  adopted: 2025-09-01
+
+articles:
+  - id: art-1
+    number: 1
+    title: Name
+    title_source: enacted
+    content: |
+      The Guild shall be known as the Marrow Vale Lamplighters' Guild, and in
+      these articles as "the Guild".
+
+  # Untouched by the fixture bill, so a test has something to prove was left
+  # alone when the bill is applied.
+  - id: art-2
+    number: 2
+    title: Objects
+    title_source: enacted
+    content: |
+      The objects of the Guild are:
+
+      1. to keep every public lamp in Marrow Vale alight from dusk to dawn;
+      2. to maintain the ladders, wicks, oil and glass in the Guild's keeping;
+      3. to train apprentices in the safe handling of flame at height.
+
+  # An article carrying both its own body and sections. The fixture bill
+  # substitutes this one in full, sections and all, which is what exercises
+  # the "complete resulting text" rule on a subdivided provision.
+  - id: art-3
+    number: 3
+    title: Membership
+    title_source: enacted
+    content: |
+      Membership of the Guild is open to any person of the Vale who keeps a
+      lamp and abides by these articles.
+    sections:
+      - id: art-3-s-1
+        number: 1
+        title: Admission
+        title_source: enacted
+        content: |
+          A person becomes a lamplighter on being entered in the Lantern Roll
+          by the Council.
+      - id: art-3-s-2
+        number: 2
+        title: Duties
+        title_source: enacted
+        content: |
+          A lamplighter shall light the lamps of their assigned round at dusk
+          and extinguish them at dawn.
+      - id: art-3-s-3
+        number: 3
+        title: Withdrawal
+        title_source: editorial
+        content: |
+          A lamplighter may withdraw by returning their taper to the Keeper of
+          the Roll.
+
+  # A number held by no provision. The gap is recorded, never closed by
+  # renumbering the articles that follow it.
+  - id: art-4
+    number: 4
+    title: Reserved
+    title_source: editorial
+    status: reserved
+    note: Held for the article on night wardens, which the Guild has not yet adopted.
+
+  - id: art-5
+    number: 5
+    title: The Council of Wicks
+    title_source: enacted
+    content: |
+      1. The Council of Wicks consists of nine lamplighters elected by the
+         Guild at the Michaelmas meeting.
+      2. The Council appoints from among its number a Keeper of the Roll and a
+         Keeper of the Oil.
+
+  # Reserved by the fixture bill: the number is kept, the text goes.
+  - id: art-6
+    number: 6
+    title: Meetings of the Council
+    title_source: enacted
+    content: |
+      1. The Council meets at the Lamp House on the first evening of each
+         quarter.
+      2. Notice of a meeting is given by lighting the blue lamp above the Lamp
+         House door for three nights beforehand.
+
+  # Omitted by the fixture bill. The number is never reused.
+  - id: art-7
+    number: 7
+    title: The Taper Fund
+    title_source: enacted
+    content: |
+      The Taper Fund holds the pennies collected from members at admission and
+      is expended by the Keeper of the Oil on tapers and matches.
+
+  - id: art-8
+    number: 8
+    title: Records and Accounts
+    title_source: enacted
+    sections:
+      - id: art-8-s-1
+        number: 1
+        title: The Roll
+        title_source: editorial
+        content: |
+          The Keeper of the Roll enters in the Lantern Roll the name of every
+          lamplighter, the round assigned to them, and the date of their
+          admission.
+      - id: art-8-s-2
+        number: 2
+        title: Annual Statement
+        title_source: enacted
+        content: |
+          The Keeper of the Oil lays before the Guild at the Michaelmas
+          meeting a statement of the oil bought, burned and remaining.
+
+  - id: art-9
+    number: 9
+    title: Amendment
+    title_source: enacted
+    content: |
+      1. These articles may be amended only by an instrument passed under this
+         article.
+      2. An amendment must be approved by the board, the intermediate board and
+         the units of the Guild.
+      3. Approval requires two thirds of those present and voting in each of
+         those bodies, abstentions being counted with neither side.

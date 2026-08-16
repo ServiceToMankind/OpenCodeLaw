@@ -143,14 +143,31 @@ fewer.
 
 | | |
 |---|---|
-| [process/PROPOSING.md](process/PROPOSING.md) | How to write a bill. Start here. |
+| [process/PROPOSING.md](process/PROPOSING.md) | How to propose a change. Start here — no terminal, no YAML, no GitHub account. |
+| [process/AUTHORING-BY-HAND.md](process/AUTHORING-BY-HAND.md) | Writing the bill file directly. Same result, for anyone who prefers it. |
 | [process/AMENDMENT-PROCESS.md](process/AMENDMENT-PROCESS.md) | Roles, lifecycle, thresholds, versioning. |
 | [process/MINUTES-TEMPLATE.md](process/MINUTES-TEMPLATE.md) | What each body's record of resolution must contain. |
-| [process/ADOPTION.md](process/ADOPTION.md) | What must be true before the in-browser bill builder goes live. |
+| [process/ADOPTION.md](process/ADOPTION.md) | What must be true before the two working surfaces go live. |
 
-The in-browser builder at `/propose/` is built but not yet published: it is an action surface, and
-it opens when the ICC is ready to receive drafts. Authoring a bill by hand produces exactly the same
-file — copy `bills/TEMPLATE.yaml` and run `npx opencodelaw bill validate`.
+Two pages are built but **not yet published**, behind `PROPOSE_ENABLED`. They are action surfaces,
+and they open together when the ICC is ready to receive.
+
+- **`/propose/` — the document editor.** The proposer opens a copy of the constitution, changes the
+  words they want changed, and downloads their proposal. The operations are derived from the
+  difference: no target is picked, no id is typed, and the word YAML never appears. Re-opening a
+  proposal replays it onto *today's* constitution, so "based on the latest version" is not a rule
+  anyone follows — it is the only thing the page can produce.
+- **`/icc/` — the clerking desk.** Numbering, the status transitions, the resolution sentence, the
+  three ballot sheets, each body's tally with the Article 16(3) verdict computing live, and a
+  browser-computed sha256 for each signed minutes PDF. It generates one record; it submits nothing
+  and **enacts nothing**.
+
+Neither page uploads anything, and neither has authority the CLI does not re-check: `act enact`
+recomputes the thresholds, re-reads every evidence file and re-verifies its checksum. A hand-forged
+record fails at that gate exactly as it would if the pages did not exist.
+
+Authoring a bill by hand produces exactly the same file — copy `bills/TEMPLATE.yaml` and run
+`npx opencodelaw bill validate`.
 
 ## Honest limitations
 

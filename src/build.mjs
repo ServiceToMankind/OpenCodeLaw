@@ -18,6 +18,7 @@ import { renderArticle, renderPreamble } from './templates/provision.mjs'
 import { generateOgImages } from './og.mjs'
 import { billsMain, billsTocItems } from './templates/bills.mjs'
 import { proposeMain, proposeTocItems } from './templates/propose.mjs'
+import { iccMain, iccTocItems } from './templates/icc.mjs'
 import { generateBillValidator } from './gen-bill-validator.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -31,20 +32,42 @@ export const SITE_ORIGIN = DEFAULT_SITE_ORIGIN
 const INCLUDE_CNAME = process.env.INCLUDE_CNAME !== 'false'
 
 /**
- * /bills/ and /propose/ are different kinds of surface, so they ship
- * differently.
+ * /bills/ and the two working surfaces are different kinds of page, so they
+ * ship differently.
  *
  * /bills/ is RECORD, and always ships: an empty register is a true statement.
  * "No bills are before the board" is information, not absence.
  *
- * /propose/ is ACTION, and an action surface opens when the desk behind it is
- * staffed. Its one actionable instruction is "email this file to the ICC"; put
- * that in front of the public before the ICC can receive, and the system's
- * first impression on its first real author is silence.
+ * /propose/ and /icc/ are ACTION, and an action surface opens when the desk
+ * behind it is staffed. The proposer's one actionable instruction is "email
+ * this file to the ICC"; put that in front of the public before the ICC can
+ * receive, and the system's first impression on its first real author is
+ * silence. The two open together — a proposal surface with no clerking desk is
+ * the same failure one step later.
  *
  * Flip with PROPOSE_ENABLED=true once process/ADOPTION.md is checked off.
  */
 const PROPOSE_ENABLED = process.env.PROPOSE_ENABLED === 'true'
+
+/**
+ * The engine modules the two pages load in the browser.
+ *
+ * Copied to dist/engine/ with their source tree shape intact, so every relative
+ * import inside them resolves unchanged and there is no build-time rewriting to
+ * get wrong. This list IS the browser boundary: a module on it must not import
+ * node:anything, and tests/browser-modules.test.mjs walks the graph to say so.
+ */
+const BROWSER_MODULES = Object.freeze([
+  'lib/paths.mjs',
+  'text-compare.mjs',
+  'bill-render.mjs',
+  'ballot.mjs',
+  'scripts/bill-serialise.mjs',
+  'scripts/bill-core.mjs',
+  'scripts/bill-derive.mjs',
+  'scripts/editor.js',
+  'scripts/icc.js'
+])
 
 // Engine and content are separate. Point these at your own files and the
 // engine needs no modification; versions/ and the act register are optional.
@@ -64,17 +87,65 @@ const write = (rel, body) => {
   return rel
 }
 
-const copyDir = (from, to) => {
+const copyDir = (from, to, keep = null) => {
   const src = path.join(ROOT, from)
   if (!fs.existsSync(src)) return 0
   const dst = path.join(OUT(), to)
   fs.mkdirSync(dst, { recursive: true })
   let n = 0
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    if (entry.isDirectory()) n += copyDir(path.join(from, entry.name), path.join(to, entry.name))
-    else { fs.copyFileSync(path.join(src, entry.name), path.join(dst, entry.name)); n++ }
+    if (entry.isDirectory()) n += copyDir(path.join(from, entry.name), path.join(to, entry.name), keep)
+    else if (!keep || keep(entry.name)) { fs.copyFileSync(path.join(src, entry.name), path.join(dst, entry.name)); n++ }
   }
   return n
+}
+
+const copyFile = (from, to) => {
+  const full = path.join(OUT(), to)
+  fs.mkdirSync(path.dirname(full), { recursive: true })
+  fs.copyFileSync(path.join(ROOT, from), full)
+  return to
+}
+
+/**
+ * The constitution as the editor holds it.
+ *
+ * Shaped exactly like constitution/current.yaml, minus what a proposer's editor
+ * has no business in, so that `provisionIndex`, `fullText` and
+ * `buildBillManifest` read it without a translation step. A translation layer
+ * between "what the page holds" and "what the rules read" is precisely where a
+ * second interpretation of a provision's text would grow — which is the class
+ * of failure this project began with.
+ */
+function constitutionJson (doc) {
+  const provision = n => ({
+    id: n.id,
+    number: n.number ?? null,
+    title: n.title ?? '',
+    title_source: n.title_source ?? 'editorial',
+    content: n.content ?? '',
+    ...(n.status ? { status: n.status } : {}),
+    ...(n.note ? { note: n.note } : {})
+  })
+  return {
+    // The version is stated twice on purpose: `info.version` is where every
+    // shared rule looks for it, and the top-level copy is what a human opening
+    // the file reads first.
+    version: doc.info.version,
+    info: {
+      version: doc.info.version,
+      organization: doc.info.organization,
+      title: doc.info.title,
+      ...(doc.info.instrument ? { instrument: doc.info.instrument } : {})
+    },
+    preamble: provision(doc.preamble),
+    articles: doc.articles.map(a => ({
+      ...provision(a),
+      sections: (a.sections ?? []).map(provision)
+    })),
+    next_article: Math.max(...doc.articles.map(a => a.number)) + 1,
+    reserved: doc.articles.filter(a => a.status === 'reserved').map(a => a.number)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -252,7 +323,7 @@ export function build () {
     title: `Constitution of ${info.organization}`,
     description: summarise(toPlainText(doc.preamble.content)),
     canonical: abs(''),
-    og: { type: 'article', image: abs('assets/og/home.png'), imageAlt: `Constitution of ${info.organization}` },
+    og: { type: 'article', image: abs('assets/og/pages/home.png'), imageAlt: `Constitution of ${info.organization}` },
     jsonLd: [legislationLd(info, doc), organizationLd(info),
       breadcrumbLd([{ name: 'Constitution', url: abs('') }])],
     main: indexMain
@@ -281,7 +352,7 @@ export function build () {
       title: `Article ${a.number}: ${a.title} — ${info.title}`,
       description: summarise(text),
       canonical,
-      og: { type: 'article', image: abs(`assets/og/${slug}.png`), imageAlt: `Article ${a.number}: ${a.title}` },
+      og: { type: 'article', image: abs(`assets/og/articles/${slug}.png`), imageAlt: `Article ${a.number}: ${a.title}` },
       jsonLd: [
         {
           '@context': 'https://schema.org', '@type': 'Article',
@@ -317,7 +388,7 @@ export function build () {
     title: `Amendment register — ${info.title}`,
     description: `Every instrument amending the constitution of ${info.organization}, with dates of assent, the provisions each touches, and the signed Act as published.`,
     canonical: abs('amendments/'),
-    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Amendment register' },
+    og: { image: abs('assets/og/pages/amendments.png'), imageAlt: 'Amendment register' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') },
       { name: 'Amendments', url: abs('amendments/') }
@@ -347,29 +418,46 @@ export function build () {
     title: `Bills — ${info.title}`,
     description: `Proposed amendments to the constitution of ${info.organization}, including bills that were rejected or withdrawn.`,
     canonical: abs('bills/'),
-    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Bills' },
+    og: { image: abs('assets/og/pages/amendments.png'), imageAlt: 'Bills' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') }, { name: 'Bills', url: abs('bills/') }
     ])],
-    main: billsMain(bills, { url, escapeHtml, actIndex })
+    main: billsMain(bills, { url, escapeHtml, actIndex, proposeEnabled: PROPOSE_ENABLED })
   })))
 
-  // ---- propose: author a bill without editing YAML ----
+  // ---- propose: edit the constitution; the machine writes the bill ----
   if (PROPOSE_ENABLED) {
-  written.push(write('propose/index.html', layout({
-    ...shell,
-    showToc: false,
-    toc: tocSections(proposeTocItems(), { heading: 'Propose a bill' }),
-    title: `Propose an amendment — ${info.title}`,
-    description: `Draft a bill to amend the constitution of ${info.organization}. The page produces a draft for the Internal Compliance Committee; it does not submit, number or approve anything.`,
-    canonical: abs('propose/'),
-    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Propose an amendment' },
-    jsonLd: [breadcrumbLd([
-      { name: 'Constitution', url: abs('') }, { name: 'Propose', url: abs('propose/') }
-    ])],
-    head: `<script type="module" src="${url('scripts/propose.js')}"></script>`,
-    main: proposeMain({ url, escapeHtml, info })
-  })))
+    written.push(write('propose/index.html', layout({
+      ...shell,
+      showToc: false,
+      toc: tocSections(proposeTocItems(), { heading: 'Propose a change' }),
+      title: `Propose an amendment — ${info.title}`,
+      description: `Open the constitution of ${info.organization}, change what you want changed, and download your proposal. The page produces a file for the Internal Compliance Committee; it does not submit, number or approve anything.`,
+      canonical: abs('propose/'),
+      og: { image: abs('assets/og/pages/amendments.png'), imageAlt: 'Propose an amendment' },
+      jsonLd: [breadcrumbLd([
+        { name: 'Constitution', url: abs('') }, { name: 'Propose', url: abs('propose/') }
+      ])],
+      head: `<script type="module" src="${url('engine/scripts/editor.js')}"></script>`,
+      main: proposeMain({ url, escapeHtml, info })
+    })))
+
+    // ---- the ICC's clerking desk ----
+    //
+    // noindex: a working surface for one committee, not a page the public is
+    // looking for. It is behind the same flag either way; this keeps it out of
+    // results where a proposer might mistake it for where they file.
+    written.push(write('icc/index.html', layout({
+      ...shell,
+      showToc: false,
+      toc: tocSections(iccTocItems(), { heading: 'Clerking a bill' }),
+      title: `ICC desk — ${info.title}`,
+      description: 'The Internal Compliance Committee\'s working surface: number a bill, record what the three bodies resolved, attach the minutes, and generate the file for the technical department.',
+      canonical: abs('icc/'),
+      extraHead: '<meta name="robots" content="noindex, nofollow">',
+      head: `<script type="module" src="${url('engine/scripts/icc.js')}"></script>`,
+      main: iccMain({ url, escapeHtml, info })
+    })))
   }
 
   // ---- archive ----
@@ -383,7 +471,7 @@ export function build () {
     title: `Archive — ${info.title}`,
     description: `Every superseded version of the constitution of ${info.organization}, frozen as published.`,
     canonical: abs('archive/'),
-    og: { image: abs('assets/og/archive.png'), imageAlt: 'Archive' },
+    og: { image: abs('assets/og/pages/archive.png'), imageAlt: 'Archive' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') }, { name: 'Archive', url: abs('archive/') }
     ])],
@@ -412,6 +500,14 @@ export function build () {
     const v = f.replace(/^v|\.yaml$/g, '')
     const d = load(`${VERSIONS_DIR}/${f}`)
     const successor = d.info.superseded_by
+
+    // The archived text, machine-readable, beside the archived page.
+    //
+    // This is what lets /propose/ tell a stale edit that still fits from one
+    // whose target was rewritten underneath it. Without the version a draft was
+    // written against, "unchanged" and "rewritten" are indistinguishable, and
+    // the page has to treat every carried-over edit as a conflict.
+    if (PROPOSE_ENABLED) write(`archive/${v}/constitution.json`, JSON.stringify(constitutionJson(d)))
     written.push(write(`archive/${v}/index.html`, layout({
       ...shell,
       articles: d.articles,
@@ -429,7 +525,7 @@ export function build () {
       // exists to publish. v1.0.0 and v3.0.0 are different documents.
       canonical: abs(`archive/${v}/`),
       extraHead: `<link rel="latest-version" href="${abs('')}">`,
-      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/archive.png'), imageAlt: `Version ${v}` },
+      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/pages/archive.png'), imageAlt: `Version ${v}` },
       jsonLd: [breadcrumbLd([
         { name: 'Constitution', url: abs('') },
         { name: 'Archive', url: abs('archive/') },
@@ -474,30 +570,23 @@ export function build () {
   // ---- data, assets, static files ----
   write('search-index.json', JSON.stringify(buildSearchIndex(doc, slugs)))
 
-  // What /propose/ needs to build an operation: the id a target is cited by,
-  // and the CURRENT text, so a substitute can be prefilled and edited into the
-  // complete resulting text. An author never types a target id or a partial edit.
-  if (PROPOSE_ENABLED) write('provisions.json', JSON.stringify({
-    base_version: info.version,
-    generated_for: 'the propose page — targets are picked from this list, never typed',
-    provisions: [
-      { id: doc.preamble.id, kind: 'preamble', number: null, title: doc.preamble.title,
-        title_source: doc.preamble.title_source ?? 'editorial', text: doc.preamble.content ?? '' },
-      ...doc.articles.flatMap(a => [
-        { id: a.id, kind: 'article', number: a.number, title: a.title,
-          title_source: a.title_source ?? 'editorial', status: a.status ?? 'active',
-          text: a.content ?? '',
-          sections: (a.sections ?? []).map(x => ({ number: x.number, title: x.title, text: x.content ?? '' })) },
-        ...(a.sections ?? []).map(x => ({
-          id: x.id, kind: 'section', number: x.number, title: x.title,
-          title_source: x.title_source ?? 'editorial', article: a.id, article_number: a.number,
-          text: x.content ?? '' }))
-      ])
-    ],
-    // The next free article number, and any reserved slot an insert may occupy.
-    next_article: Math.max(...doc.articles.map(a => a.number)) + 1,
-    reserved: doc.articles.filter(a => a.status === 'reserved').map(a => a.number)
-  }))
+  // The document the editor opens a copy of, and the bill numbers already
+  // taken, so the ICC desk suggests the next one instead of asking.
+  if (PROPOSE_ENABLED) {
+    write('constitution.json', JSON.stringify(constitutionJson(doc)))
+    write('bills.json', JSON.stringify({
+      generated_for: 'the ICC desk — which numbers are already taken, per year',
+      bills: bills.map(({ file, bill: b }) => ({
+        file,
+        year: b.bill?.year ?? null,
+        number: b.bill?.number ?? null,
+        short_title: b.bill?.short_title ?? '',
+        status: b.status ?? null,
+        act_number: b.enactment?.act_number ?? null,
+        act_year: b.enactment?.act_year ?? null
+      }))
+    }))
+  }
   write('legacy-anchors.json', JSON.stringify(legacyAnchorMap(doc)))
   for (const [from, to] of Object.entries(LEGACY_REDIRECTS)) {
     written.push(write(from, redirectStub(url(to), abs(to))))
@@ -508,23 +597,49 @@ export function build () {
   write('sitemap.xml', sitemap(doc, slugs, versions))
 
   // Open Graph plates. Generated before assets are copied so they land in dist/assets/og/.
+  //
+  // The site's own pages are namespaced, because an article's plate is named
+  // after its slug and Article 16 is titled "Amendments" — which is the same
+  // slug as the amendment register. One plate overwrote the other, so the
+  // register's social card showed Article 16 and nobody could have noticed
+  // without counting the files. A namespace makes the collision impossible
+  // rather than currently-absent.
   const ogPages = [
-    { slug: 'home', kicker: 'CONSTITUTION', title: `Constitution of ${info.organization}`,
+    { slug: 'pages/home', kicker: 'CONSTITUTION', title: `Constitution of ${info.organization}`,
       footer: `Version ${info.version} · effective ${info.effective_from}`,
       badge: state && !state.complete ? 'In reconciliation' : null },
-    { slug: 'amendments', kicker: 'AMENDMENTS', title: 'Amendment register',
+    { slug: 'pages/amendments', kicker: 'AMENDMENTS', title: 'Amendment register',
       footer: `${(register.acts ?? []).length} instruments · ${info.organization}` },
-    { slug: 'archive', kicker: 'ARCHIVE', title: 'Superseded versions',
+    { slug: 'pages/archive', kicker: 'ARCHIVE', title: 'Superseded versions',
       footer: info.organization },
     ...doc.articles.map(a => ({
-      slug: slugs.get(a.id),
+      slug: `articles/${slugs.get(a.id)}`,
       kicker: `ARTICLE ${a.number}`,
       title: a.title,
       footer: `${info.organization} · Constitution ${info.version}`,
       badge: (a.amended_by ?? []).length ? 'Amended' : null
     }))
   ]
-  const og = generateOgImages(path.join(ROOT, 'assets/og'), ogPages, {
+  // TWO PAGES MAY NOT WANT ONE PLATE. Article 16 is titled "Amendments", which
+  // is the slug the amendment register used, and one plate overwrote the other
+  // — the register's social card showed Article 16. Nothing failed: the file
+  // existed and the link resolved. Namespaced directories make the collision
+  // impossible between the two kinds of page, and this makes any remaining
+  // collision a build error rather than a last-writer win.
+  const claimed = new Map()
+  for (const p2 of ogPages) {
+    if (claimed.has(p2.slug)) {
+      throw new Error(`build aborted: two pages both want assets/og/${p2.slug}.png — ` +
+        `"${claimed.get(p2.slug)}" and "${p2.title}". One would silently overwrite the other.`)
+    }
+    claimed.set(p2.slug, p2.title)
+  }
+
+  // Rendered into the repo's assets by default, because they are build
+  // artefacts under a gitignored path. A fixture build points this elsewhere so
+  // a test build of another organisation's constitution does not leave that
+  // organisation's plates behind.
+  const og = generateOgImages(path.join(ROOT, process.env.OG_DIR ?? 'assets/og'), ogPages, {
     logoPath: path.join(ROOT, 'assets/img/OpenCodeLaw.png'),
     bannerPath: path.join(ROOT, 'assets/img/openlawcode_banner.png')
   })
@@ -533,12 +648,28 @@ export function build () {
   copyDir('favicons', 'favicons')
   copyDir('acts/pdf', 'acts/pdf')
   copyDir('src/styles', 'styles')
-  copyDir('src/scripts', 'scripts')
+  // Only the site's own enhancement script. Everything else under src/scripts/
+  // is engine, and ships — or does not — with the surfaces that load it.
+  copyDir('src/scripts', 'scripts', name => name === 'app.js')
 
-  // The propose page enforces the same schema the CLI does, compiled to a
-  // standalone module. A second hand-written check in the page would be a
-  // second implementation, free to drift.
-  if (PROPOSE_ENABLED) write('scripts/bill-validator.mjs', generateBillValidator())
+  if (PROPOSE_ENABLED) {
+    // The engine, with its source tree shape intact, so every relative import
+    // inside it resolves without any build-time rewriting.
+    for (const rel of BROWSER_MODULES) copyFile(`src/${rel}`, `engine/${rel}`)
+
+    // Both pages enforce the same schema the CLI does, compiled to a standalone
+    // module. A second hand-written check in a page would be a second
+    // implementation, free to drift.
+    write('engine/bill-validator.mjs', generateBillValidator())
+
+    // The same YAML parser the CLI uses, at the same pinned version, read from
+    // node_modules at build time rather than transcribed. The pages have to
+    // read an uploaded bill file; a hand-rolled parser for "just this shape"
+    // would be a second reader of the format, and the two would disagree on
+    // some file nobody thought to test — which is exactly how a bill would come
+    // to mean one thing on screen and another to the applier.
+    copyFile('node_modules/js-yaml/dist/js-yaml.mjs', 'engine/vendor/js-yaml.mjs')
+  }
 
   // The custom domain stays on the old site until it has been reviewed.
   if (INCLUDE_CNAME && fs.existsSync(path.join(ROOT, 'CNAME'))) {

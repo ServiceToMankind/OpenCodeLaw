@@ -30,7 +30,7 @@
     },
     "objects_and_reasons": {
       "type": "string",
-      "description": "Explanatory only. Convention C1: a Statement of Objects and Reasons is never operative and never a source of authority. It is structurally impossible for it to be one here \u2014 operations carry their own text \u2014 and the validator additionally asserts that no operation refers to it."
+      "description": "Explanatory only. Convention C1: a Statement of Objects and Reasons is never operative and never a source of authority. It is structurally impossible for it to be one here — operations carry their own text — and the validator additionally asserts that no operation refers to it."
     },
     "operations": {
       "type": "array",
@@ -69,7 +69,7 @@
         "withdrawn",
         "lapsed"
       ],
-      "description": "draft \u2192 submitted \u2192 under-review \u2192 (returned \u21c4 under-review) \u2192 scheduled \u2192 approved | rejected \u2192 enacted \u2192 applied. `withdrawn` is the author's, any time before approval. `lapsed` is the board's and is set by hand \u2014 no timeout is invented, because the constitution states none."
+      "description": "draft → submitted → under-review → (returned ⇄ under-review) → scheduled → approved | rejected → enacted → applied. `withdrawn` is the author's, any time before approval. `lapsed` is the board's and is set by hand — no timeout is invented, because the constitution states none."
     },
     "billMeta": {
       "type": "object",
@@ -127,6 +127,10 @@
             "role": {
               "type": "string"
             },
+            "membership_id": {
+              "type": "string",
+              "description": "The mover's membership number, as they state it. Nothing in this system can verify it — the ICC checks it against the register when the draft arrives, which is its whole function. It is recorded because the surfaces that ask for it say it is recorded."
+            },
             "contact": {
               "type": "string"
             }
@@ -141,7 +145,7 @@
         },
         "base_version": {
           "$ref": "#/$defs/semver",
-          "description": "The constitution version this bill was drafted against. If the constitution has moved past it, validation fails with a rebase instruction \u2014 so an approval meeting always sees what it is actually voting on."
+          "description": "The constitution version this bill was drafted against. If the constitution has moved past it, validation fails with a rebase instruction — so an approval meeting always sees what it is actually voting on."
         },
         "version_bump": {
           "enum": [
@@ -226,7 +230,7 @@
         "target": {
           "type": "string",
           "pattern": "^(preamble|art-[1-9]\\d*(-s-[1-9]\\d*)?)$",
-          "description": "Must resolve against base_version \u2014 except for `insert`, where it must not already exist."
+          "description": "Must resolve against base_version — except for `insert`, where it must not already exist."
         },
         "scope": {
           "enum": [
@@ -240,17 +244,15 @@
         },
         "text": {
           "type": "string",
-          "description": "The COMPLETE resulting text of the target provision \u2014 never a diff, never a splice, never \"insert after the words\u2026\". This is what makes application idempotent: the applier compares the target's current text against this, so re-running an applied Act is a no-op by construction rather than by luck."
+          "description": "The COMPLETE resulting text of the target provision — never a diff, never a splice, never \"insert after the words…\". This is what makes application idempotent: the applier compares the target's current text against this, so re-running an applied Act is a no-op by construction rather than by luck."
         },
         "sections": {
           "type": "array",
-          "description": "Full replacement subdivisions, where the operation restructures a provision. Omit to leave the target's sections untouched.",
+          "description": "Every clause of the target, as it will stand once the Act is applied. Each existing clause must be ACCOUNTED FOR: either restated with its text, or carried as a tombstone with status 'omitted'. Silence over a clause is refused (incomplete-substitution) — it used to mean deletion, which destroyed the clause's citation anchor with nothing in the document to say it had ever existed. Nothing is ever deleted at any depth: an omitted clause keeps its node, its number and its anchor. A previously omitted clause returns only through an entry that states its text.",
           "items": {
             "type": "object",
             "required": [
-              "number",
-              "title",
-              "text"
+              "number"
             ],
             "additionalProperties": false,
             "properties": {
@@ -265,8 +267,41 @@
               "text": {
                 "type": "string",
                 "minLength": 1
+              },
+              "status": {
+                "const": "omitted",
+                "description": "This clause is carried as omitted: it keeps its number and its anchor, and holds no text. A meeting reads exactly what dies."
+              },
+              "note": {
+                "type": "string",
+                "description": "Why this clause is omitted."
               }
-            }
+            },
+            "allOf": [
+              {
+                "$comment": "A live clause states its heading and its text; a tombstone states neither.",
+                "if": {
+                  "not": {
+                    "required": [
+                      "status"
+                    ]
+                  }
+                },
+                "then": {
+                  "required": [
+                    "title",
+                    "text"
+                  ]
+                },
+                "else": {
+                  "not": {
+                    "required": [
+                      "text"
+                    ]
+                  }
+                }
+              }
+            ]
           }
         },
         "note": {
@@ -445,7 +480,7 @@
                 "ballot-tally",
                 "poll-export"
               ],
-              "description": "A poll is a voting MECHANISM, not a record. Where the by-laws permit an online vote, the evidence is a static export attested by the ICC coordinator, archived and hashed like minutes \u2014 never the poll's URL."
+              "description": "A poll is a voting MECHANISM, not a record. Where the by-laws permit an online vote, the evidence is a static export attested by the ICC coordinator, archived and hashed like minutes — never the poll's URL."
             },
             "path": {
               "type": "string",
@@ -528,7 +563,7 @@
             "string",
             "null"
           ],
-          "description": "Bill file the instrument was rendered from \u2014 the audit link between the printed Act and the patch it came from."
+          "description": "Bill file the instrument was rendered from — the audit link between the printed Act and the patch it came from."
         }
       }
     }

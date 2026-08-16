@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
 import {
   loadBill, tally, buildBillManifest, classifyOperation, report,
-  fullText, operationText, REQUIRED_BODIES, THRESHOLD
+  fullText, operationText, REQUIRED_BODIES, THRESHOLD, applyOperation, OPERATION_STATUS
 } from '../src/bill.mjs'
 import { validateDocument } from '../src/validate.mjs'
 
@@ -86,55 +86,19 @@ function resolve (d, id) {
 }
 
 /**
- * A minimal applier, run the way the pipeline must run one: classify first,
- * and touch the document only when the classification says `apply`. Nothing
- * here is a diff or a splice — an operation carries the complete resulting
- * text, so applying it is an assignment.
+ * Classify, then apply — through THE applier, not a copy of it.
+ *
+ * This used to carry its own miniature applier. That is the disease every
+ * defect in this file's history began with: a second implementation, free to
+ * drift, agreeing with itself. It wrote `title` without `title_source`, so it
+ * could not have caught a retitle that failed to record which instrument
+ * stated the heading.
  */
-function applyOperation (d, o, baseText) {
+function applyOne (d, o, baseText) {
   const classification = classifyOperation(o, resolve(d, o.target), baseText)
   if (classification !== 'apply') return { doc: d, classification, changed: false }
-
   const next = structuredClone(d)
-  const node = resolve(next, o.target)
-  switch (o.operation) {
-    case 'substitute':
-      if (o.text != null) node.content = o.text
-      if (o.title) node.title = o.title
-      if (o.sections) {
-        node.sections = o.sections.map(s => ({
-          id: `${o.target}-s-${s.number}`,
-          number: s.number,
-          title: s.title,
-          title_source: 'enacted',
-          content: s.text
-        }))
-      }
-      break
-    case 'insert':
-      next.articles.push({
-        id: o.target,
-        number: Number(o.target.replace('art-', '')),
-        title: o.title,
-        title_source: 'enacted',
-        content: o.text
-      })
-      next.articles.sort((a, b) => a.number - b.number)
-      break
-    case 'omit':
-    case 'reserve':
-      // The number stays. A citation made to it must still resolve, which is
-      // why nothing is spliced out of the array.
-      delete node.content
-      delete node.sections
-      node.status = o.operation === 'omit' ? 'omitted' : 'reserved'
-      node.note = o.note
-      break
-    case 'retitle':
-      node.title = o.title
-      node.title_source = 'enacted'
-      break
-  }
+  applyOperation(next, o, { actId: 'act-1-2026' })
   return { doc: next, classification, changed: true }
 }
 
@@ -221,7 +185,7 @@ test('classifyOperation is a three-way decision, and each way is asserted', () =
 
   // current == proposed → already applied. The safe no-op that makes
   // re-running an Act harmless.
-  const applied = applyOperation(doc, o, baseText).doc
+  const applied = applyOne(doc, o, baseText).doc
   const appliedNode = resolve(applied, o.target)
   assert.equal(fullText(appliedNode), operationText(o))
   assert.equal(classifyOperation(o, appliedNode, baseText), 'already-applied')
@@ -245,7 +209,7 @@ test('applying a bill twice changes the document exactly once', () => {
   let once = doc
   const first = []
   for (const o of bill.operations) {
-    const r = applyOperation(once, o, baseText.get(o.id))
+    const r = applyOne(once, o, baseText.get(o.id))
     first.push([o.id, r.classification])
     once = r.doc
   }
@@ -255,7 +219,7 @@ test('applying a bill twice changes the document exactly once', () => {
   let twice = once
   const second = new Map()
   for (const o of bill.operations) {
-    const r = applyOperation(twice, o, baseText.get(o.id))
+    const r = applyOne(twice, o, baseText.get(o.id))
     second.set(o.id, r.classification)
     twice = r.doc
   }
@@ -434,6 +398,98 @@ test('an insert onto an existing provision fails, and a substitution onto a miss
   assert.deepEqual(m.filter(x => !x.exists).map(x => x.target), ['art-10'])
 })
 
+test('a substitution that does not state a provision\'s clauses is refused', async () => {
+  // A format that permits a bill which can never verify as applied is a format
+  // defect, so this is an error and not advice. The omitting form was not just
+  // discouraged — it CANNOT settle: application compares a provision's complete
+  // text, clauses included, so an operation naming none reads as unapplied
+  // forever, and as DIVERGENT the moment a base text is in play.
+  const file = variant(b => {
+    const op = opOf(b, 'substitute')
+    delete op.sections
+  })
+  const r = await validate(file)
+  assert.ok(codes(r).includes('incomplete-substitution'), detail(r))
+
+  const message = errorFor(r, 'incomplete-substitution').message
+  assert.match(message, /art-3 has 3 clauses/)
+  assert.match(message, /including the ones it does not change/)
+
+  // Proof that the refused form is the unsettleable one, from the classifier
+  // rather than from assertion: applied, it still does not read as applied.
+  const bill = loadBill(file)
+  const op = opOf(bill, 'substitute')
+  const node = structuredClone(resolve(doc, 'art-3'))
+  node.content = op.text
+  assert.notEqual(classifyOperation(op, node, null), 'already-applied',
+    'the form is refused because it can never verify, not as a matter of taste')
+})
+
+test('the carrying form is accepted, and an article with no clauses needs none', async () => {
+  // The legitimate need the omitting form appeared to serve — amend only the
+  // opening words — is served exactly by restating the clauses unchanged.
+  const untouched = await validate(BILL_FILE)
+  assert.ok(!codes(untouched).includes('incomplete-substitution'),
+    'the fixture bill states every clause of Article 3 and must pass')
+
+  // art-1 has no clauses, so a substitution of it states none.
+  const plain = variant(b => {
+    b.operations = [{ id: 'op-1', operation: 'substitute', target: 'art-1', scope: 'article', text: 'A new name.\n' }]
+  })
+  assert.ok(!codes(await validate(plain)).includes('incomplete-substitution'), 'omit sections where there are none')
+
+  // A clause this Act removes is CARRIED as omitted, never left out.
+  const carried = variant(b => {
+    b.operations = [{
+      id: 'op-1',
+      operation: 'substitute',
+      target: 'art-3',
+      scope: 'article',
+      text: 'A chapeau only.\n',
+      sections: [
+        { number: 1, title: 'Admission', text: 'On entry in the Roll.\n' },
+        { number: 2, status: 'omitted', title: 'Duties', note: 'Duties pass to the by-laws.' },
+        { number: 3, title: 'Withdrawal', text: 'By returning the taper.\n' }
+      ]
+    }]
+  })
+  const cr = await validate(carried)
+  assert.ok(!codes(cr).includes('incomplete-substitution'), detail(cr))
+})
+
+test('presence is not completeness: a partial clause list is refused', async () => {
+  // The first form of this rule asked only that `sections` be there, so a
+  // partial list validated clean and silently repealed every clause it left
+  // out — no status, no note, no anchor, and nothing in the document to say the
+  // clause had ever existed.
+  const partial = variant(b => {
+    b.operations = [{
+      id: 'op-1',
+      operation: 'substitute',
+      target: 'art-3',
+      scope: 'article',
+      text: 'A chapeau.\n',
+      sections: [{ number: 1, title: 'Admission', text: 'On entry in the Roll.\n' }]
+    }]
+  })
+  const r = await validate(partial)
+  assert.ok(codes(r).includes('incomplete-substitution'), detail(r))
+  const m = errorFor(r, 'incomplete-substitution').message
+  assert.match(m, /clauses \(2\), \(3\) are unaccounted for/)
+  assert.match(m, /carried as `status: omitted`/)
+  assert.match(m, /every citation ever made to it/)
+})
+
+test('the rule is keyed on what the target is, not on the scope it claims', async () => {
+  // `scope` and `target` are not cross-checked anywhere, so a rule keyed on the
+  // declared scope would be evadable by mislabelling one.
+  const mislabelled = variant(b => {
+    b.operations = [{ id: 'op-1', operation: 'substitute', target: 'art-3', scope: 'clause', text: 'A chapeau only.\n' }]
+  })
+  assert.ok(codes(await validate(mislabelled)).includes('incomplete-substitution'),
+    'calling an article-scope substitution a clause one must not get past the rule')
+})
+
 test('an operation may not take its authority from the Statement of Objects and Reasons', async () => {
   // Convention C1. Structurally impossible — operations carry their own text —
   // and asserted anyway, because Act 2 of 2024 set one amendment threshold in
@@ -528,10 +584,16 @@ test('a resolution sheet renders only once a bill is scheduled', async () => {
   }
 
   const b = structuredClone(loadBill(BILL_FILE)); b.status = 'scheduled'
-  const html = ballotDocument(b, { info: loadConstitution().info })
-  assert.equal((html.match(/class="sheet"/g) ?? []).length, 3, 'one sheet per body')
   const { substantiveHash } = await import('../src/bill.mjs')
+  const html = ballotDocument(b, { info: loadConstitution().info, hash: substantiveHash(b) })
+  assert.equal((html.match(/class="sheet"/g) ?? []).length, 3, 'one sheet per body')
   assert.ok(html.includes(substantiveHash(b)), 'the sheet must carry the hash')
+
+  // The sheet's whole purpose is to carry the hash into the minutes, so it
+  // refuses to render without one rather than printing a blank where a meeting
+  // expects a number to read aloud.
+  assert.throws(() => ballotDocument(b, { info: loadConstitution().info }),
+    /substantive hash/i, 'a sheet with no hash must be refused, not rendered empty')
   for (const body of ['Board', 'Intermediate Board', 'Units']) {
     assert.ok(html.includes(body), `no sheet for ${body}`)
   }
@@ -648,35 +710,8 @@ test('a fixture bill runs draft → applied, and re-applying is a clean no-op', 
     assert.notEqual(verdict, 'divergent', `${op.id} (${op.operation} ${op.target}) diverges from the base`)
   }
 
-  // Apply, the way actApply does, then re-classify: everything is a no-op.
-  for (const op of bill.operations) {
-    const node = nodeOf(doc, op.target)
-    if (op.operation === 'insert') {
-      doc.articles.push({
-        id: op.target, number: Number(op.target.replace('art-', '')),
-        title: op.title, title_source: 'enacted',
-        ...(op.text ? { content: op.text } : {})
-      })
-      doc.articles.sort((a, b) => a.number - b.number)
-    } else if (op.operation === 'omit' || op.operation === 'reserve') {
-      for (const k of Object.keys(node)) if (!['id', 'number'].includes(k)) delete node[k]
-      Object.assign(node, {
-        title: op.operation === 'omit' ? 'Omitted' : 'Reserved',
-        status: OPERATION_STATUS[op.operation],   // omitted / reserved, as actApply writes
-        note: op.note
-      })
-    } else if (op.operation === 'retitle') {
-      node.title = op.title
-    } else {
-      if (op.title) node.title = op.title
-      if (op.text != null) node.content = op.text
-      if (op.sections?.length) {
-        node.sections = op.sections.map(s => ({
-          id: `${op.target}-s-${s.number}`, number: s.number, title: s.title, content: s.text
-        }))
-      }
-    }
-  }
+  // Apply through THE applier, then re-classify: everything is a no-op.
+  for (const op of bill.operations) applyOperation(doc, op, { actId: 'act-1-2026' })
 
   for (const op of bill.operations) {
     const node = nodeOf(doc, op.target)
@@ -705,24 +740,61 @@ test('every operation type is idempotent against the status the applier writes',
   // Written against OPERATION_STATUS rather than a literal, because the last
   // bug here was the test and the code sharing the same wrong assumption:
   // both said `status: 'omit'` while the applier writes `status: 'omitted'`.
-  const { classifyOperation, OPERATION_STATUS } = await import('../src/bill.mjs')
-  const applied = [
-    ['substitute', { operation: 'substitute', text: 'T\n' }, { content: 'T\n' }],
-    ['insert', { operation: 'insert', text: 'T\n' }, { content: 'T\n' }],
-    ['retitle', { operation: 'retitle', title: 'X' }, { title: 'X' }],
-    ['omit', { operation: 'omit' }, { status: OPERATION_STATUS.omit }],
-    ['reserve', { operation: 'reserve' }, { status: OPERATION_STATUS.reserve }]
+  const { classifyOperation, OPERATION_STATUS, applyOperation } = await import('../src/bill.mjs')
+
+  // The applied shape is DERIVED by running the applier, never hand-written.
+  // The last defect here was the test and the code sharing one wrong
+  // assumption — both said `status: 'omit'` where the applier writes
+  // `status: 'omitted'` — and a hand-written expectation is how two
+  // implementations come to confirm each other's error indefinitely.
+  const fixture = () => yaml.load(fs.readFileSync(DOC_FILE, 'utf8'), YAML_OPTS)
+  const cases = [
+    ['substitute', { id: 'op-1', operation: 'substitute', target: 'art-1', scope: 'article', text: 'T\n' }],
+    ['insert', { id: 'op-1', operation: 'insert', target: 'art-10', scope: 'article', title: 'New', text: 'T\n' }],
+    ['retitle', { id: 'op-1', operation: 'retitle', target: 'art-1', scope: 'article', title: 'X' }],
+    ['omit', { id: 'op-1', operation: 'omit', target: 'art-7', scope: 'article', note: 'why' }],
+    ['reserve', { id: 'op-1', operation: 'reserve', target: 'art-7', scope: 'article', note: 'why' }]
   ]
-  for (const [name, op, node] of applied) {
-    assert.equal(classifyOperation(op, node, null), 'already-applied',
-      `re-applying ${name} must be a no-op`)
+  for (const [name, op] of cases) {
+    const d = fixture()
+    assert.equal(classifyOperation(op, resolve(d, op.target), null), 'apply', `${name} should start unapplied`)
+    applyOperation(d, op, { actId: 'act-1-2026' })
+    assert.equal(classifyOperation(op, resolve(d, op.target), null), 'already-applied',
+      `re-applying ${name} must be a no-op against the shape the applier actually writes`)
+  }
+
+  // The removing operations leave the status this expects, read back off the
+  // document rather than asserted about it.
+  for (const kind of ['omit', 'reserve']) {
+    const d = fixture()
+    applyOperation(d, { id: 'op-1', operation: kind, target: 'art-7', scope: 'article', note: 'why' }, { actId: 'act-1-2026' })
+    const node = resolve(d, 'art-7')
+    assert.equal(node.status, OPERATION_STATUS[kind])
+    assert.equal(node.number, 7, 'the number is kept, at every depth')
   }
 
   // And the status the applier actually writes is the one this expects.
   assert.deepEqual(OPERATION_STATUS, { omit: 'omitted', reserve: 'reserved' })
-  const src = fs.readFileSync(path.join(ROOT, 'src/bill-cli.mjs'), 'utf8')
-  for (const status of Object.values(OPERATION_STATUS)) {
-    assert.ok(src.includes(`status: '${status}'`),
-      `the applier must write status: '${status}'`)
-  }
+
+  // This used to grep the applier for `status: 'omitted'`, which was the
+  // weakest possible form of "an independent derivation of what the applier
+  // writes" — it proved a string was present in a file. The applier now takes
+  // the status from the shared mapping, so the literal is gone and the grep
+  // failed, correctly, on an improvement.
+  //
+  // What replaced it is stronger in both directions: tests/apply-matrix.test.mjs
+  // RUNS the applier over every operation type at every scope and reads the
+  // status back out of the document it wrote, and this asserts there is no
+  // second copy of the mapping here to drift from the first.
+  // There is now exactly one applier, in the shared module, and it names the
+  // mapping rather than repeating it. `src/bill-cli.mjs` carries no apply logic
+  // at all: it is IO, the manifest guard and the self-audit around a call.
+  const core = fs.readFileSync(path.join(ROOT, 'src/scripts/bill-core.mjs'), 'utf8')
+  assert.match(core, /status: OPERATION_STATUS\[op\.operation\]/,
+    'the applier must name the shared mapping rather than repeat it')
+  const cli = fs.readFileSync(path.join(ROOT, 'src/bill-cli.mjs'), 'utf8')
+  assert.equal(cli.match(/status: '[a-z-]+'/g), null,
+    'a second copy of the mapping is exactly the defect this test exists for')
+  assert.equal(cli.match(/doc\.articles\.push|node\.sections = op\.sections/g), null,
+    'and a second applier may not exist even as dead code')
 })

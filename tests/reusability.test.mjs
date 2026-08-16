@@ -129,7 +129,7 @@ test('documents that quote the live constitution version stay in step with it', 
   // would make them silently wrong while the suite stayed green, and an author
   // copying a stale version gets a rebase error on their first run.
   //
-  // Only REAL quotes are checked. The worked example in PROPOSING.md is a
+  // Only REAL quotes are checked. The worked example in AUTHORING-BY-HAND.md is a
   // fictional guild at its own version, and flagging that would be wrong.
   const doc = yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'), { schema: yaml.CORE_SCHEMA })
   const current = doc.info.version
@@ -140,7 +140,7 @@ test('documents that quote the live constitution version stay in step with it', 
     `bills/TEMPLATE.yaml quotes base_version ${inTemplate} but the constitution is at ${current}`)
 
   // Prose of the form "Today that is `X`" is a claim about the live document.
-  for (const rel of ['process/PROPOSING.md', 'process/AMENDMENT-PROCESS.md']) {
+  for (const rel of ['process/PROPOSING.md', 'process/AUTHORING-BY-HAND.md', 'process/AMENDMENT-PROCESS.md']) {
     const file = path.join(ROOT, rel)
     if (!fs.existsSync(file)) continue
     for (const m of fs.readFileSync(file, 'utf8').matchAll(/Today that is \*?\*?`([^`]+)`/g)) {

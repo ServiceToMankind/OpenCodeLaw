@@ -519,7 +519,7 @@ function billCard (item, doc, { url, esc, actIndex, slugs, sourceBase }) {
 
 // ---------------------------------------------------------------------------
 
-function emptyState ({ url, esc, actIndex, sourceBase }) {
+function emptyState ({ url, esc, actIndex, sourceBase, proposeEnabled }) {
   const acts = Object.keys(actIndex ?? {}).length
   return `
     <section class="bill-empty" aria-labelledby="no-bills">
@@ -528,8 +528,22 @@ function emptyState ({ url, esc, actIndex, sourceBase }) {
       amendments, not a page that failed to load${acts
         ? ` — every instrument already enacted is on the <a href="${url('amendments/')}">amendment register</a>`
         : ''}.</p>
-      <p>Anyone may propose one, and the file they write is the instrument:</p>
-      <ol class="act__provisions">
+      <p>Any member may propose one, and what they write is the instrument itself:</p>
+      ${proposeEnabled
+        ? `<ol class="act__provisions">
+        <li><a href="${url('propose/')}">Open the constitution and change what you want changed</a>. Every
+        provision is editable in place; the page works out precisely which ones you touched and what each
+        would say afterwards.</li>
+        <li>Read your own before-and-after. It is what the approval meetings will read — not your
+        explanation of it.</li>
+        <li>Download your proposal and email it to the ICC, which numbers it at submission and coordinates
+        the approvals of all three bodies under Article 16(3).</li>
+      </ol>
+      <p class="bill-note">Writing the file by hand is fully supported and produces exactly the same
+      thing: ${sourceFile('process/AUTHORING-BY-HAND.md', { esc, sourceBase })} and
+      ${sourceFile('bills/TEMPLATE.yaml', { esc, sourceBase })}. Clerking one:
+      <a href="${url('icc/')}">the ICC desk</a>.</p>`
+        : `<ol class="act__provisions">
         <li>Read ${sourceFile('process/PROPOSING.md', { esc, sourceBase })} — what a bill has to say, and to whom.</li>
         <li>Copy ${sourceFile('bills/TEMPLATE.yaml', { esc, sourceBase })} into <code>bills/&lt;year&gt;/</code>
         and describe the change. Each operation carries the <strong>complete resulting text</strong> of the
@@ -538,7 +552,7 @@ function emptyState ({ url, esc, actIndex, sourceBase }) {
         like. It checks the drafting and prints the before-and-after the approval meetings will read.</li>
         <li>Send it to the ICC, which numbers it at submission and coordinates the approvals of all three
         bodies under Article 16(3).</li>
-      </ol>
+      </ol>`}
     </section>`
 }
 
@@ -594,7 +608,9 @@ function standingSections ({ esc, url, slugs, sourceBase }) {
     citation handles. There are no patch releases of provision text: an editorial edit without an
     instrument is exactly what this system exists to prevent.</p>
     <p>The rules in full: ${sourceFile('process/AMENDMENT-PROCESS.md', { esc, sourceBase })}. For authors:
-    ${sourceFile('process/PROPOSING.md', { esc, sourceBase })} and ${sourceFile('bills/TEMPLATE.yaml', { esc, sourceBase })}.</p>`
+    ${sourceFile('process/PROPOSING.md', { esc, sourceBase })}, and
+    ${sourceFile('process/AUTHORING-BY-HAND.md', { esc, sourceBase })} with
+    ${sourceFile('bills/TEMPLATE.yaml', { esc, sourceBase })} for anyone writing the file directly.</p>`
 }
 
 /**
@@ -607,7 +623,7 @@ function standingSections ({ esc, url, slugs, sourceBase }) {
  */
 export function billsMain (bills = [], {
   url, escapeHtml: esc = defaultEscapeHtml, actIndex = {}, constitution = null,
-  slugs = null, sourceBase
+  slugs = null, sourceBase, proposeEnabled = false
 } = {}) {
   const groups = groupByYear(bills)
   const counted = bills.length
@@ -636,7 +652,7 @@ export function billsMain (bills = [], {
     ${counted
       ? `<p class="bill-note">${counted} bill${counted === 1 ? '' : 's'} on record.
       Signed Acts are on the <a href="${url('amendments/')}">amendment register</a>.</p>${body}`
-      : emptyState({ url, esc, actIndex, sourceBase })}
+      : emptyState({ url, esc, actIndex, sourceBase, proposeEnabled })}
     ${standingSections({ esc, url, slugs: slugIndex, sourceBase })}`
 }
 

@@ -101,6 +101,9 @@ export function generateOgImages (outDir, pages, { logoPath, bannerPath } = {}) 
 
   for (const page of pages) {
     const out = path.join(outDir, `${page.slug}.png`)
+    // Slugs are namespaced by kind (pages/…, articles/…), so the directory has
+    // to exist before the rasteriser writes into it.
+    fs.mkdirSync(path.dirname(out), { recursive: true })
     if (r) {
       fs.writeFileSync(tmp, svg({ ...page, logoDataUri }))
       try {

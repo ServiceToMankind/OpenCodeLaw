@@ -1,12 +1,13 @@
-# Adoption — turning `/propose/` on
+# Adoption — turning `/propose/` and `/icc/` on
 
 `/bills/` is live. It is **record**, and an empty register is a true statement: *no bills are before
 the board* is information, not absence.
 
-`/propose/` is built but **dark**. It is **action**, and an action surface opens when the desk behind
-it is staffed. Its one actionable instruction is *email this file to the ICC*. Put that in front of
-the public before the ICC can receive, and the system's first impression on its first real author is
-silence.
+`/propose/` and `/icc/` are built but **dark**, behind one flag, and they open together. They are
+**action**, and an action surface opens when the desk behind it is staffed. The proposer's one
+actionable instruction is *email this file to the ICC*. Put that in front of the public before the
+ICC can receive, and the system's first impression on its first real author is silence. Opening the
+proposal surface without the clerking desk is the same failure one step later.
 
 Everything below is checked off before it goes live. Then:
 
@@ -56,8 +57,11 @@ Not a document — a conversation. It covers:
 - **The resolution sentence and the hash.** `bill validate` prints it; the presiding officer reads
   it into the minutes, hash and all. A vote binds to that hash. Edit the bill afterwards and the
   approvals are void — including when the bill's own operations were untouched.
-- **The ballot sheets**: `bill ballot` renders one pre-filled sheet per body, so nobody composes a
-  legal record from scratch and the hash cannot be mistyped.
+- **The ballot sheets**: one pre-filled sheet per body, so nobody composes a legal record from
+  scratch and the hash cannot be mistyped. `bill ballot` writes them, and so does the download on
+  `/icc/` — the same renderer, the same sheets.
+- **The desk itself**: walk `/icc/` once, top to bottom. It is the whole job on one page, and it
+  writes the record rather than leaving anyone to compose one.
 - **Who runs `bill validate`** — the ICC, or the technical department. Decide it; do not leave it
   ambiguous.
 
@@ -99,9 +103,9 @@ Do it against `examples/starter/fixture-constitution.yaml`, never `constitution/
 
 ## When all four are checked
 
-1. Set `PROPOSE_ENABLED: 'true'` in `.github/workflows/deploy.yml`.
+1. Set `PROPOSE_ENABLED: 'true'` in `.github/workflows/deploy.yml`. Both pages open together.
 2. Merge; wait for the deploy, and allow ten minutes for the edge cache.
-3. Run the propose end-to-end against the **live** page — including hash parity between the live
+3. Run the end-to-end suites against the **live** pages — including hash parity between the live
    page and the CLI, which is the check that caught the trailing-newline defect.
 4. Announce that it is open.
 
@@ -109,10 +113,11 @@ Do it against `examples/starter/fixture-constitution.yaml`, never `constitution/
 
 ## A note for whoever reads this later
 
-While `/propose/` is dark, authoring a bill by hand is fully supported and produces exactly the same
-file: copy `bills/TEMPLATE.yaml`, edit it, run `npx opencodelaw bill validate`. The page is
-convenience, not gatekeeping — it exists so an author cannot accidentally write a partial-text
-operation, not because YAML is forbidden.
+While the two pages are dark, authoring a bill by hand is fully supported and produces exactly the
+same file: copy `bills/TEMPLATE.yaml`, edit it, run `npx opencodelaw bill validate`. See
+`process/AUTHORING-BY-HAND.md`. The pages are convenience, not gatekeeping — the editor exists so an
+author cannot accidentally propose a half-described change, and the desk so nobody composes a legal
+record from scratch. Neither holds any authority: `act enact` re-derives every claim they make.
 
 **The tripwire's zero-permitted era ends the day the first real Act applies.** From then on the
 Act's manifest *is* the permission, which is what all of this was built for. A legitimate first diff

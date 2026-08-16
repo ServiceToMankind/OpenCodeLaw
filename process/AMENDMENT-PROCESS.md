@@ -5,8 +5,11 @@ approved, enacted, and applied to the published text.
 
 **Authority:** Article 16, as in force at constitution version 3.0.0.
 **The machine contract:** [`schema/opencodelaw-bill-1.0.schema.json`](../schema/opencodelaw-bill-1.0.schema.json).
-**If you are writing one:** [`bills/TEMPLATE.yaml`](../bills/TEMPLATE.yaml) and the author's guide,
-[`PROPOSING.md`](PROPOSING.md).
+**If you want to propose one:** the propose page, and [`PROPOSING.md`](PROPOSING.md) — no terminal,
+no YAML, no GitHub account.
+**If you would rather write the file:** [`bills/TEMPLATE.yaml`](../bills/TEMPLATE.yaml) and
+[`AUTHORING-BY-HAND.md`](AUTHORING-BY-HAND.md).
+**If you are clerking one:** the ICC desk, and §2a below.
 
 A few words used throughout: the **ICC** is the Internal Compliance Committee, and the **ICC
 Coordinator** is its officer; the **IBM** is the intermediate board; a **bill** is a proposed
@@ -48,7 +51,8 @@ dropped register offered could not be found anywhere in the three Acts.
 
 **The ICC — registry and clerk.** The ICC receives bills, assigns their numbers, verifies drafting
 with the validator, schedules the approval meetings of **all three** bodies, records each body's
-tally and its evidence, and attests the enacted Act.
+tally and its evidence, and attests the enacted Act. The desk at `/icc/` (§2a) does all of that in
+one page, and generates the record rather than having anyone compose it by hand.
 
 > **The ICC checks form, not substance, and its attestation never substitutes for a body's
 > approval.**
@@ -70,6 +74,36 @@ board. Once 16(3) is satisfied, it is the board that enacts.
 all three 2024 Acts. The signature is recorded in `enactment.signed_by`, and the signed scan is
 archived with its SHA-256 checksum so the filed instrument can be proved to be the one that was
 enacted.
+
+---
+
+## 2a. The two working surfaces
+
+Both sit behind the flag in [`ADOPTION.md`](ADOPTION.md) and open together. Everything either of
+them does is also available from the command line, and neither of them has any authority the CLI
+does not re-check.
+
+**`/propose/` — the document editor.** The author opens a copy of the constitution, changes the
+words they want changed, and downloads their proposal. The operations are derived from the
+difference: the author never picks a target, never types an id, and never sees the file format.
+Re-opening a proposal replays it onto **today's** constitution, so a stale draft is re-made rather
+than re-sent — which is why `rebase-required` should stop appearing at the ICC's desk.
+
+**`/icc/` — the clerking desk.** The Coordinator opens the author's file and works down the page in
+the lifecycle's own order: validate on arrival, read the before-and-after, assign the number, record
+the submission and scheduling dates, download the three ballot sheets, enter each body's tally with
+the Article 16(3) verdict computing live, fingerprint each signed minutes PDF in the browser, and
+generate one record to send on with the PDFs.
+
+**What the desk deliberately does not do: enact, or apply.** Assent, the signed instrument's
+registration and the change to the constitution stay with the technical department's
+`act enact` and `act apply`, because that is where every claim the desk produced is independently
+re-verified — evidence files present on disk and matching their checksums, thresholds recomputed
+from the tallies, the bill's hash checked against every approval that cites it. A hand-forged record
+fails at that gate exactly as it would if the desk had never been built.
+
+Neither page uploads anything. Files opened on either are read in the browser and never leave it;
+what travels is what the user downloads and sends.
 
 ---
 
@@ -212,6 +246,28 @@ meetings.
 This is the cheap prevention for everything above. CI enforces the hard edge of it: two open bills
 amending the same provision fail the gate, naming both, because whichever applies second would
 overwrite or contradict the first.
+
+## 5b. Nothing is ever deleted
+
+A provision that is removed keeps its node, its number and its anchor. It gains a status —
+`omitted`, or `reserved` where the number is being held open — and the instrument that did it.
+This is the same rule the numbering has: an article number is a permanent citation handle, and a
+citation that stops resolving is a citation that was destroyed. **Deletion has no representation in
+this system at any depth**, article or clause.
+
+Two consequences worth stating, because both were once wrong:
+
+- **A substitution accounts for every clause of its target.** Each one is either restated with its
+  text or carried as a tombstone (`status: omitted`). Silence over a clause is refused —
+  `incomplete-substitution` — because silence used to mean deletion. A meeting must be able to read
+  exactly what dies, so the instrument and the ballot sheets state omissions in words:
+  *clause (3) is omitted*.
+- **Revival is explicit.** A clause or article that an earlier Act omitted, or a number held
+  reserved, comes back only through an operation that states its text. Carrying the tombstone is the
+  default, which is what makes an article with a dead clause amendable at all: restate the living,
+  carry the dead.
+
+---
 
 ## 6. What belongs to the by-laws — Article 16(2)
 
