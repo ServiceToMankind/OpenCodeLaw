@@ -77,6 +77,16 @@ operations:
     text: |
       The complete new text of Article 3, written out in full, exactly as it
       should read once this Act is applied.
+    # If the provision has clauses, EVERY one of them goes here — including the
+    # ones you are not changing — as they should stand afterwards. Leaving them
+    # out is refused: the applier compares the whole provision, so an operation
+    # that names no clauses could never be verified as applied. Changing one
+    # clause? Target the clause instead: `target: art-3-s-2`, `scope: clause`.
+    # sections:
+    #   - number: 1
+    #     title: Admission
+    #     text: |
+    #       The complete text of clause (1).
 
   # A second example — delete to remove it.
   # - id: op-2

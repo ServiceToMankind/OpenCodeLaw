@@ -166,6 +166,29 @@ export function validateBill (file, { constitution } = {}) {
           `${at}: the text proposed for ${op.target} is identical to what it already says. This ` +
           'operation would change nothing.', at)
       }
+
+      // A substitution of a provision that HAS clauses must state them.
+      //
+      // The schema once described `sections` as omittable "to leave the
+      // target's subdivisions untouched", and that form can never verify as
+      // applied: application compares the provision's complete text — clauses
+      // included — against the operation's, so an operation that names none
+      // reads as unapplied forever, and as DIVERGENT the moment a base text is
+      // in play. A format that permits a bill which can never settle is a
+      // format defect, so this is an error and not advice.
+      //
+      // Keyed on what the target IS, not on the declared `scope`, because the
+      // two are not cross-checked and the rule must not be evadable by
+      // mislabelling.
+      if ((existing.node.sections ?? []).length && op.sections === undefined) {
+        p.error('incomplete-substitution',
+          `${at}: ${op.target} has ${existing.node.sections.length} clauses, and a substitution of ` +
+          'it must set out every clause as it will stand once this Act is applied — including the ' +
+          'ones it does not change. Without them the Act can never be verified as applied: ' +
+          'application compares the whole provision, so it would read as unapplied forever. To ' +
+          'amend only the opening words, restate the clauses unchanged. To leave the provision with ' +
+          'no clauses at all, state `sections: []`.', at)
+      }
     }
   }
 

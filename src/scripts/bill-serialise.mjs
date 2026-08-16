@@ -231,6 +231,10 @@ export function billToYaml (bill, { header = true } = {}) {
       if (t === '') out.push('    text: ""')
       else { out.push('    text: |'); out.push(indentBlock(op.text, 6)) }
     }
+    // Presence, not truthiness: `sections: []` is "this provision ends up with
+    // no clauses", which a length test silently turned into "leave them alone".
+    // Same class as history[].evidence and recorded_by before it.
+    if (op.sections !== undefined && !op.sections.length) out.push('    sections: []')
     if (op.sections?.length) {
       out.push('    sections:')
       for (const s of op.sections) {

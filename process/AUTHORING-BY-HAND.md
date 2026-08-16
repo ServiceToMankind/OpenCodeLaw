@@ -142,9 +142,19 @@ Three smaller rules follow from the big one:
 - **`title:`** — set it only if your Act actually states a heading for the provision. If
   you set it, that heading is recorded as enacted. If you leave it out, the existing
   heading stays as it is and stays editorial.
-- **`sections:`** — if the provision has titled subdivisions and you are restructuring
-  them, list them all, each with its `number`, `title` and `text` in full. Leaving
-  `sections` out leaves the existing subdivisions untouched.
+- **`sections:`** — **required whenever the provision you are substituting has clauses.**
+  List every one of them, each with its `number`, `title` and `text` in full, as it
+  should stand once the Act is applied — *including the clauses you are not changing*.
+  To amend only the opening words, restate the clauses unchanged. To leave the provision
+  with no clauses at all, write `sections: []`. Omit `sections` only where the provision
+  has none.
+
+  The validator refuses a substitution that leaves them out (`incomplete-substitution`),
+  and not as a matter of taste: application compares the provision's **complete** text,
+  clauses included, so an operation that names none can never be verified as applied. It
+  would read as unapplied forever, and as *divergent* the moment the constitution moved.
+  If you are changing only one clause, target the clause itself — `art-6-s-2`, scope
+  `clause` — and the question does not arise.
 - **`omit` and `reserve`** carry no text at all — they remove or park a provision — and
   both require a `note` saying why.
 

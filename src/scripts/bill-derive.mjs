@@ -22,11 +22,15 @@
  * Two rules in this file are not style. Both exist because
  * `classifyOperation` compares `fullText(node)` with `operationText(op)`:
  *
- *  1. A substitute on an article that has clauses carries EVERY clause. The
- *     schema permits omitting `sections` "to leave them untouched", but an
- *     operation that does so can never compare equal to the provision it
- *     produced — so it would classify as `apply` forever, and once a base text
- *     is in play, as `divergent`. Idempotency is the property being protected.
+ *  1. A substitute on an article that has clauses carries EVERY clause, and an
+ *     article left with none says `sections: []`. An operation that names no
+ *     clauses can never compare equal to the provision it produced — it would
+ *     classify as `apply` forever, and once a base text is in play, as
+ *     `divergent`. The schema once described that form as leaving the clauses
+ *     "untouched"; it is now a validator error (`incomplete-substitution`),
+ *     because a format that permits a bill which can never verify as applied is
+ *     a format defect. This rule therefore no longer protects only bills the
+ *     editor built.
  *
  *  2. An edit confined to one clause targets THAT CLAUSE, not its article.
  *     A clause has no subdivisions, so its text compares exactly, and the
@@ -180,7 +184,11 @@ export function deriveOperations (baseDoc, model) {
     const textMoved = changed(baseNode.content, node.content)
     const headingMoved = titleChanged(baseNode.title, node.title)
     const structural = scope === 'article' && clauseSetChanged(baseNode, node)
-    const carriesClauses = scope === 'article' && (node.sections ?? []).length > 0
+    // Carried whenever the target has clauses OR had them: an article whose
+    // last clause was removed must state `sections: []`, or the operation
+    // describes a provision that still has them and can never settle.
+    const carriesClauses = scope === 'article' &&
+      ((node.sections ?? []).length > 0 || (baseNode.sections ?? []).length > 0)
 
     if (textMoved || structural) {
       add({
@@ -478,7 +486,8 @@ export function applyOperationsToModel (model, operations = []) {
     if (op.title != null) hit.node.title = op.title
     if (op.operation === 'retitle') continue
     if (op.text != null) hit.node.content = op.text
-    if (op.sections?.length) {
+    // Presence, not truthiness — `sections: []` means "and no clauses".
+    if (op.sections !== undefined) {
       hit.node.sections = op.sections.map(s => ({
         id: `${op.target}-s-${s.number}`, number: s.number, title: s.title, title_source: 'enacted', content: s.text
       }))

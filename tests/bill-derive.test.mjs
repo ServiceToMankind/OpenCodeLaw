@@ -33,6 +33,7 @@ const DOC = load('examples/starter/fixture-constitution.yaml')
 const article = (m, id) => m.articles.find(a => a.id === id)
 const clause = (m, id, n) => article(m, id).sections.find(s => s.number === n)
 const nodeOf = (doc, id) => provisionIndex(doc).get(id)?.node ?? null
+const resolveTargetIn = (doc, id) => nodeOf(doc, id)
 
 /** The document as it stands after a set of operations has been applied. */
 function applied (doc, ops) {
@@ -117,11 +118,12 @@ test('an edit confined to one clause targets that clause, not its article', () =
 })
 
 test('an article-level substitute that dropped its clauses would never be idempotent', () => {
-  // The schema permits omitting `sections` "to leave them untouched". For an
-  // article that HAS clauses, an operation that does so can never compare equal
-  // to the provision it produced — classifyOperation compares fullText against
-  // operationText, and fullText includes the clauses. It would read as `apply`
-  // forever, and as `divergent` the moment a base text is in play.
+  // Why the rule exists, demonstrated from the classifier rather than asserted.
+  // For an article that HAS clauses, an operation naming none can never compare
+  // equal to the provision it produced — classifyOperation compares fullText
+  // against operationText, and fullText includes the clauses. It would read as
+  // `apply` forever, and as `divergent` the moment a base text is in play. The
+  // validator now refuses that form outright; see the bill tests.
   const art3 = nodeOf(DOC, 'art-3')
   const bad = { id: 'op-1', operation: 'substitute', target: 'art-3', scope: 'article', text: art3.content }
   assert.equal(classifyOperation(bad, art3, null), 'apply')
@@ -137,6 +139,31 @@ test('an article-level substitute that dropped its clauses would never be idempo
   const good = deriveOperations(DOC, m)[0]
   assert.equal(good.sections.length, 3)
   assert.equal(classifyOperation(good, nodeOf(applied(DOC, [good]), 'art-3'), null), 'already-applied')
+})
+
+test('an article stripped of every clause says so, rather than saying nothing', () => {
+  // The presence-versus-truthiness class again, and reachable from the editor:
+  // remove the last clause of an article and the derived operation described a
+  // provision that still had clauses. It could never have been verified as
+  // applied — `apply` forever, `divergent` once a base text was in play.
+  const m = modelFromDoc(DOC)
+  const art3 = article(m, 'art-3')
+  for (const s of [...art3.sections]) removeClause(art3, s)
+  assert.equal(art3.sections.length, 0)
+
+  const ops = deriveOperations(DOC, m)
+  assert.equal(ops.length, 1)
+  assert.deepEqual(ops[0].sections, [], 'the operation states that the provision ends with no clauses')
+  assert.ok('sections' in ops[0], 'present, not merely falsy')
+
+  // And it settles: the applied form reads as applied.
+  const after = applied(DOC, ops)
+  assert.equal(resolveTargetIn(after, 'art-3').sections?.length ?? 0, 0)
+  assert.equal(classifyOperation(ops[0], nodeOf(after, 'art-3'), null), 'already-applied')
+
+  // Through the serialiser, which also used a length test and dropped it.
+  const round = yaml.load(billToYaml(buildDraft({ baseDoc: DOC, model: m, meta: META, today: '2026-01-15' })), YAML_OPTS)
+  assert.deepEqual(round.operations[0].sections, [], 'the emitter must carry the empty list')
 })
 
 test('there is no way to renumber or reorder, so there is nothing to reject', () => {

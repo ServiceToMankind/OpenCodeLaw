@@ -434,6 +434,64 @@ test('an insert onto an existing provision fails, and a substitution onto a miss
   assert.deepEqual(m.filter(x => !x.exists).map(x => x.target), ['art-10'])
 })
 
+test('a substitution that does not state a provision\'s clauses is refused', async () => {
+  // A format that permits a bill which can never verify as applied is a format
+  // defect, so this is an error and not advice. The omitting form was not just
+  // discouraged — it CANNOT settle: application compares a provision's complete
+  // text, clauses included, so an operation naming none reads as unapplied
+  // forever, and as DIVERGENT the moment a base text is in play.
+  const file = variant(b => {
+    const op = opOf(b, 'substitute')
+    delete op.sections
+  })
+  const r = await validate(file)
+  assert.ok(codes(r).includes('incomplete-substitution'), detail(r))
+
+  const message = errorFor(r, 'incomplete-substitution').message
+  assert.match(message, /art-3 has 3 clauses/)
+  assert.match(message, /including the ones it does not change/)
+  assert.match(message, /sections: \[\]/, 'the message names the way to say "and no clauses"')
+
+  // Proof that the refused form is the unsettleable one, from the classifier
+  // rather than from assertion: applied, it still does not read as applied.
+  const bill = loadBill(file)
+  const op = opOf(bill, 'substitute')
+  const node = structuredClone(resolve(doc, 'art-3'))
+  node.content = op.text
+  assert.notEqual(classifyOperation(op, node, null), 'already-applied',
+    'the form is refused because it can never verify, not as a matter of taste')
+})
+
+test('the carrying form is accepted, and an article with no clauses needs none', async () => {
+  // The legitimate need the omitting form appeared to serve — amend only the
+  // opening words — is served exactly by restating the clauses unchanged.
+  const untouched = await validate(BILL_FILE)
+  assert.ok(!codes(untouched).includes('incomplete-substitution'),
+    'the fixture bill states every clause of Article 3 and must pass')
+
+  // art-1 has no clauses, so a substitution of it states none.
+  const plain = variant(b => {
+    b.operations = [{ id: 'op-1', operation: 'substitute', target: 'art-1', scope: 'article', text: 'A new name.\n' }]
+  })
+  assert.ok(!codes(await validate(plain)).includes('incomplete-substitution'), 'omit sections where there are none')
+
+  // And `sections: []` states that the provision ends up with none at all.
+  const emptied = variant(b => {
+    b.operations = [{ id: 'op-1', operation: 'substitute', target: 'art-3', scope: 'article', text: 'A chapeau only.\n', sections: [] }]
+  })
+  assert.ok(!codes(await validate(emptied)).includes('incomplete-substitution'), detail(await validate(emptied)))
+})
+
+test('the rule is keyed on what the target is, not on the scope it claims', async () => {
+  // `scope` and `target` are not cross-checked anywhere, so a rule keyed on the
+  // declared scope would be evadable by mislabelling one.
+  const mislabelled = variant(b => {
+    b.operations = [{ id: 'op-1', operation: 'substitute', target: 'art-3', scope: 'clause', text: 'A chapeau only.\n' }]
+  })
+  assert.ok(codes(await validate(mislabelled)).includes('incomplete-substitution'),
+    'calling an article-scope substitution a clause one must not get past the rule')
+})
+
 test('an operation may not take its authority from the Statement of Objects and Reasons', async () => {
   // Convention C1. Structurally impossible — operations carry their own text —
   // and asserted anyway, because Act 2 of 2024 set one amendment threshold in

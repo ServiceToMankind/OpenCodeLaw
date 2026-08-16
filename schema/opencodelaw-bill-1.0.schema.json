@@ -248,7 +248,7 @@
         },
         "sections": {
           "type": "array",
-          "description": "Full replacement subdivisions, where the operation restructures a provision. Omit to leave the target's sections untouched.",
+          "description": "Every clause of the target, as it will stand once the Act is applied — including the ones this operation does not change. REQUIRED whenever the target already has clauses, and the validator refuses a substitution without them (incomplete-substitution): application compares the provision's complete text, clauses included, so an operation that names none can never be verified as applied and reads as divergent the moment a base text is in play. Use [] to state that the provision ends up with no clauses at all. Omit only where the target has none.",
           "items": {
             "type": "object",
             "required": [
