@@ -40,7 +40,9 @@
  * function that could emit one — which is a stronger guarantee than a rejected
  * input, because there is nothing to reject.
  */
-import { classifyOperation, fullText, operationText, provisionIndex } from './bill-core.mjs'
+import {
+  classifyOperation, fullText, operationText, provisionIndex, applyOperation, OPERATION_STATUS
+} from './bill-core.mjs'
 import { blockText } from './bill-serialise.mjs'
 
 /** Provisions that hold no text: their number is kept, deliberately empty. */
@@ -130,23 +132,42 @@ export function addClause (article, { title = '', text = '' } = {}) {
  * An article's number is a permanent citation handle. Every Act, every minute
  * and every shared link points at it, so a removed provision keeps its number
  * and the articles after it do not move.
+ *
+ * It is expressed exactly as the APPLIER expresses it — a status on the node —
+ * rather than in a private vocabulary. A `removed` flag here and a status there
+ * meant a carried-over omission arrived on rebase as a flag nothing read, and
+ * the proposer was told their change survived while the generated bill dropped
+ * it.
  */
 export function removeArticle (article, reason = '') {
-  article.removed = true
-  article.removal_reason = reason
+  article.status = OPERATION_STATUS.omit
+  if (reason) article.note = reason
+  else delete article.note
   return article
 }
 
 export function restoreArticle (article) {
-  delete article.removed
-  delete article.removal_reason
+  delete article.status
+  delete article.note
   return article
 }
 
-/** Removing a clause is expressed as its article restated without it. */
-export function removeClause (article, clause) {
-  article.sections = (article.sections ?? []).filter(s => s !== clause)
+/**
+ * Removing a clause marks it too. A clause's number is an anchor like any
+ * other: `art-6-s-2` appears in minutes and in links, and dropping it from the
+ * list would destroy that citation silently.
+ */
+export function removeClause (article, clause, reason = '') {
+  clause.status = OPERATION_STATUS.omit
+  if (reason) clause.note = reason
+  else delete clause.note
   return article
+}
+
+export function restoreClause (article, clause) {
+  delete clause.status
+  delete clause.note
+  return clause
 }
 
 // ---------------------------------------------------------------------------
@@ -154,17 +175,32 @@ export function removeClause (article, clause) {
 // ---------------------------------------------------------------------------
 
 const changed = (a, b) => blockText(a) !== blockText(b)
-const titleChanged = (a, b) => String(a ?? '').trim() !== String(b ?? '').trim()
+const titleChanged = (a, b) => String(a ?? '') !== String(b ?? '')
 
-const sectionsOf = node => (node.sections ?? []).map(s => ({
-  number: Number(s.number), title: String(s.title ?? ''), text: blockText(s.content)
-}))
+/**
+ * Every clause of a provision, as it will stand — the OMISSION ACCOUNTING.
+ *
+ * A clause that is going is carried as a tombstone, not dropped. Silence over a
+ * clause used to mean deletion: its node vanished, its number was free to be
+ * reused, and `art-6-s-2` in somebody's minutes stopped resolving with nothing
+ * in the document to say it ever had. A meeting must be able to read exactly
+ * what dies, so the operation says it.
+ */
+const sectionsOf = node => (node.sections ?? []).map(s => isEmptied(s)
+  ? { number: Number(s.number), title: String(s.title ?? 'Omitted'), status: OPERATION_STATUS.omit, ...(s.note ? { note: s.note } : {}) }
+  : { number: Number(s.number), title: String(s.title ?? ''), text: blockText(s.content) })
 
-/** Have clauses been added or removed, as opposed to merely edited? */
+/**
+ * Have clauses been ADDED?
+ *
+ * Not "has one been marked as going" — a clause that is going is a finding of
+ * its own, targeting that clause, so a meeting reads one clause and not six.
+ * The tombstone is carried in `sections` only when the article is being
+ * restated anyway.
+ */
 function clauseSetChanged (baseNode, node) {
-  const was = (baseNode.sections ?? []).map(s => Number(s.number)).join(',')
-  const now = (node.sections ?? []).map(s => Number(s.number)).join(',')
-  return was !== now
+  const key = n => (n.sections ?? []).map(s => Number(s.number)).join(',')
+  return key(baseNode) !== key(node)
 }
 
 /**
@@ -180,13 +216,11 @@ export function deriveOperations (baseDoc, model) {
   const ops = []
   const add = op => { ops.push({ ...op, id: `op-${ops.length + 1}` }) }
 
+  /** Returns what it emitted: 'substitute' subsumes clauses, 'retitle' does not. */
   const emit = (node, baseNode, scope) => {
     const textMoved = changed(baseNode.content, node.content)
     const headingMoved = titleChanged(baseNode.title, node.title)
     const structural = scope === 'article' && clauseSetChanged(baseNode, node)
-    // Carried whenever the target has clauses OR had them: an article whose
-    // last clause was removed must state `sections: []`, or the operation
-    // describes a provision that still has them and can never settle.
     const carriesClauses = scope === 'article' &&
       ((node.sections ?? []).length > 0 || (baseNode.sections ?? []).length > 0)
 
@@ -197,16 +231,15 @@ export function deriveOperations (baseDoc, model) {
         scope,
         ...(headingMoved ? { title: node.title } : {}),
         text: blockText(node.content),
-        // Rule 1. Every clause, every time — see the header.
         ...(carriesClauses ? { sections: sectionsOf(node) } : {})
       })
-      return true
+      return 'substitute'
     }
     if (headingMoved) {
       add({ operation: 'retitle', target: node.id, scope, title: node.title })
-      return true
+      return 'retitle'
     }
-    return false
+    return null
   }
 
   if (model.preamble && base.has(model.preamble.id)) {
@@ -214,7 +247,14 @@ export function deriveOperations (baseDoc, model) {
   }
 
   for (const article of model.articles ?? []) {
-    if (article.added) {
+    const entry = base.get(article.id)
+
+    // A number that did not exist is an insertion. A number that DID exist —
+    // one held reserved, or omitted by an earlier Act — is not: reviving a
+    // provision is stating its text, which is a substitution. Deriving an
+    // insert for it produced a bill the validator refused outright
+    // (`insert-exists`), from a button the editor itself offered.
+    if (!entry) {
       const clauses = sectionsOf(article)
       add({
         operation: 'insert',
@@ -227,27 +267,43 @@ export function deriveOperations (baseDoc, model) {
       continue
     }
 
-    const entry = base.get(article.id)
-    if (!entry) continue
+    const baseNode = entry.node
+    const wasEmptied = isEmptied(baseNode)
+    const nowEmptied = isEmptied(article)
 
-    if (article.removed) {
-      // No stand-in reason. A default like "no reason recorded" would satisfy
-      // the schema and silence the review, so a provision could be removed from
-      // a constitution with nobody having said why.
-      const why = String(article.removal_reason ?? '').trim()
-      add({ operation: 'omit', target: article.id, scope: 'article', ...(why ? { note: why } : {}) })
+    if (nowEmptied) {
+      // Already a tombstone before this proposal touched it: nothing to say.
+      if (wasEmptied && baseNode.status === article.status) continue
+      add({
+        operation: article.status === OPERATION_STATUS.reserve ? 'reserve' : 'omit',
+        target: article.id,
+        scope: 'article',
+        ...(String(article.note ?? '').trim() ? { note: article.note.trim() } : {})
+      })
       continue
     }
 
-    // An article-level substitute restates the whole provision, clauses
-    // included, so per-clause operations on it would be duplicates of what it
-    // already carries.
-    if (emit(article, entry.node, 'article')) continue
+    // An article-scope substitution restates the whole provision, clauses
+    // included, so per-clause operations on it would duplicate what it carries.
+    // A RETITLE does not: a heading change and a clause change are independent
+    // findings on the same node, and treating the heading as the end of the
+    // matter silently discarded every clause edit under it.
+    if (emit(article, baseNode, 'article') === 'substitute') continue
 
-    // Rule 2. Nothing structural moved, so each edited clause speaks for itself.
     for (const clause of article.sections ?? []) {
-      const baseClause = base.get(clause.id)
-      if (baseClause) emit(clause, baseClause.node, 'clause')
+      const bc = base.get(clause.id)
+      if (!bc) continue
+      if (isEmptied(clause) && !isEmptied(bc.node)) {
+        add({
+          operation: 'omit',
+          target: clause.id,
+          scope: 'clause',
+          ...(String(clause.note ?? '').trim() ? { note: clause.note.trim() } : {})
+        })
+        continue
+      }
+      if (isEmptied(clause)) continue
+      emit(clause, bc.node, 'clause')
     }
   }
 
@@ -274,17 +330,21 @@ export function reviewProblems (model, ops, meta = {}) {
   if (!ops.length) out.push('Nothing has been changed yet.')
 
   const label = id => {
-    const art = (model.articles ?? []).find(a => a.id === id || (a.sections ?? []).some(s => s.id === id))
     if (id === 'preamble') return 'The preamble'
+    const art = (model.articles ?? []).find(a => a.id === id || (a.sections ?? []).some(s => s.id === id))
     if (!art) return id
     if (art.id === id) return `Article ${art.number}`
-    const clause = art.sections.find(s => s.id === id)
-    return `Article ${art.number}, clause (${clause.number})`
+    return `Article ${art.number}, clause (${art.sections.find(s => s.id === id).number})`
   }
 
   for (const op of ops) {
     if (op.operation === 'omit' && !String(op.note ?? '').trim()) {
       out.push(`${label(op.target)}: say why it is being removed.`)
+    }
+    for (const s2 of op.sections ?? []) {
+      if (s2.status === OPERATION_STATUS.omit && !String(s2.note ?? '').trim()) {
+        out.push(`${label(op.target)}, clause (${s2.number}): say why it is being removed.`)
+      }
     }
     if (op.operation === 'insert' && !String(op.title ?? '').trim()) {
       out.push(`${label(op.target)}: a new article needs a heading.`)
@@ -294,6 +354,7 @@ export function reviewProblems (model, ops, meta = {}) {
       out.push(`${label(op.target)}: it cannot be left empty. To take a provision out, remove it.`)
     }
     for (const s of op.sections ?? []) {
+      if (s.status === OPERATION_STATUS.omit) continue
       // The schema requires both, and an untitled or empty clause is a drafting
       // mistake rather than a position anyone means to take.
       if (!s.title.trim()) out.push(`${label(op.target)}, clause (${s.number}): give the clause a heading.`)
@@ -445,53 +506,9 @@ export function rebasePlan (bill, currentDoc, baseDoc = null) {
  * "based on the latest constitution" the only thing the page can produce.
  */
 export function applyOperationsToModel (model, operations = []) {
-  const find = id => {
-    if (model.preamble?.id === id) return { node: model.preamble }
-    for (const a of model.articles ?? []) {
-      if (a.id === id) return { node: a }
-      for (const s of a.sections ?? []) if (s.id === id) return { node: s, article: a }
-    }
-    return null
-  }
-
-  for (const op of operations) {
-    if (op.operation === 'insert') {
-      const number = Number(String(op.target).replace('art-', ''))
-      const existing = model.articles.find(a => a.id === op.target)
-      const node = {
-        id: op.target,
-        number,
-        title: op.title ?? '',
-        title_source: 'enacted',
-        content: op.text ?? '',
-        sections: (op.sections ?? []).map(s => ({
-          id: `${op.target}-s-${s.number}`, number: s.number, title: s.title, title_source: 'enacted', content: s.text
-        })),
-        added: true
-      }
-      if (existing) model.articles.splice(model.articles.indexOf(existing), 1, node)
-      else model.articles.push(node)
-      model.articles.sort((a, b) => a.number - b.number)
-      continue
-    }
-
-    const hit = find(op.target)
-    if (!hit) continue
-
-    if (op.operation === 'omit' || op.operation === 'reserve') {
-      hit.node.removed = true
-      hit.node.removal_reason = op.note ?? ''
-      continue
-    }
-    if (op.title != null) hit.node.title = op.title
-    if (op.operation === 'retitle') continue
-    if (op.text != null) hit.node.content = op.text
-    // Presence, not truthiness — `sections: []` means "and no clauses".
-    if (op.sections !== undefined) {
-      hit.node.sections = op.sections.map(s => ({
-        id: `${op.target}-s-${s.number}`, number: s.number, title: s.title, title_source: 'enacted', content: s.text
-      }))
-    }
-  }
+  // No logic of its own. `applyOperation` is the only applier there is; this
+  // hands it the model, which is shaped exactly like a constitution document
+  // for precisely this reason.
+  for (const op of operations) applyOperation(model, op)
   return model
 }

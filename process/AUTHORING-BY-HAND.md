@@ -142,21 +142,41 @@ Three smaller rules follow from the big one:
 - **`title:`** — set it only if your Act actually states a heading for the provision. If
   you set it, that heading is recorded as enacted. If you leave it out, the existing
   heading stays as it is and stays editorial.
-- **`sections:`** — **required whenever the provision you are substituting has clauses.**
-  List every one of them, each with its `number`, `title` and `text` in full, as it
-  should stand once the Act is applied — *including the clauses you are not changing*.
-  To amend only the opening words, restate the clauses unchanged. To leave the provision
-  with no clauses at all, write `sections: []`. Omit `sections` only where the provision
-  has none.
+- **`sections:`** — **every clause of the provision must be accounted for.** Each one is
+  either restated with its `number`, `title` and `text`, or carried as a tombstone:
 
-  The validator refuses a substitution that leaves them out (`incomplete-substitution`),
-  and not as a matter of taste: application compares the provision's **complete** text,
-  clauses included, so an operation that names none can never be verified as applied. It
-  would read as unapplied forever, and as *divergent* the moment the constitution moved.
+  ```yaml
+      sections:
+        - number: 1
+          title: Admission
+          text: |
+            The complete text of clause (1), unchanged.
+        - number: 2
+          title: Duties
+          status: omitted            # this Act ends clause (2)
+          note: Duties pass to the by-laws.
+        - number: 3
+          title: Withdrawal
+          text: |
+            The complete text of clause (3).
+  ```
+
+  Leaving a clause out is refused (`incomplete-substitution`), and not as a matter of
+  taste. Silence used to mean deletion: the clause's node vanished, its number was free
+  to be reused, and `art-6-s-2` in somebody's minutes stopped resolving with nothing in
+  the document to say the clause had ever existed. **Nothing is ever deleted, at any
+  depth.** An omitted clause keeps its node, its number and its anchor.
+
+  A clause that was omitted by an earlier Act stays carried as a tombstone in every later
+  substitution of its article. It comes back only through an entry that states its text —
+  revival is explicit.
+
   If you are changing only one clause, target the clause itself — `art-6-s-2`, scope
-  `clause` — and the question does not arise.
+  `clause` — and the question does not arise. To remove one clause and nothing else, use
+  `omit` on that clause.
 - **`omit` and `reserve`** carry no text at all — they remove or park a provision — and
-  both require a `note` saying why.
+  both require a `note` saying why. They work at any depth: `omit` on `art-6-s-2` ends
+  that clause and leaves its number standing.
 
 There is no `renumber`. Article numbers are permanent: every Act, every set of minutes
 and every link anyone has ever shared points at them. Renumbering is lawful only inside

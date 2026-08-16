@@ -55,7 +55,16 @@ export function ballotSheet (bill, body, options = {}) {
         : op.operation === 'reserve' ? `reserve ${op.target}`
           : op.operation === 'retitle' ? `retitle ${op.target}`
             : `substitute ${op.target}`
-    return `<li>${i + 1}. ${esc(what)}${op.title ? ` — ${esc(op.title)}` : ''} <span class="sub">(${esc(op.scope)} scope)</span></li>`
+    // Clauses this operation removes are named here, in words. A body voting on
+    // a restatement must be told which clauses it is voting to end, not left to
+    // notice their absence from a list.
+    const dying = (op.sections ?? []).filter(s => s.status === 'omitted')
+      .map(s => `clause (${s.number})`)
+    return `<li>${i + 1}. ${esc(what)}${op.title ? ` — ${esc(op.title)}` : ''} <span class="sub">(${esc(op.scope)} scope)</span>` +
+      (dying.length
+        ? `<br><strong>and omits ${esc(dying.join(', '))}</strong>, which keep${dying.length > 1 ? '' : 's'} its number and every citation to it`
+        : '') +
+      '</li>'
   }).join('')
 
   return `<section class="sheet" aria-label="Resolution sheet for ${esc(BODY_LABEL[body] ?? body)}">

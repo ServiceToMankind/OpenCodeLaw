@@ -25,9 +25,10 @@ import { billToYaml, canonicalJson, substantiveSubject } from './bill-serialise.
 import {
   modelFromDoc, deriveOperations, buildDraft, reviewProblems, rebasePlan,
   applyOperationsToModel, addArticle, addClause, removeArticle, restoreArticle,
-  removeClause, nextArticleNumber, reservedNumbers, isEmptied
+  removeClause, restoreClause, nextArticleNumber, reservedNumbers, isEmptied
 } from './bill-derive.mjs'
 import { renderBillText, titlesFromConstitution } from '../bill-render.mjs'
+import { provisionIndex } from './bill-core.mjs'
 
 const $ = (sel, root = document) => root.querySelector(sel)
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -37,6 +38,7 @@ const STORAGE_KEY = 'opencodelaw.propose.draft.v1'
 const SITE = new URL('../../', import.meta.url)
 
 let DOC = null          // the constitution as published
+let BASE = new Map()    // its provisions, to tell an earlier Act's omission from this proposal's
 let MODEL = null        // the proposer's working copy
 let VALIDATE = null
 let ops = []
@@ -67,6 +69,7 @@ async function start () {
   ])
   DOC = doc
   VALIDATE = typeof validator === 'function' ? validator : null
+  BASE = provisionIndex(DOC)
   MODEL = modelFromDoc(DOC)
 
   renderDocument()
@@ -134,7 +137,8 @@ function articleCard (a) {
   // text into a reserved provision would derive an operation that gives it a
   // body while leaving it marked reserved. Occupying the number is a different
   // act, and it has its own control.
-  if (isEmptied(a) && !a.added) {
+  const baseNode = BASE.get(a.id)?.node ?? null
+  if (isEmptied(a) && isEmptied(baseNode)) {
     const held = a.status === 'reserved'
     return `
     <article class="prov prov--article prov--held" data-id="${esc(a.id)}">
@@ -153,7 +157,7 @@ function articleCard (a) {
     </article>`
   }
 
-  if (a.removed) {
+  if (isEmptied(a)) {
     return `
     <article class="prov prov--removed" data-id="${esc(a.id)}">
       <h3 class="prov__heading">
@@ -165,7 +169,7 @@ function articleCard (a) {
       articles after it do not move.</p>
       <div class="field">
         <label for="why-${esc(a.id)}">Why is it being removed?</label>
-        <input id="why-${esc(a.id)}" data-role="reason" value="${esc(a.removal_reason ?? '')}">
+        <input id="why-${esc(a.id)}" data-role="reason" value="${esc(a.note ?? '')}">
       </div>
       <button type="button" class="btn" data-act="restore">Keep this article after all</button>
     </article>`
@@ -194,6 +198,38 @@ function articleCard (a) {
 }
 
 function provisionCard (node, { label, kind, parent }) {
+  const baseNode = BASE.get(node.id)?.node ?? null
+  // A clause this proposal is removing. It is not spliced out of the list:
+  // `art-6-s-2` appears in minutes and in links, and a clause that vanished
+  // would take that citation with it.
+  if (kind === 'clause' && isEmptied(node) && !isEmptied(baseNode)) {
+    return `
+    <article class="prov prov--clause prov--removed" data-id="${esc(node.id)}">
+      <h3 class="prov__heading">
+        <span class="prov__num">${esc(label)}</span>
+        <span class="prov__title prov__title--struck">${esc(node.title ?? '')}</span>
+      </h3>
+      <p class="prov__removed-note"><strong>You are proposing to remove this clause.</strong>
+      It keeps its number, so every citation ever made to it still resolves, and the clauses after
+      it do not move.</p>
+      <div class="field">
+        <label for="why-${esc(node.id)}">Why is it being removed?</label>
+        <input id="why-${esc(node.id)}" data-role="reason" value="${esc(node.note ?? '')}">
+      </div>
+      <button type="button" class="btn" data-act="restore">Keep this clause after all</button>
+    </article>`
+  }
+  if (kind === 'clause' && isEmptied(node)) {
+    return `
+    <article class="prov prov--clause prov--held" data-id="${esc(node.id)}">
+      <h3 class="prov__heading">
+        <span class="prov__num">${esc(label)}</span>
+        <span class="prov__title prov__title--held">${esc(node.title ?? '')}</span>
+      </h3>
+      <p class="prov__held-note">This clause was <strong>removed</strong> by an earlier Act. Its
+      number is never reused.${node.note ? ' ' + esc(node.note) : ''}</p>
+    </article>`
+  }
   return `
   <article class="prov prov--${kind}" data-id="${esc(node.id)}"${parent ? ` data-parent="${esc(parent)}"` : ''}>
     ${provisionHead(node, label)}
@@ -264,7 +300,7 @@ function wire () {
     const role = e.target.dataset.role
     if (role === 'title') hit.node.title = e.target.value
     else if (role === 'text') hit.node.content = e.target.value
-    else if (role === 'reason') hit.node.removal_reason = e.target.value
+    else if (role === 'reason') hit.node.note = e.target.value
     schedule()
   })
 
@@ -301,15 +337,14 @@ function wire () {
         focusAfter = within('[data-act="ask-remove"]')
       } else if (act === 'confirm-remove') {
         CONFIRMING.delete(hit.node.id)
-        if (isClause) removeClause(hit.article, hit.node)
+        if (isClause) removeClause(hit.article, hit.node, '')
         else removeArticle(hit.node, '')
         // Straight to the reason box, because a removal is not complete
         // without one and the review will say so.
-        focusAfter = isClause
-          ? `.prov[data-id="${CSS.escape(hit.article.id)}"] [data-act="add-clause"]`
-          : `#why-${hit.node.id}`
+        focusAfter = `#why-${hit.node.id}`
       } else if (act === 'restore') {
-        restoreArticle(hit.node)
+        if (isClause) restoreClause(hit.article, hit.node)
+        else restoreArticle(hit.node)
         focusAfter = within('[data-act="ask-remove"]')
       } else if (act === 'add-clause') {
         const clause = addClause(hit.article, { title: '', text: '' })

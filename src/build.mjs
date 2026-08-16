@@ -323,7 +323,7 @@ export function build () {
     title: `Constitution of ${info.organization}`,
     description: summarise(toPlainText(doc.preamble.content)),
     canonical: abs(''),
-    og: { type: 'article', image: abs('assets/og/page-home.png'), imageAlt: `Constitution of ${info.organization}` },
+    og: { type: 'article', image: abs('assets/og/pages/home.png'), imageAlt: `Constitution of ${info.organization}` },
     jsonLd: [legislationLd(info, doc), organizationLd(info),
       breadcrumbLd([{ name: 'Constitution', url: abs('') }])],
     main: indexMain
@@ -352,7 +352,7 @@ export function build () {
       title: `Article ${a.number}: ${a.title} — ${info.title}`,
       description: summarise(text),
       canonical,
-      og: { type: 'article', image: abs(`assets/og/${slug}.png`), imageAlt: `Article ${a.number}: ${a.title}` },
+      og: { type: 'article', image: abs(`assets/og/articles/${slug}.png`), imageAlt: `Article ${a.number}: ${a.title}` },
       jsonLd: [
         {
           '@context': 'https://schema.org', '@type': 'Article',
@@ -388,7 +388,7 @@ export function build () {
     title: `Amendment register — ${info.title}`,
     description: `Every instrument amending the constitution of ${info.organization}, with dates of assent, the provisions each touches, and the signed Act as published.`,
     canonical: abs('amendments/'),
-    og: { image: abs('assets/og/page-amendments.png'), imageAlt: 'Amendment register' },
+    og: { image: abs('assets/og/pages/amendments.png'), imageAlt: 'Amendment register' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') },
       { name: 'Amendments', url: abs('amendments/') }
@@ -418,7 +418,7 @@ export function build () {
     title: `Bills — ${info.title}`,
     description: `Proposed amendments to the constitution of ${info.organization}, including bills that were rejected or withdrawn.`,
     canonical: abs('bills/'),
-    og: { image: abs('assets/og/page-amendments.png'), imageAlt: 'Bills' },
+    og: { image: abs('assets/og/pages/amendments.png'), imageAlt: 'Bills' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') }, { name: 'Bills', url: abs('bills/') }
     ])],
@@ -434,7 +434,7 @@ export function build () {
       title: `Propose an amendment — ${info.title}`,
       description: `Open the constitution of ${info.organization}, change what you want changed, and download your proposal. The page produces a file for the Internal Compliance Committee; it does not submit, number or approve anything.`,
       canonical: abs('propose/'),
-      og: { image: abs('assets/og/page-amendments.png'), imageAlt: 'Propose an amendment' },
+      og: { image: abs('assets/og/pages/amendments.png'), imageAlt: 'Propose an amendment' },
       jsonLd: [breadcrumbLd([
         { name: 'Constitution', url: abs('') }, { name: 'Propose', url: abs('propose/') }
       ])],
@@ -471,7 +471,7 @@ export function build () {
     title: `Archive — ${info.title}`,
     description: `Every superseded version of the constitution of ${info.organization}, frozen as published.`,
     canonical: abs('archive/'),
-    og: { image: abs('assets/og/page-archive.png'), imageAlt: 'Archive' },
+    og: { image: abs('assets/og/pages/archive.png'), imageAlt: 'Archive' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') }, { name: 'Archive', url: abs('archive/') }
     ])],
@@ -525,7 +525,7 @@ export function build () {
       // exists to publish. v1.0.0 and v3.0.0 are different documents.
       canonical: abs(`archive/${v}/`),
       extraHead: `<link rel="latest-version" href="${abs('')}">`,
-      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/page-archive.png'), imageAlt: `Version ${v}` },
+      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/pages/archive.png'), imageAlt: `Version ${v}` },
       jsonLd: [breadcrumbLd([
         { name: 'Constitution', url: abs('') },
         { name: 'Archive', url: abs('archive/') },
@@ -605,26 +605,40 @@ export function build () {
   // without counting the files. A namespace makes the collision impossible
   // rather than currently-absent.
   const ogPages = [
-    { slug: 'page-home', kicker: 'CONSTITUTION', title: `Constitution of ${info.organization}`,
+    { slug: 'pages/home', kicker: 'CONSTITUTION', title: `Constitution of ${info.organization}`,
       footer: `Version ${info.version} · effective ${info.effective_from}`,
       badge: state && !state.complete ? 'In reconciliation' : null },
-    { slug: 'page-amendments', kicker: 'AMENDMENTS', title: 'Amendment register',
+    { slug: 'pages/amendments', kicker: 'AMENDMENTS', title: 'Amendment register',
       footer: `${(register.acts ?? []).length} instruments · ${info.organization}` },
-    { slug: 'page-archive', kicker: 'ARCHIVE', title: 'Superseded versions',
+    { slug: 'pages/archive', kicker: 'ARCHIVE', title: 'Superseded versions',
       footer: info.organization },
     ...doc.articles.map(a => ({
-      slug: slugs.get(a.id),
+      slug: `articles/${slugs.get(a.id)}`,
       kicker: `ARTICLE ${a.number}`,
       title: a.title,
       footer: `${info.organization} · Constitution ${info.version}`,
       badge: (a.amended_by ?? []).length ? 'Amended' : null
     }))
   ]
-  // Rendered into the repo's assets by default, because they are committed
-  // artefacts. A fixture build points this elsewhere: a test build of another
-  // organisation's constitution would otherwise leave that organisation's
-  // social plates lying in this repository, which is how the eight stale ones
-  // already in assets/og/ got there.
+  // TWO PAGES MAY NOT WANT ONE PLATE. Article 16 is titled "Amendments", which
+  // is the slug the amendment register used, and one plate overwrote the other
+  // — the register's social card showed Article 16. Nothing failed: the file
+  // existed and the link resolved. Namespaced directories make the collision
+  // impossible between the two kinds of page, and this makes any remaining
+  // collision a build error rather than a last-writer win.
+  const claimed = new Map()
+  for (const p2 of ogPages) {
+    if (claimed.has(p2.slug)) {
+      throw new Error(`build aborted: two pages both want assets/og/${p2.slug}.png — ` +
+        `"${claimed.get(p2.slug)}" and "${p2.title}". One would silently overwrite the other.`)
+    }
+    claimed.set(p2.slug, p2.title)
+  }
+
+  // Rendered into the repo's assets by default, because they are build
+  // artefacts under a gitignored path. A fixture build points this elsewhere so
+  // a test build of another organisation's constitution does not leave that
+  // organisation's plates behind.
   const og = generateOgImages(path.join(ROOT, process.env.OG_DIR ?? 'assets/og'), ogPages, {
     logoPath: path.join(ROOT, 'assets/img/OpenCodeLaw.png'),
     bannerPath: path.join(ROOT, 'assets/img/openlawcode_banner.png')

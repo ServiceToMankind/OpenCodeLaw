@@ -60,11 +60,12 @@ a number, because a number is how the constitution is cited: in Acts, in minutes
 links people have already sent each other. Choosing one yourself would break somebody's
 citation.
 
-**Removing an article.** There is a button, and it asks you to confirm, showing you
-exactly what would disappear. **A removed article keeps its number.** It is marked as
-removed rather than deleted, so every citation ever made to it still resolves, and the
-articles after it do not shift up. You must say why — a provision should not leave a
-constitution with nobody having given a reason.
+**Removing an article or a clause.** There is a button, and it asks you to confirm,
+showing you exactly what would disappear. **What you remove keeps its number.** It is
+marked as removed rather than deleted, so every citation ever made to it still resolves,
+and nothing after it shifts up — an article, a clause, the same rule at both levels. You
+must say why: a provision should not leave a constitution with nobody having given a
+reason, and the words you write are printed in the Act.
 
 **Renumbering and reordering.** There is no control for these, anywhere. An ordinary
 amendment never moves a number.

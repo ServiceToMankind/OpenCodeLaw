@@ -460,6 +460,14 @@ function bodyOf (op, t, titles) {
   }
 
   for (const s of op.sections ?? []) {
+    // A clause the Act removes is STATED, in words, because that sentence is
+    // what the bodies vote on. It is not enough that the clause quietly stops
+    // appearing: a meeting must be able to read exactly what dies.
+    if (s.status === 'omitted') {
+      out.push({ heading: `(${s.number}) ${s.title ?? ''}`.trim() })
+      out.push({ text: `Clause (${s.number}) is omitted.${s.note ? ` ${String(s.note).trim()}` : ''}` })
+      continue
+    }
     out.push({ heading: `(${s.number}) ${s.title}` })
     out.push({ text: s.text })
   }

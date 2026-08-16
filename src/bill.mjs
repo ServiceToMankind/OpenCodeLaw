@@ -15,12 +15,12 @@ import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
 import Ajv from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
-import { normalise } from './text-compare.mjs'
+import { operativeEqual } from './text-compare.mjs'
 import { canonicalJson, substantiveSubject, blockText, SUBSTANTIVE_FIELDS } from './scripts/bill-serialise.mjs'
 import {
   REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, resolveTarget, parentIdOf,
   fullText, ownText, operationText, classifyOperation, tally, buildBillManifest,
-  unsettledOperations, resolutionSentenceFor
+  unsettledOperations, applyOperation, resolutionSentenceFor
 } from './scripts/bill-core.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -38,7 +38,7 @@ export {
   canonicalJson, blockText, SUBSTANTIVE_FIELDS,
   REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, resolveTarget, parentIdOf,
   fullText, ownText, operationText, classifyOperation, tally, buildBillManifest,
-  unsettledOperations
+  unsettledOperations, applyOperation
 }
 
 // ---------------------------------------------------------------------------
@@ -159,35 +159,49 @@ export function validateBill (file, { constitution } = {}) {
     }
 
     if (op.operation === 'substitute' && existing) {
-      const current = normalise(fullText(existing.node))
-      const proposed = normalise(operationText(op))
-      if (current === proposed && normalise(op.title ?? existing.node.title) === normalise(existing.node.title)) {
+      const current = fullText(existing.node)
+      const proposed = operationText(op)
+      if (operativeEqual(current, proposed) &&
+          operativeEqual(op.title ?? existing.node.title, existing.node.title)) {
         p.warn('no-op',
           `${at}: the text proposed for ${op.target} is identical to what it already says. This ` +
           'operation would change nothing.', at)
       }
 
-      // A substitution of a provision that HAS clauses must state them.
+      // A substitution must ACCOUNT FOR every clause of its target.
       //
-      // The schema once described `sections` as omittable "to leave the
-      // target's subdivisions untouched", and that form can never verify as
-      // applied: application compares the provision's complete text — clauses
-      // included — against the operation's, so an operation that names none
-      // reads as unapplied forever, and as DIVERGENT the moment a base text is
-      // in play. A format that permits a bill which can never settle is a
-      // format defect, so this is an error and not advice.
+      // Presence is not completeness. The first form of this rule asked only
+      // that `sections` be there, so a partial list validated clean and
+      // silently repealed every clause it left out — no status, no note, no
+      // anchor, nothing in the document to say the clause had existed. And an
+      // article with an already-omitted clause could not be amended at all:
+      // restating the living clauses deleted the dead one, and stating none was
+      // refused.
+      //
+      // Each existing clause is either restated or carried as a tombstone.
+      // Silence over one is the error, and the error names it.
       //
       // Keyed on what the target IS, not on the declared `scope`, because the
-      // two are not cross-checked and the rule must not be evadable by
-      // mislabelling.
-      if ((existing.node.sections ?? []).length && op.sections === undefined) {
-        p.error('incomplete-substitution',
-          `${at}: ${op.target} has ${existing.node.sections.length} clauses, and a substitution of ` +
-          'it must set out every clause as it will stand once this Act is applied — including the ' +
-          'ones it does not change. Without them the Act can never be verified as applied: ' +
-          'application compares the whole provision, so it would read as unapplied forever. To ' +
-          'amend only the opening words, restate the clauses unchanged. To leave the provision with ' +
-          'no clauses at all, state `sections: []`.', at)
+      // two are cross-checked nowhere and a rule keyed on a label would be
+      // evadable by mislabelling.
+      const clauses = existing.node.sections ?? []
+      if (clauses.length) {
+        const accounted = new Set((op.sections ?? []).map(x => Number(x.number)))
+        const unaccounted = clauses.map(c => Number(c.number)).filter(n => !accounted.has(n))
+        if (op.sections === undefined) {
+          p.error('incomplete-substitution',
+            `${at}: ${op.target} has ${clauses.length} clauses, and a substitution of it must set ` +
+            'out every one as it will stand once this Act is applied — including the ones it does ' +
+            'not change. Without them the Act can never be verified as applied: application ' +
+            'compares the whole provision, so it would read as unapplied forever.', at)
+        } else if (unaccounted.length) {
+          p.error('incomplete-substitution',
+            `${at}: ${op.target} clause${unaccounted.length > 1 ? 's' : ''} ` +
+            `${unaccounted.map(n => `(${n})`).join(', ')} ${unaccounted.length > 1 ? 'are' : 'is'} ` +
+            'unaccounted for. Every clause of the provision must appear: restated with its text, or ' +
+            'carried as `status: omitted` if this Act removes it. Leaving one out would delete it ' +
+            'silently — the number, the anchor and every citation ever made to it.', at)
+        }
       }
     }
   }

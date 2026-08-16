@@ -77,7 +77,10 @@ const MAXIMAL = {
         ('a very long line ' .repeat(40)) + '\n',
       sections: [
         { number: 1, title: 'First', text: 'First section text.\n' },
-        { number: 2, title: 'Second: with a colon', text: '\n' }
+        { number: 2, title: 'Second: with a colon', text: 'Second section text.\n' },
+        // A clause carried as omitted: the tombstone form. Nothing is ever
+        // deleted, so a clause an Act removes is stated, not left out.
+        { number: 3, title: 'Third', status: 'omitted', note: 'Absorbed into clause (1).' }
       ]
     },
     { id: 'op-2', operation: 'omit', target: 'art-7', scope: 'article', note: 'Removed for the fixture.' }
@@ -108,7 +111,8 @@ test('a bill with every optional field populated round-trips without loss', () =
   expected.objects_and_reasons = blockText(expected.objects_and_reasons)
   for (const op of expected.operations) {
     if (op.text != null) op.text = blockText(op.text)
-    for (const s of op.sections ?? []) s.text = blockText(s.text)
+    // A tombstone carries no text at all, so there is nothing to normalise.
+    for (const s of op.sections ?? []) { if (s.text != null) s.text = blockText(s.text) }
   }
   assert.deepEqual(round, expected, 'the serialiser dropped or altered a field')
 })

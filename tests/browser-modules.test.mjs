@@ -134,17 +134,25 @@ test('no two Open Graph plates claim the same filename', async () => {
   const doc = yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'),
     { schema: yaml.CORE_SCHEMA })
 
-  const wanted = ['page-home', 'page-amendments', 'page-archive', ...slugMap(doc.articles).values()]
+  const wanted = [
+    'pages/home', 'pages/amendments', 'pages/archive',
+    ...[...slugMap(doc.articles).values()].map(x => `articles/${x}`)
+  ]
   const duplicates = wanted.filter((s2, i) => wanted.indexOf(s2) !== i)
   assert.deepEqual(duplicates, [],
     'two pages want the same plate, so one silently overwrites the other')
+
+  // And the build refuses rather than letting the last writer win.
+  const build = fs.readFileSync(path.join(ROOT, 'src/build.mjs'), 'utf8')
+  assert.match(build, /build aborted: two pages both want/,
+    'a plate collision must be a build error, not a silent overwrite')
 
   // And every plate a built page points at was actually rendered.
   const dir = path.join(ROOT, 'assets/og')
   if (!fs.existsSync(dir) || !fs.existsSync(DIST)) return
   const referenced = new Set()
   for (const file of htmlFiles(DIST)) {
-    for (const m of fs.readFileSync(file, 'utf8').matchAll(/assets\/og\/([a-z0-9-]+\.png)/g)) {
+    for (const m of fs.readFileSync(file, 'utf8').matchAll(/assets\/og\/([a-z0-9-]+\/[a-z0-9-]+\.png)/g)) {
       referenced.add(m[1])
     }
   }

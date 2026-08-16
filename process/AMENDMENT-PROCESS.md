@@ -247,6 +247,28 @@ This is the cheap prevention for everything above. CI enforces the hard edge of 
 amending the same provision fail the gate, naming both, because whichever applies second would
 overwrite or contradict the first.
 
+## 5b. Nothing is ever deleted
+
+A provision that is removed keeps its node, its number and its anchor. It gains a status —
+`omitted`, or `reserved` where the number is being held open — and the instrument that did it.
+This is the same rule the numbering has: an article number is a permanent citation handle, and a
+citation that stops resolving is a citation that was destroyed. **Deletion has no representation in
+this system at any depth**, article or clause.
+
+Two consequences worth stating, because both were once wrong:
+
+- **A substitution accounts for every clause of its target.** Each one is either restated with its
+  text or carried as a tombstone (`status: omitted`). Silence over a clause is refused —
+  `incomplete-substitution` — because silence used to mean deletion. A meeting must be able to read
+  exactly what dies, so the instrument and the ballot sheets state omissions in words:
+  *clause (3) is omitted*.
+- **Revival is explicit.** A clause or article that an earlier Act omitted, or a number held
+  reserved, comes back only through an operation that states its text. Carrying the tombstone is the
+  default, which is what makes an article with a dead clause amendable at all: restate the living,
+  carry the dead.
+
+---
+
 ## 6. What belongs to the by-laws — Article 16(2)
 
 Article 16(2) sends the conduct of amendments to the by-laws. So the by-laws own **notice periods,

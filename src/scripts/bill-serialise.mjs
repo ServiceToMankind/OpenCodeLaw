@@ -239,7 +239,15 @@ export function billToYaml (bill, { header = true } = {}) {
       out.push('    sections:')
       for (const s of op.sections) {
         out.push(`      - number: ${s.number}`)
-        out.push(`        title: ${scalar(s.title)}`)
+        out.push(...opt(s, 'title', v => `        title: ${scalar(v)}`))
+        // A tombstone states no text: the clause keeps its number and its
+        // anchor and holds nothing. Emitting an empty string instead would be
+        // a clause that says "" rather than one that is gone.
+        if (s.status) {
+          out.push(`        status: ${s.status}`)
+          out.push(...opt(s, 'note', v => `        note: ${scalar(v)}`))
+          continue
+        }
         const st = blockText(s.text)
         if (st === '') out.push('        text: ""')
         else { out.push('        text: |'); out.push(indentBlock(s.text, 10)) }

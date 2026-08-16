@@ -388,10 +388,15 @@ test('an operation that lands nowhere aborts the Act instead of reporting succes
   assert.deepEqual(unsettledOperations({ operations: [op] }, applied), [])
 })
 
-test('a heading that does not land is caught, even when the text does', () => {
-  // Article 12's defect: the applier returned early on a content match and left
-  // the title behind. classifyOperation compares text for a substitution, so
-  // the closure checks the heading separately or it would pass this.
+test('a new heading over unchanged text applies, and then settles', () => {
+  // Article 12's defect, twice: the applier returned early on a content match
+  // and left the heading behind. The self-audit turned that silence into a
+  // permanent abort — which proved the audit worked and fixed nothing.
+  //
+  // The cause is gone now. Deciding whether an operation has landed belongs to
+  // `classifyOperation` alone, and it counts a stated heading as part of what
+  // the operation prescribes, so this classifies `apply` rather than being
+  // skipped.
   const doc = yaml.load(fs.readFileSync(path.join(ROOT, FIXTURE), 'utf8'), YAML_OPTS)
   const op = {
     id: 'op-1',
@@ -401,26 +406,42 @@ test('a heading that does not land is caught, even when the text does', () => {
     title: 'The Name of the Guild',
     text: doc.articles.find(a => a.id === 'art-1').content
   }
-  const bad = unsettledOperations({ operations: [op] }, doc)
-  assert.equal(bad.length, 1)
-  assert.match(bad[0].reason, /the text landed but the heading did not/)
+  assert.equal(classifyOperation(op, resolveTarget(doc, 'art-1').node, null), 'apply')
+  assert.equal(unsettledOperations({ operations: [op] }, doc).length, 1)
+
+  const { after, result } = apply([op])
+  assert.deepEqual(result.outcomes, [{ op: 'op-1', target: 'art-1', result: 'applied' }])
+  assert.equal(resolveTarget(after, 'art-1').node.title, 'The Name of the Guild')
+  assert.equal(resolveTarget(after, 'art-1').node.title_source, 'enacted')
+  assert.deepEqual(unsettledOperations({ operations: [op] }, after), [],
+    'and it settles, so it is not a deadlock either')
 })
 
-test('an article restated with no clauses at all says so, and settles', () => {
-  // `sections: []` is a real resulting state. A length test read it as "leave
-  // them alone", which produced a bill that could never verify as applied —
-  // the presence-versus-truthiness class, for the fourth time.
+test('an article restated around a clause it removes carries the tombstone', () => {
+  // Accounting, not presence, and not deletion. A clause this Act removes is
+  // stated as omitted; it keeps its node, its number and its anchor, so every
+  // citation ever made to it still resolves.
   const { after, result } = apply([{
     id: 'op-1',
     operation: 'substitute',
     target: 'art-3',
     scope: 'article',
     text: 'Membership of the Guild is open to any person of the Vale.\n',
-    sections: []
+    sections: [
+      { number: 1, title: 'Admission', text: 'On entry in the Lantern Roll.\n' },
+      { number: 2, title: 'Duties', status: 'omitted', note: 'Duties pass to the by-laws.' },
+      { number: 3, title: 'Withdrawal', text: 'By returning the taper.\n' }
+    ]
   }])
   assert.deepEqual(result.outcomes, [{ op: 'op-1', target: 'art-3', result: 'applied' }])
-  assert.equal(resolveTarget(after, 'art-3').node.sections, undefined,
-    'the clauses are gone because the Act said the provision ends with none')
+
+  const art3 = resolveTarget(after, 'art-3').node
+  assert.deepEqual(art3.sections.map(s => s.number), [1, 2, 3], 'nothing is deleted, at any depth')
+  const dead = resolveTarget(after, 'art-3-s-2').node
+  assert.equal(dead.status, 'omitted')
+  assert.equal(dead.content, undefined)
+  assert.equal(dead.note, 'Duties pass to the by-laws.')
+  assert.deepEqual(dead.amended_by, ['act-1-2026'], 'the tombstone names the Act that made it')
 })
 
 test('a clause-scope operation does not read as an undeclared change to its article', () => {

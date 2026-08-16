@@ -1,16 +1,52 @@
 /**
- * Text comparison for provenance analysis.
+ * Two comparators, because "is this the same text?" is two different questions.
  *
- * Used to decide whether a provision in the constitution already carries an
- * Act's prescribed text, still carries the pre-Act text, or matches neither.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * FORENSIC — one side came out of a PDF.
  *
- * ORDER IS LOAD-BEARING. Tags must be stripped before punctuation, and they
- * must be replaced with a space rather than removed. Stripping punctuation
+ * `normalise` and everything built on it fold whitespace, case, typography and
+ * enumerator formatting, because the same provision is spelled one way in a
+ * scanned Act and another way in YAML. Against extraction noise that tolerance
+ * is not a compromise, it is the whole job.
+ *
+ * ORDER IS LOAD-BEARING here. Tags must be stripped before punctuation, and
+ * they must be replaced with a space rather than removed. Stripping punctuation
  * first collapses `<br>` to the literal token `br`, which injects a word into
- * the middle of the string and produces a false NOT-APPLIED — the worst
- * failure mode available here, because acting on it would re-apply an
- * amendment already in force. See tests/text-compare.test.mjs.
+ * the middle of the string and produces a false NOT-APPLIED — the worst failure
+ * mode available, because acting on it would re-apply an amendment already in
+ * force. See tests/text-compare.test.mjs.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * OPERATIVE — both sides are canonical YAML strings.
+ *
+ * `operativeEqual` is exact. Nothing here is noise: the stored string IS the
+ * source of truth. A renumbered clause is an amendment, `units` → `Units` is a
+ * retitle, and folding either away means an Act that changes them classifies as
+ * already applied, writes nothing, reports success and bumps the version.
+ *
+ * That was not hypothetical. The forensic fold was promoted into
+ * `classifyOperation`, the apply loop and the self-audit — and because the
+ * audit folded with the thing it audited, it was structurally blind to
+ * everything the fold removed.
+ *
+ * The one tolerance kept is the trailing newline, and only because YAML
+ * genuinely cannot represent that distinction: a `|` block always round-trips
+ * with exactly one. Every other "cosmetic equivalence" is an undecidable swamp
+ * this project does not enter.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
+import { blockText } from './scripts/bill-serialise.mjs'
+
+/**
+ * Operative equality: exact, after the one normalisation YAML forces on us.
+ *
+ * Case-sensitive. Enumerators significant. Punctuation significant. Tags
+ * significant.
+ */
+export const operativeEqual = (a, b) => blockText(a) === blockText(b)
+
+/** Forensic equality: the tolerant fold. Only where one side came from a PDF. */
+export const forensicEqual = (a, b) => normalise(a) === normalise(b)
 
 /** Replace every HTML tag with a space. Never with the empty string: `a<br>b` must not become `ab`. */
 export function stripTags (s) {

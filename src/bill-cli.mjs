@@ -11,10 +11,9 @@ import yaml from 'js-yaml'
 import {
   ROOT, loadBill, loadConstitution, validateBill, report, tally, classifyOperation,
   fullText, operationText, REQUIRED_BODIES, OPERATION_STATUS,
-  resolveTarget, parentIdOf, ownText, provisionIndex, unsettledOperations
+  resolveTarget, parentIdOf, ownText, provisionIndex, unsettledOperations, applyOperation
 } from './bill.mjs'
 import { billToYaml } from './scripts/bill-serialise.mjs'
-import { normalise } from './text-compare.mjs'
 
 const OPTS = { schema: yaml.CORE_SCHEMA }
 const DUMP = { lineWidth: -1, noRefs: true, quotingType: '"' }
@@ -200,17 +199,12 @@ export function actApply (file, { actor = 'ICC', dryRun = false, constitutionFil
   const actId = `act-${bill.enactment.act_number}-${bill.enactment.act_year}`
   const outcomes = []
 
-  /** A clause node the way the applier writes one, at any depth. */
-  const clauseNode = (target, s) => ({
-    id: `${target}-s-${s.number}`,
-    number: s.number,
-    title: s.title,
-    title_source: 'enacted',
-    content: s.text.trimEnd() + '\n'
-  })
-
   for (const op of bill.operations) {
     const node = resolveTarget(doc, op.target)?.node ?? null
+
+    // THE SKIP DECISION IS classifyOperation, and nothing else. A private
+    // shortcut here is how a heading came to be skipped behind a content match
+    // — Article 12's defect, reborn inside the applier written to prevent it.
     const verdict = classifyOperation(op, node, null)
 
     if (verdict === 'divergent') {
@@ -221,82 +215,10 @@ export function actApply (file, { actor = 'ICC', dryRun = false, constitutionFil
     }
     if (verdict === 'already-applied') { outcomes.push({ op: op.id, target: op.target, result: 'already applied' }); continue }
 
-    if (op.operation === 'insert') {
-      // A clause insertion lands in its article's list; an article insertion in
-      // the document's. Taking the number from the id worked only for articles:
-      // `Number('art-3-s-4'.replace('art-', ''))` is NaN, so the applier wrote
-      // a nameless article carrying a NaN number into the constitution instead
-      // of a clause into Article 3.
-      const parentId = parentIdOf(op.target)
-      if (parentId) {
-        const parent = resolveTarget(doc, parentId)?.node
-        if (!parent) {
-          throw new Error(`ABORT: ${op.target} cannot be inserted — ${parentId} does not exist. Nothing has been written.`)
-        }
-        parent.sections ??= []
-        parent.sections.push({
-          id: op.target,
-          number: Number(String(op.target).replace(/^.*-s-/, '')),
-          title: op.title,
-          title_source: 'enacted',
-          content: (op.text ?? '').trimEnd() + '\n',
-          // The clause records the Act that created it, exactly as an inserted
-          // article does — that link is what the amendment register renders.
-          amended_by: [actId]
-        })
-        parent.sections.sort((a, b) => a.number - b.number)
-        // The clause records the Act; the ARTICLE does not. Its own words did
-        // not change, and marking it would be a mutation of a provision the Act
-        // never declared — invisible to the manifest guard, which measures own
-        // text and not provenance. Which Act touched which article is derivable
-        // from the operations, and derived beats silently written.
-      } else {
-        doc.articles.push({
-          id: op.target,
-          number: Number(String(op.target).replace('art-', '')),
-          title: op.title,
-          title_source: 'enacted',
-          ...(op.text ? { content: op.text.trimEnd() + '\n' } : {}),
-          ...(op.sections?.length
-            ? { sections: op.sections.map(s => clauseNode(op.target, s)) }
-            : {}),
-          amended_by: [actId]
-        })
-        doc.articles.sort((a, b) => a.number - b.number)
-      }
-    } else if (op.operation === 'omit' || op.operation === 'reserve') {
-      // Omission is a STATUS, never a deletion, and the rule is the same at
-      // every depth: the node stays, its number stays, and every citation ever
-      // made to it still resolves. This branch searched `doc.articles` alone,
-      // so a clause-scope omission found nothing, changed nothing, and reported
-      // success — silence dressed as success, inside the applier itself.
-      const removing = op.operation === 'omit'
-      for (const k of Object.keys(node)) if (!['id', 'number'].includes(k)) delete node[k]
-      Object.assign(node, {
-        title: removing ? 'Omitted' : 'Reserved',
-        title_source: removing ? 'enacted' : 'editorial',
-        // The operation is `omit`; the status it leaves behind is `omitted`.
-        // Named once, here and in classifyOperation, so the two cannot drift.
-        status: OPERATION_STATUS[op.operation],
-        note: op.note,
-        amended_by: [actId]
-      })
-    } else if (op.operation === 'retitle') {
-      node.title = op.title
-      node.title_source = 'enacted'
-      node.amended_by = [...new Set([...(node.amended_by ?? []), actId])]
-    } else {
-      if (op.title) { node.title = op.title; node.title_source = 'enacted' }
-      if (op.text != null) node.content = op.text.trimEnd() + '\n'
-      // PRESENCE, not truthiness. `sections: []` is an article restated with no
-      // clauses at all — a real, if rare, resulting state — and a length test
-      // read it as "leave them alone", producing a bill that could never verify
-      // as applied. The third time this class has bitten; see bill-serialise.
-      if (op.sections !== undefined) {
-        if (op.sections.length) node.sections = op.sections.map(s => clauseNode(op.target, s))
-        else delete node.sections
-      }
-      node.amended_by = [...new Set([...(node.amended_by ?? []), actId])]
+    try {
+      applyOperation(doc, op, { actId })
+    } catch (err) {
+      throw new Error(`ABORT: ${op.id} (${op.operation} ${op.target}) could not be applied — ${err.message} Nothing has been written.`)
     }
     outcomes.push({ op: op.id, target: op.target, result: 'applied' })
   }
