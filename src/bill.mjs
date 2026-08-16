@@ -18,8 +18,9 @@ import addFormats from 'ajv-formats'
 import { normalise } from './text-compare.mjs'
 import { canonicalJson, substantiveSubject, blockText, SUBSTANTIVE_FIELDS } from './scripts/bill-serialise.mjs'
 import {
-  REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, fullText, operationText,
-  classifyOperation, tally, buildBillManifest, resolutionSentenceFor
+  REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, resolveTarget, parentIdOf,
+  fullText, ownText, operationText, classifyOperation, tally, buildBillManifest,
+  unsettledOperations, resolutionSentenceFor
 } from './scripts/bill-core.mjs'
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -35,8 +36,9 @@ export const BILL_SCHEMA = 'schema/opencodelaw-bill-1.0.schema.json'
  */
 export {
   canonicalJson, blockText, SUBSTANTIVE_FIELDS,
-  REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, fullText, operationText,
-  classifyOperation, tally, buildBillManifest
+  REQUIRED_BODIES, THRESHOLD, OPERATION_STATUS, provisionIndex, resolveTarget, parentIdOf,
+  fullText, ownText, operationText, classifyOperation, tally, buildBillManifest,
+  unsettledOperations
 }
 
 // ---------------------------------------------------------------------------

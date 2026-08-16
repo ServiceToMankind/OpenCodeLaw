@@ -726,9 +726,21 @@ test('every operation type is idempotent against the status the applier writes',
 
   // And the status the applier actually writes is the one this expects.
   assert.deepEqual(OPERATION_STATUS, { omit: 'omitted', reserve: 'reserved' })
+
+  // This used to grep the applier for `status: 'omitted'`, which was the
+  // weakest possible form of "an independent derivation of what the applier
+  // writes" — it proved a string was present in a file. The applier now takes
+  // the status from the shared mapping, so the literal is gone and the grep
+  // failed, correctly, on an improvement.
+  //
+  // What replaced it is stronger in both directions: tests/apply-matrix.test.mjs
+  // RUNS the applier over every operation type at every scope and reads the
+  // status back out of the document it wrote, and this asserts there is no
+  // second copy of the mapping here to drift from the first.
   const src = fs.readFileSync(path.join(ROOT, 'src/bill-cli.mjs'), 'utf8')
-  for (const status of Object.values(OPERATION_STATUS)) {
-    assert.ok(src.includes(`status: '${status}'`),
-      `the applier must write status: '${status}'`)
-  }
+  assert.match(src, /status: OPERATION_STATUS\[op\.operation\]/,
+    'the applier must name the shared mapping rather than repeat it')
+  assert.equal(src.match(/status: '[a-z-]+'/g), null,
+    'a hardcoded status literal in the applier is a second copy of the mapping, and two copies ' +
+    'quietly disagreeing is exactly the defect this test exists for')
 })
