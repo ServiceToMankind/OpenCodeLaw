@@ -13,3 +13,11 @@ css/style.css.map
 .DS_Store
 assets/og/
 bill-gate-report.md
+
+# Scratch space for reproductions and workflow agents. Never committed.
+.tmp-scratch/
+.wf-scratch/
+
+# Scratch space for reproductions. Never committed.
+.tmp-scratch/
+.wf-scratch/

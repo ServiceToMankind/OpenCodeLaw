@@ -108,6 +108,59 @@ test('the pages ship, or do not ship, together', () => {
   assert.equal(fs.existsSync(path.join(DIST, 'engine/bill-validator.mjs')), built)
 })
 
+test('dark means dark: a build without the flag ships none of the engine', {
+  skip: fs.existsSync(path.join(DIST, 'propose/index.html')) ? 'built with PROPOSE_ENABLED' : false
+}, () => {
+  // Phase 8 shipped the engine whether the page did or not — `dist/scripts/`
+  // carried the serialiser and the whole propose script with no page to load
+  // them. Inert, but it meant "dark" described the page and not the build.
+  assert.deepEqual(fs.readdirSync(path.join(DIST, 'scripts')), ['app.js'],
+    'only the site\'s own enhancement script ships when the surfaces are dark')
+
+  for (const gone of ['engine', 'constitution.json', 'bills.json', 'propose', 'icc',
+    'archive/1.0.0/constitution.json']) {
+    assert.equal(fs.existsSync(path.join(DIST, gone)), false, `${gone} must not ship in a dark build`)
+  }
+})
+
+test('no two Open Graph plates claim the same filename', async () => {
+  // A plate is named after its page's slug, and Article 16 is titled
+  // "Amendments" — the same slug the amendment register used. One plate
+  // overwrote the other, so the register's social card showed Article 16, and
+  // nothing failed: the file existed and the link resolved. Only counting the
+  // files against the pages that asked for them showed it.
+  const { slugMap } = await import('../src/lib/paths.mjs')
+  const yaml = (await import('js-yaml')).default
+  const doc = yaml.load(fs.readFileSync(path.join(ROOT, 'constitution/current.yaml'), 'utf8'),
+    { schema: yaml.CORE_SCHEMA })
+
+  const wanted = ['page-home', 'page-amendments', 'page-archive', ...slugMap(doc.articles).values()]
+  const duplicates = wanted.filter((s2, i) => wanted.indexOf(s2) !== i)
+  assert.deepEqual(duplicates, [],
+    'two pages want the same plate, so one silently overwrites the other')
+
+  // And every plate a built page points at was actually rendered.
+  const dir = path.join(ROOT, 'assets/og')
+  if (!fs.existsSync(dir) || !fs.existsSync(DIST)) return
+  const referenced = new Set()
+  for (const file of htmlFiles(DIST)) {
+    for (const m of fs.readFileSync(file, 'utf8').matchAll(/assets\/og\/([a-z0-9-]+\.png)/g)) {
+      referenced.add(m[1])
+    }
+  }
+  const missing = [...referenced].filter(n => !fs.existsSync(path.join(dir, n)))
+  assert.deepEqual(missing, [], `referenced but never rendered: ${missing.join(', ')}`)
+})
+
+function htmlFiles (dir, acc = []) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, e.name)
+    if (e.isDirectory()) htmlFiles(full, acc)
+    else if (e.name.endsWith('.html')) acc.push(full)
+  }
+  return acc
+}
+
 test('the ICC desk is not offered to search engines', {
   skip: !fs.existsSync(path.join(DIST, 'icc/index.html')) ? 'built without PROPOSE_ENABLED' : false
 }, () => {

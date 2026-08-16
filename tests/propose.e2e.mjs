@@ -23,7 +23,8 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import yaml from 'js-yaml'
-import { execFileSync } from 'node:child_process'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { findChrome, serve, launch, settle, captureDownloads } from './helpers/browser.mjs'
 import { substantiveHash, validateBill } from '../src/bill.mjs'
@@ -370,7 +371,11 @@ describe('continuing a proposal after the constitution moves', {
     out = path.join(tmp, 'site')
     // A fixture site: the Guild's constitution at 2.2.0, with 2.1.0 published
     // in the archive exactly as a real superseded version is.
-    execFileSync(process.execPath, [path.join(ROOT, 'src/build.mjs')], {
+    // Asynchronous deliberately. execFileSync blocks the whole event loop for
+    // the length of a site build, and a sibling suite's puppeteer timers fire
+    // the instant it unblocks — a 5s waitForFunction "timing out" against a
+    // page that was never slow. That was the flake; the page was fine.
+    await promisify(execFile)(process.execPath, [path.join(ROOT, 'src/build.mjs')], {
       cwd: ROOT,
       env: {
         ...process.env,

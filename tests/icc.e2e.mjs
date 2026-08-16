@@ -19,7 +19,8 @@ import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import yaml from 'js-yaml'
-import { execFileSync } from 'node:child_process'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { serve, launch, findChrome, settle, captureDownloads } from './helpers/browser.mjs'
 import { substantiveHash } from '../src/bill.mjs'
@@ -54,7 +55,11 @@ describe('the ICC desk', { skip: !CHROME ? 'no Chrome' : false }, () => {
   before(async () => {
     tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'icc-'))
     out = path.join(tmp, 'site')
-    execFileSync(process.execPath, [path.join(ROOT, 'src/build.mjs')], {
+    // Asynchronous deliberately. execFileSync blocks the whole event loop for
+    // the length of a site build, and a sibling suite's puppeteer timers fire
+    // the instant it unblocks — a 5s waitForFunction "timing out" against a
+    // page that was never slow. That was the flake; the page was fine.
+    await promisify(execFile)(process.execPath, [path.join(ROOT, 'src/build.mjs')], {
       cwd: ROOT,
       env: {
         ...process.env,

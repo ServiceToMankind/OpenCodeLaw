@@ -323,7 +323,7 @@ export function build () {
     title: `Constitution of ${info.organization}`,
     description: summarise(toPlainText(doc.preamble.content)),
     canonical: abs(''),
-    og: { type: 'article', image: abs('assets/og/home.png'), imageAlt: `Constitution of ${info.organization}` },
+    og: { type: 'article', image: abs('assets/og/page-home.png'), imageAlt: `Constitution of ${info.organization}` },
     jsonLd: [legislationLd(info, doc), organizationLd(info),
       breadcrumbLd([{ name: 'Constitution', url: abs('') }])],
     main: indexMain
@@ -388,7 +388,7 @@ export function build () {
     title: `Amendment register — ${info.title}`,
     description: `Every instrument amending the constitution of ${info.organization}, with dates of assent, the provisions each touches, and the signed Act as published.`,
     canonical: abs('amendments/'),
-    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Amendment register' },
+    og: { image: abs('assets/og/page-amendments.png'), imageAlt: 'Amendment register' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') },
       { name: 'Amendments', url: abs('amendments/') }
@@ -418,7 +418,7 @@ export function build () {
     title: `Bills — ${info.title}`,
     description: `Proposed amendments to the constitution of ${info.organization}, including bills that were rejected or withdrawn.`,
     canonical: abs('bills/'),
-    og: { image: abs('assets/og/amendments.png'), imageAlt: 'Bills' },
+    og: { image: abs('assets/og/page-amendments.png'), imageAlt: 'Bills' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') }, { name: 'Bills', url: abs('bills/') }
     ])],
@@ -434,7 +434,7 @@ export function build () {
       title: `Propose an amendment — ${info.title}`,
       description: `Open the constitution of ${info.organization}, change what you want changed, and download your proposal. The page produces a file for the Internal Compliance Committee; it does not submit, number or approve anything.`,
       canonical: abs('propose/'),
-      og: { image: abs('assets/og/amendments.png'), imageAlt: 'Propose an amendment' },
+      og: { image: abs('assets/og/page-amendments.png'), imageAlt: 'Propose an amendment' },
       jsonLd: [breadcrumbLd([
         { name: 'Constitution', url: abs('') }, { name: 'Propose', url: abs('propose/') }
       ])],
@@ -471,7 +471,7 @@ export function build () {
     title: `Archive — ${info.title}`,
     description: `Every superseded version of the constitution of ${info.organization}, frozen as published.`,
     canonical: abs('archive/'),
-    og: { image: abs('assets/og/archive.png'), imageAlt: 'Archive' },
+    og: { image: abs('assets/og/page-archive.png'), imageAlt: 'Archive' },
     jsonLd: [breadcrumbLd([
       { name: 'Constitution', url: abs('') }, { name: 'Archive', url: abs('archive/') }
     ])],
@@ -525,7 +525,7 @@ export function build () {
       // exists to publish. v1.0.0 and v3.0.0 are different documents.
       canonical: abs(`archive/${v}/`),
       extraHead: `<link rel="latest-version" href="${abs('')}">`,
-      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/archive.png'), imageAlt: `Version ${v}` },
+      og: { type: 'article', url: abs(`archive/${v}/`), image: abs('assets/og/page-archive.png'), imageAlt: `Version ${v}` },
       jsonLd: [breadcrumbLd([
         { name: 'Constitution', url: abs('') },
         { name: 'Archive', url: abs('archive/') },
@@ -597,13 +597,20 @@ export function build () {
   write('sitemap.xml', sitemap(doc, slugs, versions))
 
   // Open Graph plates. Generated before assets are copied so they land in dist/assets/og/.
+  //
+  // The site's own pages are namespaced, because an article's plate is named
+  // after its slug and Article 16 is titled "Amendments" — which is the same
+  // slug as the amendment register. One plate overwrote the other, so the
+  // register's social card showed Article 16 and nobody could have noticed
+  // without counting the files. A namespace makes the collision impossible
+  // rather than currently-absent.
   const ogPages = [
-    { slug: 'home', kicker: 'CONSTITUTION', title: `Constitution of ${info.organization}`,
+    { slug: 'page-home', kicker: 'CONSTITUTION', title: `Constitution of ${info.organization}`,
       footer: `Version ${info.version} · effective ${info.effective_from}`,
       badge: state && !state.complete ? 'In reconciliation' : null },
-    { slug: 'amendments', kicker: 'AMENDMENTS', title: 'Amendment register',
+    { slug: 'page-amendments', kicker: 'AMENDMENTS', title: 'Amendment register',
       footer: `${(register.acts ?? []).length} instruments · ${info.organization}` },
-    { slug: 'archive', kicker: 'ARCHIVE', title: 'Superseded versions',
+    { slug: 'page-archive', kicker: 'ARCHIVE', title: 'Superseded versions',
       footer: info.organization },
     ...doc.articles.map(a => ({
       slug: slugs.get(a.id),

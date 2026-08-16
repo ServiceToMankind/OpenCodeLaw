@@ -349,8 +349,26 @@ const meta = () => ({
   type: $('#p-type')?.value ?? 'amendment'
 })
 
+/**
+ * Which refresh is the current one.
+ *
+ * `refresh` awaits SubtleCrypto, so two of them can be in flight — the one the
+ * page starts on load, and the one a restored draft starts a moment later. Both
+ * resume after their await and write to the same elements, and the LAST to
+ * resume wins regardless of which is current. That put an empty draft's hash on
+ * screen above a review showing a real proposal: a hash that did not match what
+ * it sat under, which is the one defect this project cannot tolerate. It also
+ * let a stale run's `save()` overwrite a restored draft in browser storage.
+ *
+ * Everything before the await is synchronous and cannot interleave. Everything
+ * after it belongs to the newest call or to nobody.
+ */
+let generation = 0
+
 async function refresh () {
   if (!MODEL) return
+  const mine = ++generation
+
   ops = deriveOperations(DOC, MODEL)
   const bill = buildDraft({ baseDoc: DOC, model: MODEL, meta: meta() })
 
@@ -362,7 +380,10 @@ async function refresh () {
   }
   report(problems)
 
-  $('#hash-out').textContent = await substantiveHash(bill)
+  const hash = await substantiveHash(bill)
+  if (mine !== generation) return
+
+  $('#hash-out').textContent = hash
   $('#preview').textContent = instrumentPreview(bill)
   $('#generate').disabled = problems.length > 0
   save()
